@@ -18,7 +18,7 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDTO {
+public class UserDTO extends BaseDTO{
 
     /**
      * The Id.
