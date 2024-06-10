@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
  */
 @RestController()
 @RequestMapping(value = "/auth")
-public class AuthenticationController {
+public class AuthenticationController extends BaseController {
 
     /**
      * The Service.

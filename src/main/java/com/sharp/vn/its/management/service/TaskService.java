@@ -31,7 +31,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class TaskService {
+public class TaskService extends BaseService {
 
     /**
      * The Task status repository.

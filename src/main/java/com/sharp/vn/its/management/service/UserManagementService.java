@@ -20,7 +20,7 @@ import java.util.Collections;
  */
 @Service
 @Slf4j
-public class UserManagementService {
+public class UserManagementService extends BaseService {
     /**
      * The User repository.
      */

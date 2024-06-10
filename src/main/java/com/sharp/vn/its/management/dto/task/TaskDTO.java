@@ -1,5 +1,6 @@
 package com.sharp.vn.its.management.dto.task;
 
+import com.sharp.vn.its.management.dto.BaseDTO;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NotNull
-public class TaskDTO {
+public class TaskDTO extends BaseDTO {
 
     /**
      * The Task id.

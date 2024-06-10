@@ -1,6 +1,7 @@
 package com.sharp.vn.its.management.dto.task;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sharp.vn.its.management.dto.BaseDTO;
 import com.sharp.vn.its.management.dto.UserDTO;
 import lombok.Data;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TaskDataDTO {
+public class TaskDataDTO extends BaseDTO {
     /**
      * The Systems.
      */

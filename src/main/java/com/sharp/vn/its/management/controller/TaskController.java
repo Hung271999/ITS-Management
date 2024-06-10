@@ -15,7 +15,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/users/{user_id}/tasks")
-public class TaskController {
+public class TaskController extends BaseController {
 
     /**
      * The Task service.

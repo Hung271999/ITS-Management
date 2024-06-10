@@ -1,6 +1,7 @@
 package com.sharp.vn.its.management.repositories;
 
 import com.sharp.vn.its.management.entity.UserEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,8 +10,8 @@ import java.util.Optional;
 /**
  * The interface User repository.
  */
-@Repository
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
+@Transactional
+public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
 
     /**
      * Find by username optional.

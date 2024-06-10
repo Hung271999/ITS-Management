@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * The type Authentication service.
  */
 @Service
-public class AuthenticationService {
+public class AuthenticationService extends BaseService {
     /**
      * The User repository.
      */
