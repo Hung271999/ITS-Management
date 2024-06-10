@@ -1,58 +1,93 @@
 package com.sharp.vn.its.management.controller;
 
-import com.sharp.vn.its.management.dto.TaskDto;
-import com.sharp.vn.its.management.dto.TaskInforDto;
-import com.sharp.vn.its.management.entity.TaskEntity;
+import com.sharp.vn.its.management.dto.task.TaskDTO;
+import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Task controller.
+ */
 @RestController
-@RequestMapping(value = "/users/tasks")
+@RequestMapping(value = "/users/{user_id}/tasks")
 public class TaskController {
 
+    /**
+     * The Task service.
+     */
     @Autowired
     private TaskService taskService;
 
+    /**
+     * Load task data task data dto.
+     *
+     * @return the task data dto
+     */
     @GetMapping("/info")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public TaskInforDto loadTaskInformation() {
-        return taskService.loadTaskInformation();
+    public TaskDataDTO loadTaskData() {
+        return taskService.getTaskData();
     }
 
+    /**
+     * Save task task dto.
+     *
+     * @param request the request
+     * @return the task dto
+     */
     @PostMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public TaskDto saveTask(@RequestBody TaskDto request) {
+    public TaskDTO saveTask(@Valid @RequestBody TaskDTO request) {
         return taskService.saveTask(request);
     }
 
+    /**
+     * Delete task response entity.
+     *
+     * @param taskId the task id
+     * @return the response entity
+     */
     @DeleteMapping("/{taskId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<?> deleteTask(@PathVariable Long taskId) {
+    public ResponseEntity<?> deleteTask(@PathVariable(required = true) Long taskId) {
         taskService.deleteTask(taskId);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public List<TaskDto> loadTask() {
-        return taskService.loadAllTask();
-    }
-
+    /**
+     * Update task task dto.
+     *
+     * @param taskId the task id
+     * @param request the request
+     * @return the task dto
+     */
     @PutMapping("/{taskId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public TaskDto updateTask(@PathVariable Long taskId, @RequestBody TaskDto request) {
+    public TaskDTO updateTask(@PathVariable(required = true) Long taskId,
+            @RequestBody TaskDTO request) {
         return taskService.saveTask(request);
     }
 
+    /**
+     * Gets task detail.
+     *
+     * @param taskId the task id
+     * @return the task detail
+     */
     @GetMapping("/{taskId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public TaskDto getTaskDetail(@PathVariable Long taskId) {
+    public TaskDTO getTaskDetail(@PathVariable(required = true) Long taskId) {
         return taskService.getTaskDetail(taskId);
+    }
+
+    /**
+     * Load all tasks list.
+     *
+     * @return the list
+     */
+    @GetMapping
+    public List<TaskDTO> loadAllTasks() {
+        return taskService.getAllTasks();
     }
 
 

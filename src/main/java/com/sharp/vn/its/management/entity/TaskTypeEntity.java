@@ -8,15 +8,24 @@ import org.springframework.scheduling.config.Task;
 
 import java.util.Set;
 
+/**
+ * The type Task type entity.
+ */
 @Entity(name = "its_task_type")
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TaskTypeEntity extends BaseEntity {
+    /**
+     * The Id.
+     */
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "task_name")
-    private String name;
+
+    /**
+     * The Task type.
+     */
+    @Column(name = "task_type")
+    private String taskType;
 }

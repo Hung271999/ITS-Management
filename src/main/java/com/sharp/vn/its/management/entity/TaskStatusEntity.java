@@ -7,16 +7,26 @@ import lombok.Setter;
 import org.springframework.scheduling.config.Task;
 
 import java.util.Set;
+
+/**
+ * The type Task status entity.
+ */
 @Entity(name = "its_task_status")
 @Getter
 @Setter
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class TaskStatusEntity extends BaseEntity{
+public class TaskStatusEntity extends BaseEntity {
 
+    /**
+     * The Id.
+     */
     @Id
-    @Column(name="id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name =  "status_name")
-    private String name;
+
+    /**
+     * The Task status.
+     */
+    @Column(name = "task_status")
+    private String taskStatus;
 }

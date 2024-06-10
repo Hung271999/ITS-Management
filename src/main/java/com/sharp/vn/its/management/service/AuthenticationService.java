@@ -1,28 +1,44 @@
 package com.sharp.vn.its.management.service;
 
-import com.sharp.vn.its.management.repository.RoleRepository;
-import com.sharp.vn.its.management.repository.UserRepository;
-import com.sharp.vn.its.management.security.UserDetailsImpl;
+import com.sharp.vn.its.management.repositories.RoleRepository;
+import com.sharp.vn.its.management.repositories.UserRepository;
+import com.sharp.vn.its.management.security.UserSecurityDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type Authentication service.
+ */
 @Service
 public class AuthenticationService {
+    /**
+     * The User repository.
+     */
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * The Role repository.
+     */
     @Autowired
     private RoleRepository roleRepository;
 
+    /**
+     * Gets user.
+     *
+     * @return the user
+     */
     public UserDetails getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        if (authentication != null
+                && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            userDetails = (UserSecurityDetails) authentication.getPrincipal();
             return userDetails;
         }
-        return null;
+        throw new AuthenticationCredentialsNotFoundException("User not authenticated");
     }
 }
