@@ -3,11 +3,10 @@ package com.sharp.vn.its.management.dto.task;
 import com.sharp.vn.its.management.dto.BaseDTO;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.util.DateTimeUtil;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 /**
  * The type Task dto.
@@ -40,22 +39,22 @@ public class TaskDTO extends BaseDTO {
     /**
      * The Receive date.
      */
-    private LocalDateTime receiveDate;
+    private Long receiveDate;
 
     /**
      * The Expired date.
      */
-    private LocalDateTime expiredDate;
+    private Long expiredDate;
 
     /**
      * The Start date.
      */
-    private LocalDateTime startDate;
+    private Long startDate;
 
     /**
      * The End date.
      */
-    private LocalDateTime endDate;
+    private Long endDate;
 
     /**
      * The Content.
@@ -114,10 +113,10 @@ public class TaskDTO extends BaseDTO {
      */
     public TaskDTO(TaskEntity taskEntity) {
         this.taskId = taskEntity.getId();
-        this.receiveDate = taskEntity.getReceiveDate();
-        this.expiredDate = taskEntity.getExpiredDate();
-        this.startDate = taskEntity.getStartDate();
-        this.endDate = taskEntity.getEndDate();
+        this.receiveDate = DateTimeUtil.toEpochSeconds(taskEntity.getReceiveDate());
+        this.expiredDate = DateTimeUtil.toEpochSeconds(taskEntity.getExpiredDate());
+        this.startDate = DateTimeUtil.toEpochSeconds(taskEntity.getStartDate());
+        this.endDate = DateTimeUtil.toEpochSeconds(taskEntity.getEndDate());
         this.content = taskEntity.getContent();
         this.cost = taskEntity.getCost();
         this.ticketNumber = taskEntity.getTicketNumber();
