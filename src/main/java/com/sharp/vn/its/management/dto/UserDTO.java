@@ -18,7 +18,7 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDTO extends BaseDTO{
+public class UserDTO extends BaseDTO {
 
     /**
      * The Id.
@@ -57,6 +57,11 @@ public class UserDTO extends BaseDTO{
     private String lastName;
 
     /**
+     * The Full name.
+     */
+    private String fullName;
+
+    /**
      * The Role.
      */
     @NotNull(message = "Role must not be null")
@@ -78,6 +83,7 @@ public class UserDTO extends BaseDTO{
         this.userName = userEntity.getUsername();
         this.firstName = userEntity.getFirstName();
         this.lastName = userEntity.getLastName();
+        this.fullName = this.firstName + " " + this.lastName;
         this.email = userEntity.getEmail();
         this.role = userEntity.getRoles().stream().findFirst().get().getRoleName();
     }
@@ -99,8 +105,12 @@ public class UserDTO extends BaseDTO{
      * @param userId the user id
      * @param userName the user name
      */
-    public UserDTO(final long userId, final String userName) {
+    public UserDTO(final long userId, final String userName, final String firstName,
+            final String lastName) {
         this.userId = userId;
         this.userName = userName;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.fullName = firstName + " " + lastName;
     }
 }

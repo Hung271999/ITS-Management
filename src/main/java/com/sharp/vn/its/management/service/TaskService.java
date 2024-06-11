@@ -83,8 +83,9 @@ public class TaskService extends BaseService {
         final List<SystemDTO> systems =
                 systemRepository.findAll().stream().map(SystemDTO::new).toList();
         final List<UserDTO> users = userRepository.findAll().stream()
-                .map(userEntity -> new UserDTO(userEntity.getId(), userEntity.getUsername()))
-                .toList();
+                .map(userEntity -> new UserDTO(userEntity.getId(), userEntity.getUsername(),
+                        userEntity.getFirstName(), userEntity.getLastName()))
+                        .toList();
         log.info("Task data fetched successfully.");
         return new TaskDataDTO(types, status, users, systems);
     }
