@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import java.util.TimeZone;
+
 /**
  * The type Its management application.
  */
@@ -23,6 +25,7 @@ public class ItsManagementApplication {
      * @param args the input arguments
      */
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SpringApplication.run(ItsManagementApplication.class, args);
     }
 
