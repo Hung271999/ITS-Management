@@ -103,7 +103,4 @@ public class UserDTO extends BaseDTO{
         this.userId = userId;
         this.userName = userName;
     }
-
-
-
 }
