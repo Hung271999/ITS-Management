@@ -94,7 +94,7 @@ public class TaskService extends BaseService {
      *
      * @return the all tasks
      */
-    public List<TaskDTO> getAllTasks() {
+    public List<TaskDTO> getAllTasks(TaskDTO request) {
         log.info("Fetching all tasks...");
         final List<TaskDTO> tasks = taskRepository.findAll().stream().map(TaskDTO::new).toList();
         log.info("All tasks fetched successfully.");

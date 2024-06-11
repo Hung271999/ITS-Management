@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * The type Base dto.
  */
-public abstract class BaseDTO implements Serializable {
+public abstract class BaseDTO extends BaseFilterDTO implements Serializable {
 }
