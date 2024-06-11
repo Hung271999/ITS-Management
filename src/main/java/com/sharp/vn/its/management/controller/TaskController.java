@@ -85,7 +85,7 @@ public class TaskController extends BaseController {
      *
      * @return the list
      */
-    @GetMapping
+    @PostMapping("/all")
     public List<TaskDTO> loadAllTasks(@RequestBody TaskDTO request) {
         return taskService.getAllTasks(request);
     }
