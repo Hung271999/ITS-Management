@@ -2,6 +2,7 @@ package com.sharp.vn.its.management.dto.task;
 
 import com.sharp.vn.its.management.dto.BaseDTO;
 import com.sharp.vn.its.management.entity.TaskEntity;
+import com.sharp.vn.its.management.entity.UserEntity;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,16 @@ public class TaskDTO extends BaseDTO {
      * The User id.
      */
     private Long userId;
+
+    /**
+     * The User name.
+     */
+    private String userName;
+
+    /**
+     * The Full name.
+     */
+    private String fullName;
 
     /**
      * The Receive date.
@@ -103,7 +114,6 @@ public class TaskDTO extends BaseDTO {
      */
     public TaskDTO(TaskEntity taskEntity) {
         this.taskId = taskEntity.getId();
-        this.userId = getUserId();
         this.receiveDate = taskEntity.getReceiveDate();
         this.expiredDate = taskEntity.getExpiredDate();
         this.startDate = taskEntity.getStartDate();
@@ -116,5 +126,12 @@ public class TaskDTO extends BaseDTO {
         this.status = new TaskStatusDTO(taskEntity.getStatus());
         this.type = new TaskTypeDTO(taskEntity.getType());
         this.system = new SystemDTO(taskEntity.getSystem());
+        UserEntity userEntity = taskEntity.getUser();
+        if (userEntity == null) {
+            return;
+        }
+        this.fullName = userEntity.getFirstName() + " " + userEntity.getLastName();
+        this.userName = userEntity.getUsername();
+        this.userId = userEntity.getId();
     }
 }
