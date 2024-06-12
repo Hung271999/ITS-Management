@@ -27,7 +27,10 @@ public final class DateTimeUtil {
      * @param millis the millis
      * @return the local date time
      */
-    public static LocalDateTime toLocalDateTime(long millis) {
+    public static LocalDateTime toLocalDateTime(Long millis) {
+        if (millis == null) {
+            return null;
+        }
         return Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDateTime();
     }
 
