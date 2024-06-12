@@ -67,7 +67,7 @@ public class TaskDTO {
     /**
      * The Cost.
      */
-    private Integer cost;
+    private Double cost;
 
     /**
      * The Ticket number.

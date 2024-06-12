@@ -1,5 +1,6 @@
 package com.sharp.vn.its.management.filter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,6 +55,7 @@ public class CriteriaSearchRequest {
      *
      * @return the pageable
      */
+    @JsonIgnore
     public Pageable getPageable() {
         init();
         List<Sort.Order> orders = sort.entrySet().stream()

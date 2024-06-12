@@ -57,7 +57,7 @@ public class TaskEntity extends BaseEntity {
      * The Cost.
      */
     @Column(name = "cost")
-    private Integer cost;
+    private Double cost;
 
     /**
      * The Ticket number.
