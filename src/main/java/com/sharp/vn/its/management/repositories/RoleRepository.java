@@ -1,10 +1,8 @@
 package com.sharp.vn.its.management.repositories;
 
-import com.sharp.vn.its.management.constants.ITSRole;
+import com.sharp.vn.its.management.constants.Role;
 import com.sharp.vn.its.management.entity.RoleEntity;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -20,5 +18,5 @@ public interface RoleRepository extends BaseJpaRepository<RoleEntity, Long> {
      * @param name the name
      * @return the optional
      */
-    Optional<RoleEntity> findByRoleName(ITSRole name);
+    Optional<RoleEntity> findByRoleName(Role name);
 }

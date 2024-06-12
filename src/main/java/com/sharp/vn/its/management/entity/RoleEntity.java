@@ -1,14 +1,10 @@
 package com.sharp.vn.its.management.entity;
 
 
-import com.sharp.vn.its.management.constants.ITSRole;
+import com.sharp.vn.its.management.constants.Role;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The type Role entity.
@@ -16,7 +12,7 @@ import java.util.Set;
 @Entity(name = "its_role")
 @Getter
 @Setter
-public class RoleEntity extends BaseEntity {
+public class RoleEntity {
     /**
      * The Role id.
      */
@@ -29,8 +25,8 @@ public class RoleEntity extends BaseEntity {
      * The Role name.
      */
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, name="role_name")
-    private ITSRole roleName;
+    @Column(length = 20, name = "role_name")
+    private Role roleName;
 
     /**
      * The Description.

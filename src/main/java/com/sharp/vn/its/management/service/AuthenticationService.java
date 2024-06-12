@@ -32,10 +32,10 @@ public class AuthenticationService extends BaseService {
      *
      * @return the user
      */
-    public UserDetails getUser() {
+    public UserSecurityDetails getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null
-                && authentication.getPrincipal() instanceof UserDetails userDetails) {
+                && authentication.getPrincipal() instanceof UserSecurityDetails userDetails) {
             userDetails = (UserSecurityDetails) authentication.getPrincipal();
             return userDetails;
         }

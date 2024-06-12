@@ -1,7 +1,7 @@
 package com.sharp.vn.its.management.service;
 
-import com.sharp.vn.its.management.constants.ITSRole;
-import com.sharp.vn.its.management.dto.UserDTO;
+import com.sharp.vn.its.management.constants.Role;
+import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.entity.RoleEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * The type User management service.
@@ -62,7 +63,7 @@ public class UserManagementService extends BaseService {
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
 
-        final ITSRole itsRole = request.getRole();
+        final Role itsRole = request.getRole();
         final RoleEntity role = roleRepository.findByRoleName(itsRole)
                 .orElseThrow(() -> new ObjectNotFoundException(
                         "Can't find role with name: " + itsRole.name()));
@@ -84,5 +85,15 @@ public class UserManagementService extends BaseService {
         }
         userRepository.deleteById(id);
         log.info("User with id {} deleted successfully.", id);
+    }
+
+    public List<UserDTO> getAllUsersData() {
+        log.info("Fetching all systems...");
+        final List<UserDTO> users = userRepository.findAll().stream()
+                .map(userEntity -> new UserDTO(userEntity.getId(), userEntity.getUsername(),
+                        userEntity.getFirstName(), userEntity.getLastName()))
+                .toList();
+        log.info("All systems fetched successfully.");
+        return users;
     }
 }

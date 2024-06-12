@@ -80,16 +80,14 @@ public class TaskEntity extends BaseEntity {
     /**
      * The Status.
      */
-    @ManyToOne
-    @JoinColumn(name = "status_id", referencedColumnName = "id")
-    private TaskStatusEntity status;
+    @Column(name = "status_id")
+    private Integer status;
 
     /**
      * The Type.
      */
-    @ManyToOne
-    @JoinColumn(name = "type_id", referencedColumnName = "id")
-    private TaskTypeEntity type;
+    @Column(name = "type_id")
+    private Integer type;
 
     /**
      * The System.
@@ -103,5 +101,15 @@ public class TaskEntity extends BaseEntity {
      */
     @ManyToOne
     @JoinColumn(name = "user_Id", referencedColumnName = "id")
-    private UserEntity user;
+    private UserEntity personInCharge;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CreatedBy")
+    private UserEntity createdBy;
+
+    /** The updated by. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UpdatedBy")
+    private UserEntity updatedBy;
+
 }

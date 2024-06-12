@@ -28,4 +28,13 @@ public class SystemEntity extends BaseEntity{
      */
     @Column(name =  "system_name")
     private String systemName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CreatedBy")
+    private UserEntity createdBy;
+
+    /** The updated by. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UpdatedBy")
+    private UserEntity updatedBy;
 }

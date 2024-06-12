@@ -1,29 +1,31 @@
 package com.sharp.vn.its.management.service;
 
 
-import com.sharp.vn.its.management.dto.UserDTO;
-import com.sharp.vn.its.management.dto.task.SystemDTO;
+import com.sharp.vn.its.management.constants.TaskStatus;
+import com.sharp.vn.its.management.constants.TaskType;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
-import com.sharp.vn.its.management.dto.task.TaskDataDTO;
-import com.sharp.vn.its.management.dto.task.TaskStatusDTO;
-import com.sharp.vn.its.management.dto.task.TaskTypeDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
-import com.sharp.vn.its.management.entity.TaskStatusEntity;
-import com.sharp.vn.its.management.entity.TaskTypeEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.repositories.SystemRepository;
 import com.sharp.vn.its.management.repositories.TaskRepository;
-import com.sharp.vn.its.management.repositories.TaskStatusRepository;
-import com.sharp.vn.its.management.repositories.TaskTypeRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
+import com.sharp.vn.its.management.util.DateTimeUtil;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,18 +34,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class TaskService extends BaseService {
-
-    /**
-     * The Task status repository.
-     */
-    @Autowired
-    private TaskStatusRepository taskStatusRepository;
-
-    /**
-     * The Task type repository.
-     */
-    @Autowired
-    private TaskTypeRepository taskTypeRepository;
 
     /**
      * The System repository.
@@ -70,36 +60,21 @@ public class TaskService extends BaseService {
     private AuthenticationService authenticationService;
 
     /**
-     * Gets task data.
-     *
-     * @return the task data
-     */
-    public TaskDataDTO getTaskData() {
-        log.info("Fetching task data...");
-        final List<TaskStatusDTO> status =
-                taskStatusRepository.findAll().stream().map(TaskStatusDTO::new).toList();
-        final List<TaskTypeDTO> types =
-                taskTypeRepository.findAll().stream().map(TaskTypeDTO::new).toList();
-        final List<SystemDTO> systems =
-                systemRepository.findAll().stream().map(SystemDTO::new).toList();
-        final List<UserDTO> users = userRepository.findAll().stream()
-                .map(userEntity -> new UserDTO(userEntity.getId(), userEntity.getUsername(),
-                        userEntity.getFirstName(), userEntity.getLastName()))
-                        .toList();
-        log.info("Task data fetched successfully.");
-        return new TaskDataDTO(types, status, users, systems);
-    }
-
-    /**
      * Gets all tasks.
      *
      * @return the all tasks
      */
-    public List<TaskDTO> getAllTasks(TaskDTO request) {
+    public Page<TaskDTO> getAllTasks(TaskDTO request) {
         log.info("Fetching all tasks...");
-        final List<TaskDTO> tasks = taskRepository.findAll().stream().map(TaskDTO::new).toList();
+        Specification<TaskEntity> specification =
+                (Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+        Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()
+                .getPageable());
         log.info("All tasks fetched successfully.");
-        return tasks;
+        return pageable.map(TaskDTO::new);
     }
 
     /**
@@ -142,9 +117,7 @@ public class TaskService extends BaseService {
     public TaskDTO saveTask(TaskDTO taskDTO) {
         log.info("Saving task...");
         final Long taskId = taskDTO.getTaskId();
-        final Long typeId = taskDTO.getType().getTypeId();
-        final Long statusId = taskDTO.getStatus().getStatusId();
-        final Long systemId = taskDTO.getSystem().getSystemId();
+        final Long systemId = taskDTO.getSystem();
 
         TaskEntity taskEntity = new TaskEntity();
         // update when task id is not null
@@ -158,21 +131,28 @@ public class TaskService extends BaseService {
         }
         final SystemEntity system = systemRepository.findById(systemId).orElseThrow(
                 () -> new ObjectNotFoundException("System not found with id: " + systemId));
-        final TaskTypeEntity taskType = taskTypeRepository.findById(typeId).orElseThrow(
-                () -> new ObjectNotFoundException("Task type not found with id: " + typeId));
-        final TaskStatusEntity taskStatus = taskStatusRepository.findById(statusId).orElseThrow(
-                () -> new ObjectNotFoundException("Task status not found with id: " + statusId));
-        final UserEntity userEntity = userRepository.findById(taskDTO.getUserId()).orElseThrow(
+
+        final TaskType taskType = TaskType.valueOf(taskDTO.getType());
+
+        final TaskStatus taskStatus = TaskStatus.valueOf(taskDTO.getStatus());
+
+        final UserEntity personInCharge = userRepository.findById(taskDTO.getUserId()).orElseThrow(
                 () -> new ObjectNotFoundException(
                         "User not found with id: " + taskDTO.getUserId()));
+        final UserEntity userEntity = userRepository.findById(authenticationService.getUser()
+                .getId()).get();
         // set properties
         BeanUtils.copyProperties(taskDTO, taskEntity);
+        taskEntity.setStartDate(DateTimeUtil.toLocalDateTime(taskDTO.getStartDate()));
+        taskEntity.setEndDate(DateTimeUtil.toLocalDateTime(taskDTO.getEndDate()));
+        taskEntity.setReceiveDate(DateTimeUtil.toLocalDateTime(taskDTO.getReceiveDate()));
+        taskEntity.setExpiredDate(DateTimeUtil.toLocalDateTime(taskDTO.getExpiredDate()));
         taskEntity.setSystem(system);
-        taskEntity.setType(taskType);
-        taskEntity.setUser(userEntity);
-        taskEntity.setStatus(taskStatus);
-        taskEntity.setCreatedBy(userName);
-        taskEntity.setUpdatedBy(userName);
+        taskEntity.setType(taskType.getType());
+        taskEntity.setPersonInCharge(personInCharge);
+        taskEntity.setStatus(taskStatus.getStatus());
+        taskEntity.setCreatedBy(userEntity);
+        taskEntity.setUpdatedBy(userEntity);
         taskEntity = taskRepository.save(taskEntity);
         log.info("Task saved successfully.");
         return new TaskDTO(taskEntity);

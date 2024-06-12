@@ -65,4 +65,18 @@ public class UserEntity extends BaseEntity {
     )
     private Set<RoleEntity> roles = new HashSet<>();
 
+    /**
+     * The Created by.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserEntity createdBy;
+
+    /**
+     * The Updated by.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by")
+    private UserEntity updatedBy;
+
 }

@@ -1,8 +1,10 @@
 package com.sharp.vn.its.management.dto.task;
 
-import com.sharp.vn.its.management.dto.BaseDTO;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sharp.vn.its.management.dto.system.SystemDTO;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
 import com.sharp.vn.its.management.util.DateTimeUtil;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -14,7 +16,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NotNull
-public class TaskDTO extends BaseDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TaskDTO {
 
     /**
      * The Task id.
@@ -85,19 +88,38 @@ public class TaskDTO extends BaseDTO {
      * The Status.
      */
     @NotNull(message = "Task status is required")
-    private TaskStatusDTO status;
+    private Integer status;
 
     /**
      * The Type.
      */
-    @NotNull(message = "TTask type is required")
-    private TaskTypeDTO type;
+    @NotNull(message = "Task type is required")
+    private Integer type;
 
     /**
      * The System.
      */
     @NotNull(message = "System information is required")
-    private SystemDTO system;
+    private Long system;
+
+    /**
+     * The System name.
+     */
+    private String systemName;
+
+    /**
+     * The Created date.
+     */
+    private Long createdDate;
+
+    /**
+     * The Updated date.
+     */
+    private Long updatedDate;
+    /**
+     * The Filter.
+     */
+    private CriteriaSearchRequest filter = new CriteriaSearchRequest();
 
 
     /**
@@ -122,15 +144,19 @@ public class TaskDTO extends BaseDTO {
         this.ticketNumber = taskEntity.getTicketNumber();
         this.ticketURL = taskEntity.getTicketURL();
         this.note = taskEntity.getNote();
-        this.status = new TaskStatusDTO(taskEntity.getStatus());
-        this.type = new TaskTypeDTO(taskEntity.getType());
-        this.system = new SystemDTO(taskEntity.getSystem());
-        UserEntity userEntity = taskEntity.getUser();
+        this.status = taskEntity.getStatus();
+        this.type = taskEntity.getType();
+        this.system = taskEntity.getSystem().getId();
+        this.systemName = taskEntity.getSystem().getSystemName();
+        UserEntity userEntity = taskEntity.getPersonInCharge();
         if (userEntity == null) {
             return;
         }
         this.fullName = userEntity.getFirstName() + " " + userEntity.getLastName();
         this.userName = userEntity.getUsername();
         this.userId = userEntity.getId();
+        this.createdDate = DateTimeUtil.toEpochSeconds(taskEntity.getCreatedDate());
+        this.updatedDate = DateTimeUtil.toEpochSeconds(taskEntity.getUpdatedDate());
+        this.filter = null;
     }
 }

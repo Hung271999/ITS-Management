@@ -1,14 +1,19 @@
 package com.sharp.vn.its.management.controller;
 
 import com.sharp.vn.its.management.dto.task.TaskDTO;
-import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The type Task controller.
@@ -22,16 +27,6 @@ public class TaskController extends BaseController {
      */
     @Autowired
     private TaskService taskService;
-
-    /**
-     * Load task data task data dto.
-     *
-     * @return the task data dto
-     */
-    @GetMapping("/info")
-    public TaskDataDTO loadTaskData() {
-        return taskService.getTaskData();
-    }
 
     /**
      * Save task task dto.
@@ -86,7 +81,7 @@ public class TaskController extends BaseController {
      * @return the list
      */
     @PostMapping("/all")
-    public List<TaskDTO> loadAllTasks(@RequestBody TaskDTO request) {
+    public Page<TaskDTO> loadAllTasks(@RequestBody TaskDTO request) {
         return taskService.getAllTasks(request);
     }
 

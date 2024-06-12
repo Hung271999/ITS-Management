@@ -1,12 +1,9 @@
-package com.sharp.vn.its.management.dto.task;
+package com.sharp.vn.its.management.dto.system;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sharp.vn.its.management.dto.BaseDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * The type System dto.
@@ -14,7 +11,7 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SystemDTO extends BaseDTO {
+public class SystemDTO {
     /**
      * The System id.
      */

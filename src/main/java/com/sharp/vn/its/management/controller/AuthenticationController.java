@@ -1,7 +1,7 @@
 package com.sharp.vn.its.management.controller;
 
 import com.sharp.vn.its.management.dto.ResponseData;
-import com.sharp.vn.its.management.dto.UserDTO;
+import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.security.UserSecurityDetails;
 import com.sharp.vn.its.management.service.UserManagementService;

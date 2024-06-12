@@ -1,6 +1,8 @@
 package com.sharp.vn.its.management.util;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
  * The type Date util.
@@ -18,4 +20,15 @@ public final class DateTimeUtil {
         }
         return localDateTime.toEpochSecond(java.time.ZoneOffset.UTC);
     }
+
+    /**
+     * To local date time local date time.
+     *
+     * @param millis the millis
+     * @return the local date time
+     */
+    public static LocalDateTime toLocalDateTime(long millis) {
+        return Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDateTime();
+    }
+
 }

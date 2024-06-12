@@ -1,16 +1,14 @@
-package com.sharp.vn.its.management.dto;
+package com.sharp.vn.its.management.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sharp.vn.its.management.constants.ITSRole;
+import com.sharp.vn.its.management.constants.Role;
 import com.sharp.vn.its.management.entity.UserEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * The type User dto.
@@ -18,7 +16,7 @@ import lombok.Setter;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDTO extends BaseDTO {
+public class UserDTO {
 
     /**
      * The Id.
@@ -65,7 +63,7 @@ public class UserDTO extends BaseDTO {
      * The Role.
      */
     @NotNull(message = "Role must not be null")
-    private ITSRole role;
+    private Role role;
 
     /**
      * The Token.
