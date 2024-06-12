@@ -51,7 +51,7 @@ public class UserEntity extends BaseEntity {
     /**
      * The Password.
      */
-    @Column(name = "password", unique = true)
+    @Column(name = "password")
     private String password;
 
     /**
