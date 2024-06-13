@@ -173,12 +173,15 @@ public final class CriteriaUtil {
     public static Predicate buildCombinedPredicate(CriteriaBuilder criteriaBuilder,
             FilterType filterType,
             Predicate... predicates) {
-        if (predicates == null || predicates.length == 0) {
+        if (predicates == null) {
             return null;
         }
         predicates = Arrays.stream(predicates)
                 .filter(Objects::nonNull)
                 .toArray(Predicate[]::new);
+        if (predicates.length == 0) {
+            return null;
+        }
         switch (filterType) {
             case AND:
                 return criteriaBuilder.and(predicates);
