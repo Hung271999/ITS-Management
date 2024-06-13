@@ -16,10 +16,19 @@ import java.util.List;
 public class CriteriaFilterItem {
 
     /**
+     * The Field name.
+     */
+    private String fieldName;
+
+    /**
+     * The Type.
+     */
+    private int type;
+
+    /**
      * The Filter boolean value.
      */
     private BooleanCriteriaFilter filterBooleanValue;
-
     /**
      * The Filter datetime value.
      */

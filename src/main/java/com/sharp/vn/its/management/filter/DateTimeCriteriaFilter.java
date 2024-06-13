@@ -49,15 +49,4 @@ public class DateTimeCriteriaFilter {
    */
   private Long endTime;
 
-  /**
-   * The Type.
-   */
-  private int type;
-
-  /**
-   * The Condition type.
-   */
-  private Integer conditionType;
-
-
 }

@@ -1,6 +1,7 @@
 package com.sharp.vn.its.management.service;
 
 
+import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.TaskStatus;
 import com.sharp.vn.its.management.constants.TaskType;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
@@ -9,24 +10,32 @@ import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
+import com.sharp.vn.its.management.filter.CriteriaFilterItem;
 import com.sharp.vn.its.management.repositories.SystemRepository;
 import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
+import com.sharp.vn.its.management.util.CollectionUtils;
 import com.sharp.vn.its.management.util.DateTimeUtil;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
+import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
 
 /**
  * The type Task service.
@@ -66,9 +75,42 @@ public class TaskService extends BaseService {
      */
     public Page<TaskDTO> getAllTasks(TaskDTO request) {
         log.info("Fetching all tasks...");
+        Map<String, CriteriaFilterItem> searchParam = request.getFilter().getSearchParam();
         Specification<TaskEntity> specification =
                 (Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
+                    List<Predicate> subPredicates = new ArrayList<>();
+                    if (searchParam == null) {
+                        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                    }
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildPredicate(criteriaBuilder, root, searchParam.get("status")));
+
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildPredicate(criteriaBuilder, root, searchParam.get("type")));
+
+
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildCombinedPredicate(criteriaBuilder, FilterType.OR,
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("ticketNumber")),
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("content"))));
+
+                    CriteriaFilterItem personInCharge = searchParam.get("personInCharge");
+                    if (personInCharge != null) {
+                        Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
+                        CollectionUtils.addIfNotEmptyOrNull(predicates,
+                                criteriaBuilder.equal(userJoin.get("id"),
+                                        personInCharge.getFilterNumberValue().getToValue()));
+                    }
+                    CriteriaFilterItem system = searchParam.get("system");
+                    if (system != null) {
+                        Join<TaskEntity, SystemEntity> systemJoin = root.join("system");
+                        CollectionUtils.addIfNotEmptyOrNull(predicates,
+                                criteriaBuilder.equal(systemJoin.get("id"),
+                                        system.getFilterNumberValue().getToValue()));
+                    }
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
         Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()

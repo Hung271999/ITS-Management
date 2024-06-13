@@ -1,0 +1,27 @@
+its:
+    app:
+        jwtCookieName: its
+        jwtExpirationMs: 180000000
+        jwtSecret: ======================ITS=VN===========================
+server:
+    port: 8080
+    servlet:
+        context-path: /api/v1
+spring:
+    application:
+        name: its-management
+    datasource:
+        password: postgres
+        url: jdbc:postgresql://localhost:5432/its_management
+        username: postgres
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+springdoc:
+    api-docs:
+        path: /swagger-doc/v3/api-docs
+    swagger-ui:
+        operationsSorter: method
