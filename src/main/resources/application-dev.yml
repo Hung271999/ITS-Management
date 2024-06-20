@@ -11,15 +11,16 @@ spring:
     application:
         name: its-management
     datasource:
-        password: postgres
-        url: jdbc:postgresql://localhost:5432/its_management
-        username: postgres
+        username: admin
+        password: its-admin
+        url: jdbc:postgresql://172.29.32.1:5432/its_management
     jpa:
         hibernate:
             ddl-auto: update
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
+        show-sql: true
 springdoc:
     api-docs:
         path: /swagger-doc/v3/api-docs

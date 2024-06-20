@@ -11,9 +11,9 @@ spring:
     application:
         name: its-management
     datasource:
+        username: postgres
         password: postgresql
         url: jdbc:postgresql://localhost:5432/its_management
-        username: postgres
     jpa:
         hibernate:
             ddl-auto: update
