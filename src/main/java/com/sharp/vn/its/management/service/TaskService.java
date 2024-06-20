@@ -2,6 +2,7 @@ package com.sharp.vn.its.management.service;
 
 
 import com.sharp.vn.its.management.constants.FilterType;
+import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
 import com.sharp.vn.its.management.constants.TaskType;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
@@ -9,30 +10,41 @@ import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
+import com.sharp.vn.its.management.exception.ITSException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.filter.CriteriaFilterItem;
+import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
+import com.sharp.vn.its.management.filter.SortCriteria;
 import com.sharp.vn.its.management.repositories.SystemRepository;
 import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.util.CollectionUtils;
 import com.sharp.vn.its.management.util.DateTimeUtil;
+import com.sharp.vn.its.management.util.ExcelUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -69,13 +81,28 @@ public class TaskService extends BaseService {
     private AuthenticationService authenticationService;
 
     /**
+     * The constant HEADERS.
+     */
+    private static final List<String> HEADERS = Arrays.asList(
+            "依頼番号", "担当者", "受付日", "作業期限", "作業開始日", "作業終了日",
+            "作業内容", "状況", "工数", "システム環境", "タイプ", "Ticket 番号",
+            "Ticket URL", "備考"
+    );
+    /**
+     * The constant SHEET_NAME.
+     */
+    private static final String SHEET_NAME = "Tasks";
+
+
+    /**
      * Gets all tasks.
      *
      * @return the all tasks
      */
     public Page<TaskDTO> getAllTasks(TaskDTO request) {
         log.info("Fetching all tasks...");
-        Map<String, CriteriaFilterItem> searchParam = request.getFilter().getSearchParam();
+        CriteriaSearchRequest filter = request.getFilter();
+        Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
         Specification<TaskEntity> specification =
                 (Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
@@ -200,6 +227,53 @@ public class TaskService extends BaseService {
         return new TaskDTO(taskEntity);
     }
 
+    /**
+     * Load task data byte [ ].
+     *
+     * @param request the request
+     * @return the byte [ ]
+     */
+    public byte[] loadTaskData(TaskDTO request) {
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            Sheet sheet = ExcelUtils.createSheet(workbook, SHEET_NAME);
+            ExcelUtils.addHeaderRow(sheet, HEADERS);
+            CellStyle headerStyle = ExcelUtils.createHeaderStyle(workbook);
+            Row headerRow = sheet.getRow(0);
+            headerRow.forEach(cell -> ExcelUtils.formatCell(cell, headerStyle));
+            Page<TaskDTO> page = getAllTasks(request);
+            List<TaskDTO> data = page.getContent();
+            for (int i = 0; i < data.size(); i++) {
+                TaskDTO task = data.get(i);
+                Row row = sheet.createRow(i + 1);
+                ExcelUtils.writeCell(row, 0, task.getTaskId());
+                ExcelUtils.writeCell(row, 1, task.getFullName());
+                ExcelUtils.writeCell(row, 2, DateTimeUtil.toLocalDateTime(task.getReceiveDate()));
+                ExcelUtils.writeCell(row, 3, DateTimeUtil.toLocalDateTime(task.getExpiredDate()));
+                ExcelUtils.writeCell(row, 4, DateTimeUtil.toLocalDateTime(task.getStartDate()));
+                ExcelUtils.writeCell(row, 5, DateTimeUtil.toLocalDateTime(task.getEndDate()));
+                ExcelUtils.writeCell(row, 6, task.getContent());
+                TaskStatus taskStatus = TaskStatus.valueOf(task.getStatus());
+                if (taskStatus != null) {
+                    ExcelUtils.writeCell(row, 7, taskStatus.getStatus());
+                }
 
+                ExcelUtils.writeCell(row, 8, task.getCost());
+                ExcelUtils.writeCell(row, 9, task.getSystemName());
+                TaskType taskType = TaskType.valueOf(task.getType());
+                if (taskType != null) {
+                    ExcelUtils.writeCell(row, 10, taskType.getType());
+                }
+                ExcelUtils.writeCell(row, 11, task.getTicketNumber());
+                ExcelUtils.writeCell(row, 12, task.getTicketURL());
+                ExcelUtils.writeCell(row, 13, task.getNote());
+            }
+            workbook.write(bos);
+            return bos.toByteArray();
 
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new ITSException("Failed to load task data", e);
+        }
+    }
 }

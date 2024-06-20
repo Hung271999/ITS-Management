@@ -5,6 +5,8 @@ import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -85,5 +87,16 @@ public class TaskController extends BaseController {
         return taskService.getAllTasks(request);
     }
 
-
+    @PostMapping("export")
+    public ResponseEntity exportTaskData(@RequestBody TaskDTO request) {
+        byte[] data = taskService.loadTaskData(request);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.setContentDispositionFormData("attachment", "[ITS -VN] Task.xlsx");
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(data);
+    }
 }

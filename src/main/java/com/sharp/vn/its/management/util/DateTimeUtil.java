@@ -18,7 +18,7 @@ public final class DateTimeUtil {
         if (localDateTime == null) {
             return null;
         }
-        return localDateTime.toEpochSecond(java.time.ZoneOffset.UTC);
+        return localDateTime.atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
     }
 
     /**
@@ -31,7 +31,7 @@ public final class DateTimeUtil {
         if (millis == null) {
             return null;
         }
-        return Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDateTime();
+        return  LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC);
     }
 
 }

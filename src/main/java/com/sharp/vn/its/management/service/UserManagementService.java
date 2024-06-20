@@ -60,6 +60,7 @@ public class UserManagementService extends BaseService {
         user.setUsername(request.getUserName());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
+        user.setFullName(user.getFirstName() + " " + user.getLastName());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
 

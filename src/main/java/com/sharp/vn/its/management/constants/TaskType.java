@@ -56,7 +56,10 @@ public enum TaskType {
      * @param type the type
      * @return the task type
      */
-    public static TaskType valueOf(int type) {
+    public static TaskType valueOf(Integer type) {
+        if (type == null) {
+            return null;
+        }
         return Arrays.stream(values())
                 .filter(taskType -> taskType.getType() == type)
                 .findFirst()

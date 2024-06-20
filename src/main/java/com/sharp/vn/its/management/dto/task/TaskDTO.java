@@ -152,7 +152,7 @@ public class TaskDTO {
         if (userEntity == null) {
             return;
         }
-        this.fullName = userEntity.getFirstName() + " " + userEntity.getLastName();
+        this.fullName = userEntity.getFullName();
         this.userName = userEntity.getUsername();
         this.userId = userEntity.getId();
         this.createdDate = DateTimeUtil.toEpochSeconds(taskEntity.getCreatedDate());

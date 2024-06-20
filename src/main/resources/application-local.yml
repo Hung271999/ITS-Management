@@ -11,12 +11,13 @@ spring:
     application:
         name: its-management
     datasource:
-        password: postgres
+        password: postgresql
         url: jdbc:postgresql://localhost:5432/its_management
         username: postgres
     jpa:
         hibernate:
             ddl-auto: update
+        show-sql: true
         properties:
             hibernate:
                 dialect: org.hibernate.dialect.PostgreSQLDialect

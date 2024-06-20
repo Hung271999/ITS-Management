@@ -23,4 +23,16 @@ public class SortCriteria {
      */
     private String sortType;
 
+    /**
+     * Instantiates a new Sort criteria.
+     *
+     * @param fieldName the field name
+     * @param sortType the sort type
+     */
+    public SortCriteria(String fieldName, String sortType) {
+        this.fieldName = fieldName;
+        this.sortType = sortType;
+    }
+
+
 }

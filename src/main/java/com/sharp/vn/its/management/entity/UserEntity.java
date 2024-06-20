@@ -37,6 +37,12 @@ public class UserEntity extends BaseEntity {
     private String lastName;
 
     /**
+     * The Full name.
+     */
+    @Column(name = "full_name")
+    private String fullName;
+
+    /**
      * The Email.
      */
     @Column(name = "email")

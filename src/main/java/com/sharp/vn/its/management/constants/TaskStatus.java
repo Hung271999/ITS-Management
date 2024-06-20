@@ -51,7 +51,10 @@ public enum TaskStatus {
      * @param status the status
      * @return the task status
      */
-    public static TaskStatus valueOf(int status) {
+    public static TaskStatus valueOf(Integer status) {
+        if (status == null) {
+            return null;
+        }
         return Arrays.stream(values())
                 .filter(taskStatus -> taskStatus.getStatus() == status)
                 .findFirst()

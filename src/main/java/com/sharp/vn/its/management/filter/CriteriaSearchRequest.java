@@ -63,7 +63,7 @@ public class CriteriaSearchRequest {
                     SortCriteria sortCriteria = entry.getValue();
                     Sort.Direction direction =
                             Sort.Direction.fromString(sortCriteria.getSortType());
-                    return new Sort.Order(direction, entry.getKey());
+                    return new Sort.Order(direction,sortCriteria.getFieldName());
                 })
                 .collect(Collectors.toList());
 
