@@ -103,43 +103,10 @@ public class TaskService extends BaseService {
         log.info("Fetching all tasks...");
         CriteriaSearchRequest filter = request.getFilter();
         Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
-        Specification<TaskEntity> specification =
-                (Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
-                    List<Predicate> predicates = new ArrayList<>();
-                    List<Predicate> subPredicates = new ArrayList<>();
-                    if (searchParam == null) {
-                        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-                    }
-                    CollectionUtils.addIfNotEmptyOrNull(predicates,
-                            buildPredicate(criteriaBuilder, root, searchParam.get("status")));
-
-                    CollectionUtils.addIfNotEmptyOrNull(predicates,
-                            buildPredicate(criteriaBuilder, root, searchParam.get("type")));
-
-
-                    CollectionUtils.addIfNotEmptyOrNull(predicates,
-                            buildCombinedPredicate(criteriaBuilder, FilterType.OR,
-                                    buildPredicate(criteriaBuilder, root,
-                                            searchParam.get("ticketNumber")),
-                                    buildPredicate(criteriaBuilder, root,
-                                            searchParam.get("content"))));
-
-                    CriteriaFilterItem personInCharge = searchParam.get("personInCharge");
-                    if (personInCharge != null) {
-                        Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
-                        CollectionUtils.addIfNotEmptyOrNull(predicates,
-                                criteriaBuilder.equal(userJoin.get("id"),
-                                        personInCharge.getFilterNumberValue().getToValue()));
-                    }
-                    CriteriaFilterItem system = searchParam.get("system");
-                    if (system != null) {
-                        Join<TaskEntity, SystemEntity> systemJoin = root.join("system");
-                        CollectionUtils.addIfNotEmptyOrNull(predicates,
-                                criteriaBuilder.equal(systemJoin.get("id"),
-                                        system.getFilterNumberValue().getToValue()));
-                    }
-                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-                };
+        Map<String, SortCriteria> sort = new HashMap<>();
+        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.ASC.getText()));
+        filter.setSort(sort);
+        Specification<TaskEntity> specification = buildFilterCondition(searchParam);
         Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()
                 .getPageable());
         log.info("All tasks fetched successfully.");
@@ -241,8 +208,10 @@ public class TaskService extends BaseService {
             CellStyle headerStyle = ExcelUtils.createHeaderStyle(workbook);
             Row headerRow = sheet.getRow(0);
             headerRow.forEach(cell -> ExcelUtils.formatCell(cell, headerStyle));
-            Page<TaskDTO> page = getAllTasks(request);
-            List<TaskDTO> data = page.getContent();
+            CriteriaSearchRequest filter = request.getFilter();
+            Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
+            List<TaskEntity> tasks = taskRepository.findAll(buildFilterCondition(searchParam));
+            List<TaskDTO> data = tasks.stream().map(TaskDTO::new).toList();
             for (int i = 0; i < data.size(); i++) {
                 TaskDTO task = data.get(i);
                 Row row = sheet.createRow(i + 1);
@@ -275,5 +244,53 @@ public class TaskService extends BaseService {
             log.error(e.getMessage());
             throw new ITSException("Failed to load task data", e);
         }
+    }
+
+    /**
+     * Build filter condition specification.
+     *
+     * @param searchParam the search param
+     * @return the specification
+     */
+    private Specification<TaskEntity> buildFilterCondition(
+            Map<String, CriteriaFilterItem> searchParam) {
+        return
+                (Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    List<Predicate> subPredicates = new ArrayList<>();
+                    if (searchParam == null) {
+                        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                    }
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildPredicate(criteriaBuilder, root, searchParam.get("status")));
+
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildPredicate(criteriaBuilder, root, searchParam.get("type")));
+
+
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildCombinedPredicate(criteriaBuilder, FilterType.OR,
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("ticketNumber")),
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("content"))));
+
+                    CriteriaFilterItem personInCharge = searchParam.get("personInCharge");
+                    if (personInCharge != null) {
+                        Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
+                        CollectionUtils.addIfNotEmptyOrNull(predicates,
+                                criteriaBuilder.equal(userJoin.get("id"),
+                                        personInCharge.getFilterNumberValue().getToValue()));
+                    }
+                    CriteriaFilterItem system = searchParam.get("system");
+                    if (system != null) {
+                        Join<TaskEntity, SystemEntity> systemJoin = root.join("system");
+                        CollectionUtils.addIfNotEmptyOrNull(predicates,
+                                criteriaBuilder.equal(systemJoin.get("id"),
+                                        system.getFilterNumberValue().getToValue()));
+                    }
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+
     }
 }
