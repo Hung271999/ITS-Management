@@ -1,21 +1,30 @@
 package com.sharp.vn.its.management.controller;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
+import com.sharp.vn.its.management.entity.TaskEntity;
+import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * The type Task controller.
@@ -56,13 +65,13 @@ public class TaskController extends BaseController {
     /**
      * Update task task dto.
      *
-     * @param taskId the task id
+     * @param taskId  the task id
      * @param request the request
      * @return the task dto
      */
     @PutMapping("/{taskId}")
     public TaskDTO updateTask(@PathVariable(required = true) Long taskId,
-            @RequestBody TaskDTO request) {
+                              @RequestBody TaskDTO request) {
         return taskService.saveTask(request);
     }
 
@@ -98,5 +107,22 @@ public class TaskController extends BaseController {
                 .ok()
                 .headers(headers)
                 .body(data);
+    }
+
+    /**
+     * Upload file.
+     *
+     * @param file the multipart file (.csv)
+     */
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @PostMapping("/upload-excel")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException, CsvException {
+        if (file.isEmpty()) {
+            return new ResponseEntity<>("Please to a file to upload!", HttpStatus.BAD_REQUEST);
+        }
+        taskService.uploadFile(file);
+        return new ResponseEntity<>("Uploaded and processed CSV file successfully!", HttpStatus.OK);
     }
 }
