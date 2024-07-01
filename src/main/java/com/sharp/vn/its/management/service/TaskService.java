@@ -38,13 +38,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+    import java.io.ByteArrayOutputStream;
+    import java.io.IOException;
+    import java.util.ArrayList;
+    import java.util.Arrays;
+    import java.util.HashMap;
+    import java.util.List;
+    import java.util.Map;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -104,7 +104,7 @@ public class TaskService extends BaseService {
         CriteriaSearchRequest filter = request.getFilter();
         Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
         Map<String, SortCriteria> sort = new HashMap<>();
-        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.ASC.getText()));
+        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
         filter.setSort(sort);
         Specification<TaskEntity> specification = buildFilterCondition(searchParam);
         Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()
@@ -280,7 +280,7 @@ public class TaskService extends BaseService {
                         Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
                         CollectionUtils.addIfNotEmptyOrNull(predicates,
                                 criteriaBuilder.equal(userJoin.get("id"),
-                                        personInCharge.getFilterNumberValue().getToValue()));
+                                         personInCharge.getFilterNumberValue().getToValue()));
                     }
                     CriteriaFilterItem system = searchParam.get("system");
                     if (system != null) {
