@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.time.LocalDateTime;
+
 /**
  * The type System dto.
  */
@@ -30,6 +32,21 @@ public class SystemDTO {
     private String systemName;
 
     /**
+     * The Update by.
+     */
+    private String updateBy;
+
+    /**
+     * The Created date.
+     */
+    private LocalDateTime createdDate;
+
+    /**
+     * The Updated date.
+     */
+    private LocalDateTime updatedDate;
+
+    /**
      * Instantiates a new System dto.
      *
      * @param system the system
@@ -37,6 +54,9 @@ public class SystemDTO {
     public SystemDTO(SystemEntity system) {
         this.systemId = system.getId();
         this.systemName = system.getSystemName();
+        this.createdDate = system.getCreatedDate();
+        this.updatedDate = system.getUpdatedDate();
+        this.updateBy = system.getUpdatedBy().getFullName();
     }
 
     /**
