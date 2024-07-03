@@ -105,9 +105,9 @@ public class TaskService extends BaseService {
         log.info("Fetching all tasks...");
         CriteriaSearchRequest filter = request.getFilter();
         Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
-        Map<String, SortCriteria> sort = new HashMap<>();
-        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
-        filter.setSort(sort);
+//        Map<String, SortCriteria> sort = new HashMap<>();
+//        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
+//        filter.setSort(sort);
         Specification<TaskEntity> specification = buildFilterCondition(searchParam);
         Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()
                 .getPageable());
@@ -333,4 +333,5 @@ public class TaskService extends BaseService {
         }
         csvReader.close();
     }
+
 }
