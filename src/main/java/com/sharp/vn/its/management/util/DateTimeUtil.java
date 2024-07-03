@@ -17,7 +17,7 @@ public final class DateTimeUtil {
      * @param localDateTime the local date time
      * @return the long
      */
-    public static Long toEpochSeconds(LocalDateTime localDateTime) {
+    public static Long toEpochMilli(LocalDateTime localDateTime) {
         if (localDateTime == null) {
             return null;
         }

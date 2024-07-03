@@ -108,21 +108,4 @@ public class TaskController extends BaseController {
                 .headers(headers)
                 .body(data);
     }
-
-    /**
-     * Upload file.
-     *
-     * @param file the multipart file (.csv)
-     */
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @PostMapping("/upload-excel")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException, CsvException {
-        if (file.isEmpty()) {
-            return new ResponseEntity<>("Please to a file to upload!", HttpStatus.BAD_REQUEST);
-        }
-        taskService.uploadFile(file);
-        return new ResponseEntity<>("Uploaded and processed CSV file successfully!", HttpStatus.OK);
-    }
 }

@@ -59,7 +59,7 @@ public class SystemService extends BaseService {
      * @return the all systems data
      */
     public Page<SystemDTO> loadAllSystemData(String searchParam, Pageable pageable) {
-        Page<SystemEntity> systemEntities = systemRepository.findAllSystems(searchParam, pageable);
+        Page<SystemEntity> systemEntities = systemRepository.findBySystemNameContains(searchParam, pageable);
         return systemEntities.map(SystemDTO::new);
     }
 

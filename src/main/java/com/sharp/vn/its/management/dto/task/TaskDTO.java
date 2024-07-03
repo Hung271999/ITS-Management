@@ -1,7 +1,6 @@
 package com.sharp.vn.its.management.dto.task;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sharp.vn.its.management.dto.system.SystemDTO;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
@@ -135,10 +134,10 @@ public class TaskDTO {
      */
     public TaskDTO(TaskEntity taskEntity) {
         this.taskId = taskEntity.getId();
-        this.receiveDate = DateTimeUtil.toEpochSeconds(taskEntity.getReceiveDate());
-        this.expiredDate = DateTimeUtil.toEpochSeconds(taskEntity.getExpiredDate());
-        this.startDate = DateTimeUtil.toEpochSeconds(taskEntity.getStartDate());
-        this.endDate = DateTimeUtil.toEpochSeconds(taskEntity.getEndDate());
+        this.receiveDate = DateTimeUtil.toEpochMilli(taskEntity.getReceiveDate());
+        this.expiredDate = DateTimeUtil.toEpochMilli(taskEntity.getExpiredDate());
+        this.startDate = DateTimeUtil.toEpochMilli(taskEntity.getStartDate());
+        this.endDate = DateTimeUtil.toEpochMilli(taskEntity.getEndDate());
         this.content = taskEntity.getContent();
         this.cost = taskEntity.getCost();
         this.ticketNumber = taskEntity.getTicketNumber();
@@ -155,8 +154,8 @@ public class TaskDTO {
         this.fullName = userEntity.getFullName();
         this.userName = userEntity.getUsername();
         this.userId = userEntity.getId();
-        this.createdDate = DateTimeUtil.toEpochSeconds(taskEntity.getCreatedDate());
-        this.updatedDate = DateTimeUtil.toEpochSeconds(taskEntity.getUpdatedDate());
+        this.createdDate = DateTimeUtil.toEpochMilli(taskEntity.getCreatedDate());
+        this.updatedDate = DateTimeUtil.toEpochMilli(taskEntity.getUpdatedDate());
         this.filter = null;
     }
 }

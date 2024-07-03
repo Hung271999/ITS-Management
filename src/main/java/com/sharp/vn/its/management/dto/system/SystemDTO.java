@@ -3,14 +3,13 @@ package com.sharp.vn.its.management.dto.system;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sharp.vn.its.management.entity.SystemEntity;
+import com.sharp.vn.its.management.util.DateTimeUtil;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.time.LocalDateTime;
 
 /**
  * The type System dto.
@@ -39,12 +38,12 @@ public class SystemDTO {
     /**
      * The Created date.
      */
-    private LocalDateTime createdDate;
+    private Long createdDate;
 
     /**
      * The Updated date.
      */
-    private LocalDateTime updatedDate;
+    private Long updatedDate;
 
     /**
      * Instantiates a new System dto.
@@ -54,8 +53,8 @@ public class SystemDTO {
     public SystemDTO(SystemEntity system) {
         this.systemId = system.getId();
         this.systemName = system.getSystemName();
-        this.createdDate = system.getCreatedDate();
-        this.updatedDate = system.getUpdatedDate();
+        this.createdDate = DateTimeUtil.toEpochMilli(system.getCreatedDate());
+        this.updatedDate = DateTimeUtil.toEpochMilli(system.getUpdatedDate());
         this.updateBy = system.getUpdatedBy().getFullName();
     }
 

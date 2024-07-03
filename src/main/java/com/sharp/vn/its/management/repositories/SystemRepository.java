@@ -12,13 +12,13 @@ import org.springframework.data.repository.query.Param;
  */
 @Transactional
 public interface SystemRepository extends BaseJpaRepository<SystemEntity, Long> {
-    /**
+     /**
      * Find all page.
      *
      * @param searchParam the searchParam
      * @param pageable the pageable
      * @return the page
      */
-    @Query("SELECT s FROM SystemEntity s WHERE :searchParam IS NULL OR s.systemName LIKE %:searchParam%")
-    Page<SystemEntity> findAllSystems(@Param("searchParam") String searchParam, Pageable pageable);
+//    @Query("SELECT s FROM SystemEntity s WHERE s.systemName LIKE %:searchParam%")
+    Page<SystemEntity> findBySystemNameContains(@Param("searchParam") String searchParam, Pageable pageable);
 }
