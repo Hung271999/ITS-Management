@@ -12,6 +12,7 @@ public enum TaskStatus {
      * Not start task.
      */
     NOT_START(1, "未着手"),
+
     /**
      * Complete task status.
      */
