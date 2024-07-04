@@ -1,6 +1,6 @@
 package com.sharp.vn.its.management.controller;
 
-import com.sharp.vn.its.management.dto.task.CloneTaskDTO;
+import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
@@ -74,6 +74,7 @@ public class TaskController extends BaseController {
     /**
      * Load all tasks list.
      *
+     * @param request the request
      * @return the list
      */
     @PostMapping("/all")
@@ -81,6 +82,12 @@ public class TaskController extends BaseController {
         return taskService.getAllTasks(request);
     }
 
+    /**
+     * Export task data response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
     @PostMapping("/export")
     public ResponseEntity exportTaskData(@RequestBody TaskDTO request) {
         byte[] data = taskService.loadTaskData(request);
@@ -94,9 +101,15 @@ public class TaskController extends BaseController {
                 .body(data);
     }
 
+    /**
+     * Clone task response entity.
+     *
+     * @param request the duplicate task dto
+     * @return the response entity
+     */
     @PostMapping("/cloneTask")
-    public ResponseEntity<?> cloneTask(@RequestBody CloneTaskDTO duplicateTaskDTO){
-        taskService.cloneTask(duplicateTaskDTO.getTaskId(), duplicateTaskDTO.getNumberOfCloneTask());
+    public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request){
+        taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
 }

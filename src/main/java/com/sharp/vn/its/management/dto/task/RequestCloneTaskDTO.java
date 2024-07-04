@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NotNull
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CloneTaskDTO {
+public class RequestCloneTaskDTO {
     /**
      * The Task id.
      */

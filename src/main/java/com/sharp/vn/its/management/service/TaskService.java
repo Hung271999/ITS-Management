@@ -299,14 +299,16 @@ public class TaskService extends BaseService {
         if (taskId == null) {
             throw new DataValidationException("Task id not found");
         }
-        log.info("Fetching task for id: {}", taskId);
+        log.info("Start cloning task: {}", taskId);
         TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFoundException("Task not found with id: " + taskId));
+        List<TaskEntity> taskEntities = new ArrayList<>();
         for (int i = 0 ; i < numberOfTasks; i++){
             TaskEntity taskClone = new TaskEntity();
             BeanUtils.copyProperties(taskEntity, taskClone);
             taskClone.setId(null);
-            taskRepository.save(taskClone);
+            taskEntities.add(taskClone);
         }
+        taskRepository.saveAll(taskEntities);
         log.info("Clone {} tasks successfully.", numberOfTasks);
     }
 }
