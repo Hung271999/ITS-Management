@@ -301,6 +301,8 @@ public class TaskService extends BaseService {
      */
     private void buildSortCondition(Map<String, SortCriteria> sort) {
         if (sort == null || sort.isEmpty()) {
+            sort = new HashMap<>();
+            sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
             return;
         }
         sort.forEach((key, criteria) -> {
