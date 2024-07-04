@@ -1,31 +1,15 @@
 package com.sharp.vn.its.management.controller;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
-import com.sharp.vn.its.management.dto.task.DuplicateTaskDTO;
+import com.sharp.vn.its.management.dto.task.CloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
-import com.sharp.vn.its.management.entity.TaskEntity;
-import com.sharp.vn.its.management.entity.UserEntity;
-import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * The type Task controller.
@@ -97,7 +81,7 @@ public class TaskController extends BaseController {
         return taskService.getAllTasks(request);
     }
 
-    @PostMapping("export")
+    @PostMapping("/export")
     public ResponseEntity exportTaskData(@RequestBody TaskDTO request) {
         byte[] data = taskService.loadTaskData(request);
         HttpHeaders headers = new HttpHeaders();
@@ -110,9 +94,9 @@ public class TaskController extends BaseController {
                 .body(data);
     }
 
-    @PostMapping("/duplicate")
-    public ResponseEntity<?> duplicateTask(@RequestBody DuplicateTaskDTO duplicateTaskDTO){
-        taskService.duplicateTask(duplicateTaskDTO.getTaskId(), duplicateTaskDTO.getNumberOfTasks());
+    @PostMapping("/cloneTask")
+    public ResponseEntity<?> cloneTask(@RequestBody CloneTaskDTO duplicateTaskDTO){
+        taskService.cloneTask(duplicateTaskDTO.getTaskId(), duplicateTaskDTO.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
 }

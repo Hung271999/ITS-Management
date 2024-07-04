@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NotNull
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DuplicateTaskDTO {
+public class CloneTaskDTO {
     /**
      * The Task id.
      */
@@ -18,5 +18,5 @@ public class DuplicateTaskDTO {
     /**
      * The Number of tasks.
      */
-    private int numberOfTasks;
+    private int numberOfCloneTask;
 }

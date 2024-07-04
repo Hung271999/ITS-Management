@@ -1,9 +1,6 @@
 package com.sharp.vn.its.management.service;
 
 
-import ch.qos.logback.core.boolex.EvaluationException;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -40,12 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
@@ -302,20 +295,18 @@ public class TaskService extends BaseService {
      * @param taskId the taskId
      * @param numberOfTasks the number of tasks
      */
-    public void duplicateTask(Long taskId, int numberOfTasks){
+    public void cloneTask(Long taskId, int numberOfTasks){
         if (taskId == null) {
             throw new DataValidationException("Task id not found");
         }
         log.info("Fetching task for id: {}", taskId);
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
-            return new ObjectNotFoundException("Task not found with id: " + taskId);
-        });
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFoundException("Task not found with id: " + taskId));
         for (int i = 0 ; i < numberOfTasks; i++){
-            TaskEntity taskDuplicate = new TaskEntity();
-            BeanUtils.copyProperties(taskEntity, taskDuplicate);
-            taskDuplicate.setId(null);
-            taskRepository.save(taskDuplicate);
+            TaskEntity taskClone = new TaskEntity();
+            BeanUtils.copyProperties(taskEntity, taskClone);
+            taskClone.setId(null);
+            taskRepository.save(taskClone);
         }
-        log.info("Duplicated {} tasks successfully.", numberOfTasks);
+        log.info("Clone {} tasks successfully.", numberOfTasks);
     }
 }
