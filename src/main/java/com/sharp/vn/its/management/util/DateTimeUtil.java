@@ -1,8 +1,11 @@
 package com.sharp.vn.its.management.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The type Date util.
@@ -14,7 +17,7 @@ public final class DateTimeUtil {
      * @param localDateTime the local date time
      * @return the long
      */
-    public static Long toEpochSeconds(LocalDateTime localDateTime) {
+    public static Long toEpochMilli(LocalDateTime localDateTime) {
         if (localDateTime == null) {
             return null;
         }
@@ -32,6 +35,13 @@ public final class DateTimeUtil {
             return null;
         }
         return  LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC);
+    }
+
+    public static LocalDateTime toLocalDateTime(String date,  DateTimeFormatter dateTimeFormatter) {
+        if (StringUtils.isEmpty(date)) {
+            return null;
+        }
+        return LocalDateTime.parse(date + " 00:00", dateTimeFormatter);
     }
 
 }

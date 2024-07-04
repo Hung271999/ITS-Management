@@ -7,12 +7,11 @@ import java.util.Arrays;
 /**
  * The enum Task status.
  */
-public enum
-
-
-
-
-TaskStatus {
+public enum TaskStatus {
+    /**
+     * Not start task.
+     */
+    NOT_START(1, "未着手"),
     /**
      * Not start task.
      */
