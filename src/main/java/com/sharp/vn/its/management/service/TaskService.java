@@ -1,6 +1,9 @@
 package com.sharp.vn.its.management.service;
 
 
+import ch.qos.logback.core.boolex.EvaluationException;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -37,14 +40,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -104,7 +106,7 @@ public class TaskService extends BaseService {
         CriteriaSearchRequest filter = request.getFilter();
         Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
         Map<String, SortCriteria> sort = new HashMap<>();
-        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.ASC.getText()));
+        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
         filter.setSort(sort);
         Specification<TaskEntity> specification = buildFilterCondition(searchParam);
         Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()
@@ -202,7 +204,7 @@ public class TaskService extends BaseService {
      */
     public byte[] loadTaskData(TaskDTO request) {
         try (Workbook workbook = new XSSFWorkbook();
-                ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             Sheet sheet = ExcelUtils.createSheet(workbook, SHEET_NAME);
             ExcelUtils.addHeaderRow(sheet, HEADERS);
             CellStyle headerStyle = ExcelUtils.createHeaderStyle(workbook);

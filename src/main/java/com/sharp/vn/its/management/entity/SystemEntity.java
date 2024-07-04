@@ -12,9 +12,10 @@ import java.util.Set;
 /**
  * The type System entity.
  */
-@Entity(name = "its_system")
+@Entity
 @Getter
 @Setter
+@Table(name = "its_system")
 public class SystemEntity extends BaseEntity{
     /**
      * The Id.
