@@ -66,7 +66,8 @@ public class UserSecurityDetails implements UserDetails {
      */
     public UserSecurityDetails(UserEntity user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
+                .map(userRole -> new SimpleGrantedAuthority(
+                        userRole.getRole().getRoleName().name()))
                 .collect(Collectors.toList());
         this.id = user.getId();
         this.userName = user.getUsername();
