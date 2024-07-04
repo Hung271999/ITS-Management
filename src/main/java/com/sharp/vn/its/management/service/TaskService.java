@@ -295,4 +295,27 @@ public class TaskService extends BaseService {
                 };
 
     }
+
+    /**
+     * Duplicate task.
+     *
+     * @param taskId the taskId
+     * @param numberOfTasks the number of tasks
+     */
+    public void duplicateTask(Long taskId, int numberOfTasks){
+        if (taskId == null) {
+            throw new DataValidationException("Task id not found");
+        }
+        log.info("Fetching task for id: {}", taskId);
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
+            return new ObjectNotFoundException("Task not found with id: " + taskId);
+        });
+        for (int i = 0 ; i < numberOfTasks; i++){
+            TaskEntity taskDuplicate = new TaskEntity();
+            BeanUtils.copyProperties(taskEntity, taskDuplicate);
+            taskDuplicate.setId(null);
+            taskRepository.save(taskDuplicate);
+        }
+        log.info("Duplicated {} tasks successfully.", numberOfTasks);
+    }
 }

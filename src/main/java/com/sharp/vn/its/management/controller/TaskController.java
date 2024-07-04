@@ -2,6 +2,7 @@ package com.sharp.vn.its.management.controller;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import com.sharp.vn.its.management.dto.task.DuplicateTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -107,5 +108,11 @@ public class TaskController extends BaseController {
                 .ok()
                 .headers(headers)
                 .body(data);
+    }
+
+    @PostMapping("/duplicate")
+    public ResponseEntity<?> duplicateTask(@RequestBody DuplicateTaskDTO duplicateTaskDTO){
+        taskService.duplicateTask(duplicateTaskDTO.getTaskId(), duplicateTaskDTO.getNumberOfTasks());
+        return ResponseEntity.ok().build();
     }
 }
