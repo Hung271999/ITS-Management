@@ -39,6 +39,6 @@ public class AuthenticationService extends BaseService {
             userDetails = (UserSecurityDetails) authentication.getPrincipal();
             return userDetails;
         }
-        throw new AuthenticationCredentialsNotFoundException("User not authenticated");
+        return null;
     }
 }
