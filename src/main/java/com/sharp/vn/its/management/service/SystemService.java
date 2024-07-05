@@ -6,12 +6,8 @@ import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.repositories.SystemRepository;
-import com.sharp.vn.its.management.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -58,8 +54,10 @@ public class SystemService extends BaseService {
      *
      * @return the all systems data
      */
-    public Page<SystemDTO> loadAllSystemData(String searchParam, Pageable pageable) {
-        Page<SystemEntity> systemEntities = systemRepository.findBySystemNameContains(searchParam, pageable);
+    public Page<SystemDTO> loadAllSystemData(SystemDTO request) {
+        Map<String, SortCriteria> sort = request.getFilter().getSort();
+        buildSortCondition(sort);
+        Page<SystemEntity> systemEntities = systemRepository.findBySystemNameContains(request.getFilter().getSearchKeyword(), request.getFilter().getPageable());
         return systemEntities.map(SystemDTO::new);
     }
 
@@ -125,5 +123,36 @@ public class SystemService extends BaseService {
         systemEntity = systemRepository.save(systemEntity);
         log.info("System saved successfully.");
         return new SystemDTO(systemEntity);
+    }
+
+
+    /**
+     * Build sort condition.
+     *
+     * @param sort the sort
+     */
+    private void buildSortCondition(Map<String, SortCriteria> sort) {
+        if (sort.isEmpty()) {
+            sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
+            return;
+        }
+        sort.forEach((key, criteria) -> {
+            switch (key) {
+                case "systemId":
+                    criteria.setFieldName("id");
+                    break;
+                case "createdDate":
+                    criteria.setFieldName("createdDate");
+                    break;
+                case "updatedDate":
+                    criteria.setFieldName("updatedDate");
+                    break;
+                case "updateBy":
+                    criteria.setFieldName("updatedBy");
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 }

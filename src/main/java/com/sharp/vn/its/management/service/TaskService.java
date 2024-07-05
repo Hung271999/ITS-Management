@@ -1,9 +1,6 @@
 package com.sharp.vn.its.management.service;
 
 
-import ch.qos.logback.core.boolex.EvaluationException;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -42,11 +39,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -99,7 +98,6 @@ public class TaskService extends BaseService {
     /**
      * Gets all tasks.
      *
-     * @param request the request
      * @return the all tasks
      */
     public Page<TaskDTO> getAllTasks(TaskDTO request) {
