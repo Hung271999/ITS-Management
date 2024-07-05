@@ -1,9 +1,6 @@
 package com.sharp.vn.its.management.service;
 
 
-import ch.qos.logback.core.boolex.EvaluationException;
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -42,11 +39,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -105,10 +104,7 @@ public class TaskService extends BaseService {
         log.info("Fetching all tasks...");
         CriteriaSearchRequest filter = request.getFilter();
         Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
-        Map<String, SortCriteria> sort = new HashMap<>();
-        sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
-        filter.setSort(sort);
-        Specification<TaskEntity> specification = buildFilterCondition(searchParam);
+        Specification<TaskEntity> specification = buildFilterCondition(filter);
         Page<TaskEntity> pageable = taskRepository.findAll(specification, request.getFilter()
                 .getPageable());
         log.info("All tasks fetched successfully.");
@@ -211,8 +207,7 @@ public class TaskService extends BaseService {
             Row headerRow = sheet.getRow(0);
             headerRow.forEach(cell -> ExcelUtils.formatCell(cell, headerStyle));
             CriteriaSearchRequest filter = request.getFilter();
-            Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
-            List<TaskEntity> tasks = taskRepository.findAll(buildFilterCondition(searchParam));
+            List<TaskEntity> tasks = taskRepository.findAll(buildFilterCondition(filter));
             List<TaskDTO> data = tasks.stream().map(TaskDTO::new).toList();
             for (int i = 0; i < data.size(); i++) {
                 TaskDTO task = data.get(i);
@@ -251,11 +246,14 @@ public class TaskService extends BaseService {
     /**
      * Build filter condition specification.
      *
-     * @param searchParam the search param
+     * @param filter the filter
      * @return the specification
      */
     private Specification<TaskEntity> buildFilterCondition(
-            Map<String, CriteriaFilterItem> searchParam) {
+            CriteriaSearchRequest filter) {
+        Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
+        Map<String, SortCriteria> sort = filter.getSort();
+        buildSortCondition(sort);
         return
                 (Root<TaskEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
                     List<Predicate> predicates = new ArrayList<>();
@@ -282,7 +280,7 @@ public class TaskService extends BaseService {
                         Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
                         CollectionUtils.addIfNotEmptyOrNull(predicates,
                                 criteriaBuilder.equal(userJoin.get("id"),
-                                        personInCharge.getFilterNumberValue().getToValue()));
+                                         personInCharge.getFilterNumberValue().getToValue()));
                     }
                     CriteriaFilterItem system = searchParam.get("system");
                     if (system != null) {
@@ -295,4 +293,32 @@ public class TaskService extends BaseService {
                 };
 
     }
+
+    /**
+     * Build sort condition.
+     *
+     * @param sort the sort
+     */
+    private void buildSortCondition(Map<String, SortCriteria> sort) {
+        if (sort.isEmpty()) {
+            sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
+            return;
+        }
+        sort.forEach((key, criteria) -> {
+            switch (key) {
+                case "taskId":
+                    criteria.setFieldName("id");
+                    break;
+                case "systemName":
+                    criteria.setFieldName("system.systemName");
+                    break;
+                case "fullName":
+                    criteria.setFieldName("personInCharge.fullName");
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
 }

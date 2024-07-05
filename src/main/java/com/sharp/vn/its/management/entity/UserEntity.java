@@ -12,9 +12,10 @@ import java.util.Set;
 /**
  * The type User entity.
  */
-@Entity(name = "its_user")
+@Entity
 @Getter
 @Setter
+@Table(name = "its_user")
 public class UserEntity extends BaseEntity {
     /**
      * The Id.
@@ -63,13 +64,8 @@ public class UserEntity extends BaseEntity {
     /**
      * The Roles.
      */
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "its_user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<RoleEntity> roles = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<UserRoleEntity> roles = new HashSet<>();
 
     /**
      * The Created by.

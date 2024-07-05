@@ -2,13 +2,17 @@ package com.sharp.vn.its.management.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sharp.vn.its.management.constants.Role;
+import com.sharp.vn.its.management.entity.RoleEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.entity.UserRoleEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Optional;
 
 /**
  * The type User dto.
@@ -83,7 +87,11 @@ public class UserDTO {
         this.lastName = userEntity.getLastName();
         this.fullName = this.firstName + " " + this.lastName;
         this.email = userEntity.getEmail();
-        this.role = userEntity.getRoles().stream().findFirst().get().getRoleName();
+        this.role = userEntity.getRoles().stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("User does not have any roles"))
+                .getRole()
+                .getRoleName();
     }
 
     /**

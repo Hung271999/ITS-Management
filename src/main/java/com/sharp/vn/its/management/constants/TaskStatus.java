@@ -12,22 +12,23 @@ public enum TaskStatus {
      * Not start task.
      */
     NOT_START(1, "未着手"),
+
     /**
      * Complete task status.
      */
-    COMPLETE(2, "完了"),
+    COMPLETE(1, "完了"),
     /**
      * In progress task status.
      */
-    IN_PROGRESS(3, "対応中"),
+    IN_PROGRESS(2, "対応中"),
     /**
      * On hold task status.
      */
-    ON_HOLD(4, "保留"),
+    ON_HOLD(3, "保留"),
     /**
      * Suspended task status.
      */
-    SUSPENDED(5, "中止");
+    SUSPENDED(4, "中止");
 
     /**
      * The status.

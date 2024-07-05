@@ -19,7 +19,6 @@ public class SystemDTO {
      * The System id.
      */
     private Long systemId;
-
     /**
      * The System name.
      */

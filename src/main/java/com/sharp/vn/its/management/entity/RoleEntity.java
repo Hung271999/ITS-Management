@@ -6,6 +6,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * The type Role entity.
  */
@@ -33,5 +37,11 @@ public class RoleEntity {
      */
     @Column(name = "description")
     private String description;
+
+    /**
+     * The Users.
+     */
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UserRoleEntity> users  = new HashSet<>();
 }
 
