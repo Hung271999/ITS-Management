@@ -41,8 +41,7 @@ public class SystemController {
      */
     @PostMapping("/all")
     public Page<SystemDTO> loadAllSystems(@RequestBody SystemDTO request) {
-        Pageable pageable = request.getPageable();
-        return systemService.loadAllSystemData(request.getSearchParam(), pageable);
+        return systemService.loadAllSystemData(request);
     }
 
     /**

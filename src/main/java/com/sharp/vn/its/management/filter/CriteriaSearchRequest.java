@@ -41,6 +41,10 @@ public class CriteriaSearchRequest {
     private Map<String, SortCriteria> sort;
 
     /**
+     * The Search Keyword.
+     */
+    private String searchKeyword;
+    /**
      * The Page no.
      */
     private int pageNo = 0;
