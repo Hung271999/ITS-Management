@@ -303,34 +303,34 @@ public class TaskService extends BaseService {
         List<String[]> rows = csvReader.readAll();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         rows.remove(0);
+        List<TaskEntity> taskEntityList = new ArrayList<>();
         for (String[] row : rows) {
             TaskEntity task = new TaskEntity();
-//            task.setId(Long.parseLong(row[0]));
             task.setPersonInCharge(userRepository.findById(Long.parseLong(row[1])).orElseThrow());
             try {
                 task.setReceiveDate(DateTimeUtil.toLocalDateTime(row[2], dateTimeFormatter));
                 task.setExpiredDate(DateTimeUtil.toLocalDateTime(row[3], dateTimeFormatter));
                 task.setStartDate(DateTimeUtil.toLocalDateTime(row[4], dateTimeFormatter));
                 task.setEndDate(DateTimeUtil.toLocalDateTime(row[5], dateTimeFormatter));
-                task.setContent(row[6]);
-//                Optional.ofNullable(row[9]).orElse("");
+                task.setContent(row[6].trim());
                 task.setStatus(Integer.parseInt(row[7]));
                 if(!row[9].isEmpty())
                     task.setCost(Double.parseDouble(row[9]));
                 task.setSystem(systemRepository.findById(Long.parseLong(row[10])).orElseThrow());
                 task.setType(Integer.parseInt(row[11]));
-                task.setTicketNumber(row[12]);
-                task.setTicketURL(row[13]);
-                task.setNote(row[14]);
+                task.setTicketNumber(row[12].trim());
+                task.setTicketURL(row[13].trim());
+                task.setNote(row[14].trim());
                 task.setCreatedBy(userRepository.findById(Long.parseLong(row[15])).orElseThrow());
                 task.setUpdatedBy(userRepository.findById(Long.parseLong(row[16])).orElseThrow());
                 task.setCreatedDate(LocalDateTime.parse(row[17], dateTimeFormatter));
                 task.setUpdatedDate(LocalDateTime.parse(row[18], dateTimeFormatter));
-                taskRepository.save(task);
+                taskEntityList.add(task);
             } catch (Exception e) {
                 System.out.println(e);
             }
         }
+        taskRepository.saveAll(taskEntityList);
         csvReader.close();
     }
 
