@@ -1,9 +1,11 @@
 package com.sharp.vn.its.management.controller;
 
 import com.sharp.vn.its.management.dto.system.SystemDTO;
+import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.service.SystemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -63,8 +65,12 @@ public class SystemController {
      */
     @DeleteMapping("/{systemId}")
     public ResponseEntity<?> deleteSystem(@PathVariable(required = true) Long systemId) {
-        systemService.deleteSystem(systemId);
-        return ResponseEntity.ok().build();
+        try {
+            systemService.deleteSystem(systemId);
+            return ResponseEntity.ok().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     /**

@@ -5,6 +5,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The interface Task repository.
@@ -20,4 +22,6 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
      * @return the page
      */
     Page<TaskEntity> findAll(Specification<TaskEntity> spec, Pageable pageable);
+
+    boolean existsBySystemId(Long systemId);
 }
