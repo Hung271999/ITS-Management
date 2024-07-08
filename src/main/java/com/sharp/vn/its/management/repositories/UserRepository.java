@@ -1,11 +1,16 @@
 package com.sharp.vn.its.management.repositories;
 
+import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 
 import java.util.Optional;
 
@@ -22,7 +27,12 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
      * @return the optional
      */
     Optional<UserEntity> findByUsername(String username);
+//    @Query("SELECT u FROM UserEntity u WHERE u.username LIKE %:searchParam%")
+    Page<UserEntity> findAll(Specification<UserEntity> spec, Pageable pageable);
 
+    // Tìm kiếm theo fullName có chứa searchParam (sử dụng LIKE và % %)
+    @Query("SELECT u FROM UserEntity u WHERE u.fullName LIKE %:searchParam%")
+    Page<UserEntity> searchByFullName(@Param("searchParam") String searchParam, Pageable pageable);
     /**
      * Exists by username boolean.
      *

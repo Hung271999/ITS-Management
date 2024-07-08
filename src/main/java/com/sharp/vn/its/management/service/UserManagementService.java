@@ -1,22 +1,39 @@
 package com.sharp.vn.its.management.service;
 
+import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.Role;
 import com.sharp.vn.its.management.dto.user.UserDTO;
-import com.sharp.vn.its.management.entity.RoleEntity;
-import com.sharp.vn.its.management.entity.UserEntity;
-import com.sharp.vn.its.management.entity.UserRoleEntity;
+import com.sharp.vn.its.management.entity.*;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
+import com.sharp.vn.its.management.filter.CriteriaFilterItem;
 import com.sharp.vn.its.management.repositories.RoleRepository;
+import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.security.UserSecurityDetails;
+import com.sharp.vn.its.management.util.CollectionUtils;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import com.sharp.vn.its.management.constants.SortType;
+import com.sharp.vn.its.management.entity.TaskEntity;
+import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
+import com.sharp.vn.its.management.filter.SortCriteria;
 
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
+import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
 
 /**
  * The type User management service.
@@ -36,6 +53,8 @@ public class UserManagementService extends BaseService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private TaskRepository taskRepository;
     /**
      * The Authentication service.
      */
@@ -54,6 +73,7 @@ public class UserManagementService extends BaseService {
         final String userName = request.getUserName();
         final String email = request.getEmail();
         final Long userId = request.getUserId();
+        final String password = request.getPassword();
         // Check if username or email already exists
         if (StringUtils.isEmpty(userName) || userRepository.existsByUsername(userName,
                 userId)) {
@@ -103,9 +123,18 @@ public class UserManagementService extends BaseService {
         if (id == null) {
             throw new DataValidationException("User ID is null or empty");
         }
-        userRepository.deleteById(id);
-        log.info("User with id {} deleted successfully.", id);
+        try {
+            Boolean hasTasks = taskRepository.existsByPersonInChargeId(id);
+            if (hasTasks) {
+                throw new DataValidationException("Cannot delete user with associate tasks.");
+            }
+            userRepository.deleteById(id);
+            log.info("User with id {} deleted successfully.", id);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("Cannot delete user due to existing dependencies.");
+        }
     }
+
 
     /**
      * Gets all users data.
@@ -115,10 +144,110 @@ public class UserManagementService extends BaseService {
     public List<UserDTO> getAllUsersData() {
         log.info("Fetching all users...");
         final List<UserDTO> users = userRepository.findAll().stream()
-                .map(userEntity -> new UserDTO(userEntity.getId(), userEntity.getUsername(),
-                        userEntity.getFirstName(), userEntity.getLastName()))
+                .map(UserDTO::new)
                 .toList();
         log.info("All users fetched successfully.");
         return users;
+    }
+    /**
+     * Gets user detail.
+     *
+     * @param id the id
+     * @return the user detail
+     */
+    public UserDTO getUserDetail(Long id) {
+        if (id == null) {
+            throw new DataValidationException("User id not found");
+        }
+        log.info("Fetching user detail for id: {}", id);
+        final UserDTO userDTO = new UserDTO(userRepository.findById(id).orElseThrow(() -> {
+            return new ObjectNotFoundException("User not found with id: " + id);
+        }));
+        log.info("User detail fetched successfully for id: {}", id);
+        return userDTO;
+    }
+
+    /**
+     * Gets list users data.
+     *
+     * @param request the request
+     * @return the list users data
+     */
+    public Page<UserDTO> getListUsersData(UserDTO request) {
+        log.info("Fetching all users...");
+        CriteriaSearchRequest filter = request.getFilter();
+        Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
+        Map<String, SortCriteria> sort = filter.getSort();
+        buildSortCondition(sort);
+
+        Specification<UserEntity> specification = buildFilterCondition(searchParam);
+        Page<UserEntity> pageable = userRepository.findAll(specification, request.getFilter().getPageable());
+        log.info("All users fetched successfully.");
+        return pageable.map(UserDTO::new);
+    }
+
+
+
+    /**
+     * Build filter condition specification.
+     *
+     * @param searchParam the search param
+     * @return the specification
+     */
+    public Specification<UserEntity> buildFilterCondition(
+            Map<String, CriteriaFilterItem> searchParam) {
+        return
+                (Root<UserEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+
+                    if (searchParam == null) {
+                        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                    }
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildCombinedPredicate(criteriaBuilder, FilterType.OR,
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("userName")),
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("fullName"))));
+                    CriteriaFilterItem personInCharge = searchParam.get("personInCharge");
+                    if (personInCharge != null) {
+                        Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
+                        CollectionUtils.addIfNotEmptyOrNull(predicates,
+                                criteriaBuilder.equal(userJoin.get("id"),
+                                        personInCharge.getFilterNumberValue().getToValue()));
+                    }
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+    }
+    ;
+    private void buildSortCondition(Map<String, SortCriteria> sort) {
+        if (sort == null || sort.isEmpty()) {
+            sort.put("id", new SortCriteria("id", SortType.DESC.getText()));
+            return;
+        }
+        sort.forEach((key, criteria) -> {
+            switch (key) {
+                case "userId":
+                    criteria.setFieldName("id");
+                    break;
+                case "firstName":
+                    criteria.setFieldName("firstName");
+                    break;
+                case "lastName":
+                    criteria.setFieldName("lastName");
+                    break;
+                case "email":
+                    criteria.setFieldName("email");
+                    break;
+                case "userName":
+                    criteria.setFieldName("username");
+                    break;
+                case "role":
+                    criteria.setFieldName("roles");
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 }

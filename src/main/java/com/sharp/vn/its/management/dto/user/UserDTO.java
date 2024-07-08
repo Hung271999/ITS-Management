@@ -11,8 +11,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import com.sharp.vn.its.management.filter.*;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The type User dto.
@@ -57,6 +58,7 @@ public class UserDTO {
      */
     @NotBlank(message = "Last name must not be blank")
     private String lastName;
+    private CriteriaSearchRequest filter = new CriteriaSearchRequest();
 
     /**
      * The Full name.
@@ -112,11 +114,14 @@ public class UserDTO {
      * @param userName the user name
      */
     public UserDTO(final long userId, final String userName, final String firstName,
-            final String lastName) {
+                   final String lastName) {
         this.userId = userId;
         this.userName = userName;
         this.firstName = firstName;
         this.lastName = lastName;
         this.fullName = firstName + " " + lastName;
     }
+
+
+
 }

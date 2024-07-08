@@ -1,16 +1,22 @@
 package com.sharp.vn.its.management.service;
 
+import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.dto.system.SystemDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
+import com.sharp.vn.its.management.filter.SortCriteria;
 import com.sharp.vn.its.management.repositories.SystemRepository;
+import com.sharp.vn.its.management.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type System service.
