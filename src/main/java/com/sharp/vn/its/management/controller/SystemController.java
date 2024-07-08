@@ -65,12 +65,8 @@ public class SystemController {
      */
     @DeleteMapping("/{systemId}")
     public ResponseEntity<?> deleteSystem(@PathVariable(required = true) Long systemId) {
-        try {
-            systemService.deleteSystem(systemId);
-            return ResponseEntity.ok().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        systemService.deleteSystem(systemId);
+        return ResponseEntity.ok().build();
     }
 
     /**

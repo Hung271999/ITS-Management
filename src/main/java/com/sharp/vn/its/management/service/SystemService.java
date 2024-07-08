@@ -94,6 +94,7 @@ public class SystemService extends BaseService {
     /**
      * Delete system.
      *
+     *
      * @param id the id
      */
     public void deleteSystem(Long id) {
@@ -101,7 +102,7 @@ public class SystemService extends BaseService {
             throw new DataValidationException("System id not found");
         }
         if(taskRepository.existsBySystemId(id)){
-           throw new DataIntegrityViolationException("Cannot delete system with id " + id +" because tasks are associated with it");
+           throw new DataValidationException("Cannot delete system");
         }
         systemRepository.deleteById(id);
         log.info("System with id {} deleted successfully.", id);
