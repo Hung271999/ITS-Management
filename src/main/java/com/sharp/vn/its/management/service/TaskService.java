@@ -1,10 +1,7 @@
 package com.sharp.vn.its.management.service;
 
 
-import com.sharp.vn.its.management.constants.FilterType;
-import com.sharp.vn.its.management.constants.SortType;
-import com.sharp.vn.its.management.constants.TaskStatus;
-import com.sharp.vn.its.management.constants.TaskType;
+import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
@@ -119,11 +116,13 @@ public class TaskService extends BaseService {
      */
     public TaskDTO getTaskDetail(Long id) {
         if (id == null) {
-            throw new DataValidationException("Task id not found");
+            log.error("Task id empty or null");
+            throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         }
         log.info("Fetching task detail for id: {}", id);
         final TaskDTO taskDTO = new TaskDTO(taskRepository.findById(id).orElseThrow(() -> {
-            return new ObjectNotFoundException("Task not found with id: " + id);
+            log.error("Task not found with id: {}", id);
+            return new ObjectNotFoundException(MessageCode.ERROR_TASK_NOT_FOUND);
         }));
         log.info("Task detail fetched successfully for id: {}", id);
         return taskDTO;
@@ -136,7 +135,8 @@ public class TaskService extends BaseService {
      */
     public void deleteTask(Long id) {
         if (id == null) {
-            throw new DataValidationException("Task id not found");
+            log.error("Task id not found");
+            throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         }
         taskRepository.deleteById(id);
         log.info("Task with id {} deleted successfully.", id);
@@ -156,15 +156,20 @@ public class TaskService extends BaseService {
         TaskEntity taskEntity = new TaskEntity();
         // update when task id is not null
         if (taskId != null) {
-            taskEntity = taskRepository.findById(taskId).orElseThrow(
-                    () -> new DataValidationException("Task not found with id: " + taskId));
+            taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
+                        log.error("Task not found with id: {}", taskId);
+                        return new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+                    });
         }
         final String userName = authenticationService.getUser().getUsername();
         if (userName == null) {
             throw new ObjectNotFoundException("User not found");
         }
         final SystemEntity system = systemRepository.findById(systemId).orElseThrow(
-                () -> new ObjectNotFoundException("System not found with id: " + systemId));
+                () -> {
+                    log.error("System not found with id: {}", systemId);
+                    return new ObjectNotFoundException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
+                });
 
         final TaskType taskType = TaskType.valueOf(taskDTO.getType());
 
@@ -302,10 +307,14 @@ public class TaskService extends BaseService {
      */
     public void cloneTask(Long taskId, int numberOfTasks){
         if (taskId == null) {
-            throw new DataValidationException("Task id not found");
+            log.error("Task id not found");
+            throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         }
         log.info("Start cloning task: {}", taskId);
-        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFoundException("Task not found with id: " + taskId));
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
+            log.error("Task not found with id: {}", taskId);
+            return new ObjectNotFoundException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+        });
         List<TaskEntity> taskEntities = new ArrayList<>();
         for (int i = 0 ; i < numberOfTasks; i++){
             TaskEntity taskClone = new TaskEntity();
