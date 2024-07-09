@@ -8,10 +8,12 @@ import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.filter.SortCriteria;
 import com.sharp.vn.its.management.repositories.SystemRepository;
+import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +44,9 @@ public class SystemService extends BaseService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
     /**
      * Gets all systems data.
      *
@@ -58,6 +63,7 @@ public class SystemService extends BaseService {
     /**
      * Gets all systems data by search param and pageable.
      *
+     * @param request the request
      * @return the all systems data
      */
     public Page<SystemDTO> loadAllSystemData(SystemDTO request) {
@@ -88,11 +94,15 @@ public class SystemService extends BaseService {
     /**
      * Delete system.
      *
+     *
      * @param id the id
      */
     public void deleteSystem(Long id) {
         if (id == null) {
             throw new DataValidationException("System id not found");
+        }
+        if(taskRepository.existsBySystemId(id)){
+           throw new DataValidationException("Cannot delete system");
         }
         systemRepository.deleteById(id);
         log.info("System with id {} deleted successfully.", id);

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -46,6 +47,9 @@ public class ExceptionHandlingController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public @ResponseBody ResponseData exceptionHandler(final HttpServletRequest request,
             final HttpServletResponse response, final Exception ex) throws Exception {
+        if(ex instanceof AccessDeniedException){
+            throw ex;
+        }
         String msgExt = "";
         final StackTraceElement[] stackTrace = ex.getStackTrace();
         if (stackTrace.length > 1) {
@@ -125,11 +129,10 @@ public class ExceptionHandlingController {
      * @return the response data
      */
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler({AuthenticationException.class,
-            org.springframework.security.core.AuthenticationException.class})
+    @ExceptionHandler({AuthenticationException.class})
     public @ResponseBody ResponseData handleAuthenticationException(
             final HttpServletRequest request,
-            final HttpServletResponse response, final RuntimeException ex) {
+            final HttpServletResponse response, final AuthenticationException ex) {
         String msgExt = "";
         final StackTraceElement[] stackTrace = ex.getStackTrace();
         if (stackTrace.length > 1) {
@@ -195,6 +198,4 @@ public class ExceptionHandlingController {
         responseAPI.setMessage(message);
         return responseAPI;
     }
-
-
 }
