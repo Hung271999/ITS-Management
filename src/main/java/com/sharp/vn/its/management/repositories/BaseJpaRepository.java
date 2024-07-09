@@ -24,7 +24,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 /**
  * The Interface BaseJpaRepository.
  *
- * @param <T> the generic type
+ * @param <T>  the generic type
  * @param <ID> the generic type
  * @author <a href="mailto:developer@hitachiconsulting.com">phongtnguyen.jk</a>
  */
@@ -43,7 +43,7 @@ public interface BaseJpaRepository<T, ID extends Serializable>
     /**
      * Refresh entity.
      *
-     * @param <S> the generic type
+     * @param <S>    the generic type
      * @param entity the entity
      */
     <S extends T> void refresh(S entity);
@@ -65,11 +65,10 @@ public interface BaseJpaRepository<T, ID extends Serializable>
     List<T> findAll(List<ID> ids);
 
     /**
-     * Save batch.
+     * Save batch list.
      *
-     * @param <T> the generic type
      * @param entities the entities
-     * @return the collection
+     * @return the list
      */
     List<T> saveBatch(Collection<T> entities);
 }

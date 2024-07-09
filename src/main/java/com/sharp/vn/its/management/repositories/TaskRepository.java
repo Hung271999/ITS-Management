@@ -24,4 +24,14 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
     Page<TaskEntity> findAll(Specification<TaskEntity> spec, Pageable pageable);
 
     boolean existsBySystemId(Long systemId);
+
+
+    /**
+     * Exists tasks by user id boolean.
+     *
+     * @param userId the user id
+     * @return the boolean
+     */
+    Boolean existsByPersonInChargeId(Long userId);
+
 }

@@ -7,8 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+
+
+
 
 import java.util.List;
+
 
 /**
  * The type User controller.
@@ -17,11 +22,10 @@ import java.util.List;
 @RequestMapping(value = "/users")
 public class UserController extends BaseController {
 
-    /**
-     * The Service.
-     */
+
     @Autowired
     private UserManagementService service;
+
 
     /**
      * Register user user dto.
@@ -38,7 +42,7 @@ public class UserController extends BaseController {
     /**
      * Update user user dto.
      *
-     * @param userId the user id
+     * @param userId  the user id
      * @param request the request
      * @return the user dto
      */
@@ -47,6 +51,19 @@ public class UserController extends BaseController {
     public UserDTO updateUser(@PathVariable Long userId, @Valid @RequestBody UserDTO request) {
         return service.saveUser(request);
     }
+
+
+    /**
+     * Gets user detail.
+     *
+     * @param userId the user id
+     * @return the user detail
+     */
+    @GetMapping("/{userId}")
+    public UserDTO getUserDetail(@PathVariable(required = true) Long userId) {
+        return service.getUserDetail(userId);
+    }
+
 
     /**
      * Delete user response entity.
@@ -61,6 +78,7 @@ public class UserController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
+
     /**
      * Load all users data list.
      *
@@ -71,4 +89,15 @@ public class UserController extends BaseController {
         return service.getAllUsersData();
     }
 
+
+    /**
+     * Load all users page.
+     *
+     * @param request the request
+     * @return the page
+     */
+    @PostMapping("/all")
+    public Page<UserDTO> loadAllUsers(@RequestBody UserDTO request) {
+        return service.getListUsersData(request);
+    }
 }
