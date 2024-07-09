@@ -280,7 +280,7 @@ public class TaskService extends BaseService {
                         Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
                         CollectionUtils.addIfNotEmptyOrNull(predicates,
                                 criteriaBuilder.equal(userJoin.get("id"),
-                                         personInCharge.getFilterNumberValue().getToValue()));
+                                        personInCharge.getFilterNumberValue().getToValue()));
                     }
                     CriteriaFilterItem system = searchParam.get("system");
                     if (system != null) {
@@ -292,6 +292,29 @@ public class TaskService extends BaseService {
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
 
+    }
+
+    /**
+     * Duplicate task.
+     *
+     * @param taskId the taskId
+     * @param numberOfTasks the number of tasks
+     */
+    public void cloneTask(Long taskId, int numberOfTasks){
+        if (taskId == null) {
+            throw new DataValidationException("Task id not found");
+        }
+        log.info("Start cloning task: {}", taskId);
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFoundException("Task not found with id: " + taskId));
+        List<TaskEntity> taskEntities = new ArrayList<>();
+        for (int i = 0 ; i < numberOfTasks; i++){
+            TaskEntity taskClone = new TaskEntity();
+            BeanUtils.copyProperties(taskEntity, taskClone);
+            taskClone.setId(null);
+            taskEntities.add(taskClone);
+        }
+        taskRepository.saveAll(taskEntities);
+        log.info("Clone {} tasks successfully.", numberOfTasks);
     }
 
     /**
