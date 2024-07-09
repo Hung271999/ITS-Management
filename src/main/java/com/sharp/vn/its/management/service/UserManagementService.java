@@ -126,6 +126,7 @@ public class UserManagementService extends BaseService {
         try {
             Boolean hasTasks = taskRepository.existsByPersonInChargeId(id);
             if (hasTasks) {
+
                 throw new DataValidationException("Cannot delete user with associate tasks.");
             }
             userRepository.deleteById(id);
@@ -149,6 +150,7 @@ public class UserManagementService extends BaseService {
         log.info("All users fetched successfully.");
         return users;
     }
+
     /**
      * Gets user detail.
      *
@@ -187,7 +189,6 @@ public class UserManagementService extends BaseService {
     }
 
 
-
     /**
      * Build filter condition specification.
      *
@@ -209,13 +210,6 @@ public class UserManagementService extends BaseService {
                                             searchParam.get("userName")),
                                     buildPredicate(criteriaBuilder, root,
                                             searchParam.get("fullName"))));
-                    CriteriaFilterItem personInCharge = searchParam.get("personInCharge");
-                    if (personInCharge != null) {
-                        Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
-                        CollectionUtils.addIfNotEmptyOrNull(predicates,
-                                criteriaBuilder.equal(userJoin.get("id"),
-                                        personInCharge.getFilterNumberValue().getToValue()));
-                    }
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
     }
@@ -243,7 +237,7 @@ public class UserManagementService extends BaseService {
                     criteria.setFieldName("username");
                     break;
                 case "role":
-                    criteria.setFieldName("roles");
+                    criteria.setFieldName("roles.role.roleName");
                     break;
                 default:
                     break;

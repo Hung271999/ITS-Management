@@ -1,18 +1,16 @@
 package com.sharp.vn.its.management.repositories;
 
-import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
 import java.util.Optional;
+
 
 /**
  * The interface User repository.
@@ -27,16 +25,21 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
      * @return the optional
      */
     Optional<UserEntity> findByUsername(String username);
-//    @Query("SELECT u FROM UserEntity u WHERE u.username LIKE %:searchParam%")
+
+    /**
+     * Find all page.
+     *
+     * @param spec     the spec
+     * @param pageable the pageable
+     * @return the page
+     */
     Page<UserEntity> findAll(Specification<UserEntity> spec, Pageable pageable);
 
-    // Tìm kiếm theo fullName có chứa searchParam (sử dụng LIKE và % %)
-    @Query("SELECT u FROM UserEntity u WHERE u.fullName LIKE %:searchParam%")
-    Page<UserEntity> searchByFullName(@Param("searchParam") String searchParam, Pageable pageable);
     /**
      * Exists by username boolean.
      *
      * @param username the username
+     * @param id       the id
      * @return the boolean
      */
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM UserEntity u WHERE u.username = :username AND (:id IS NULL OR u.id <> :id)")
@@ -46,6 +49,7 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
      * Exists by email boolean.
      *
      * @param email the email
+     * @param id    the id
      * @return the boolean
      */
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM UserEntity u WHERE u.email = :email AND (:id IS NULL OR u.id <> :id)")

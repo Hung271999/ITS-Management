@@ -4,18 +4,16 @@ import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.service.UserManagementService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import com.sharp.vn.its.management.filter.*;
+
 
 
 
 import java.util.List;
+
 
 /**
  * The type User controller.
@@ -24,12 +22,10 @@ import java.util.List;
 @RequestMapping(value = "/users")
 public class UserController extends BaseController {
 
-    /**
-     * The Service.
-     */
+
     @Autowired
     private UserManagementService service;
-    private CriteriaSearchRequest filter = new CriteriaSearchRequest();
+
 
     /**
      * Register user user dto.
@@ -56,21 +52,18 @@ public class UserController extends BaseController {
         return service.saveUser(request);
     }
 
+
     /**
      * Gets user detail.
      *
      * @param userId the user id
      * @return the user detail
      */
-    /* Gets task detail.
-     *
-     * @param taskId the task id
-     * @return the task detail
-     */
     @GetMapping("/{userId}")
     public UserDTO getUserDetail(@PathVariable(required = true) Long userId) {
         return service.getUserDetail(userId);
     }
+
 
     /**
      * Delete user response entity.
@@ -85,6 +78,7 @@ public class UserController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
+
     /**
      * Load all users data list.
      *
@@ -95,12 +89,13 @@ public class UserController extends BaseController {
         return service.getAllUsersData();
     }
 
-    //    /**
-//     * Search users with pagination.
-//     *
-//     * @param request the request
-//     * @return the page of UserDTO
-//     */
+
+    /**
+     * Load all users page.
+     *
+     * @param request the request
+     * @return the page
+     */
     @PostMapping("/all")
     public Page<UserDTO> loadAllUsers(@RequestBody UserDTO request) {
         return service.getListUsersData(request);
