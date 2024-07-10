@@ -63,6 +63,7 @@ public class UserController extends BaseController {
      * @return the user detail
      */
     @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO getUserDetail(@PathVariable(required = true) Long userId) {
         return service.getUserDetail(userId);
     }
