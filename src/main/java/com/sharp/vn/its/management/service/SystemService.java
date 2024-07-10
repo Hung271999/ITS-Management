@@ -45,6 +45,9 @@ public class SystemService extends BaseService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * The Task repository.
+     */
     @Autowired
     private TaskRepository taskRepository;
 
@@ -96,7 +99,6 @@ public class SystemService extends BaseService {
 
     /**
      * Delete system.
-     *
      *
      * @param id the id
      */

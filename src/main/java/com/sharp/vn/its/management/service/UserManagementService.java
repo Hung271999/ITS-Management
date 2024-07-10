@@ -54,8 +54,13 @@ public class UserManagementService extends BaseService {
     @Autowired
     private RoleRepository roleRepository;
 
+    /**
+     * The Task repository.
+     */
     @Autowired
     private TaskRepository taskRepository;
+
+    
     /**
      * The Authentication service.
      */
@@ -222,7 +227,12 @@ public class UserManagementService extends BaseService {
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
     }
-    
+
+    /**
+     * Build sort condition.
+     *
+     * @param sort the sort
+     */
     private void buildSortCondition(Map<String, SortCriteria> sort) {
         if (sort == null || sort.isEmpty()) {
             sort.put("id", new SortCriteria("id", SortType.DESC.getText()));

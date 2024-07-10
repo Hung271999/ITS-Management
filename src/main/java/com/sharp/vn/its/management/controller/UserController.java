@@ -23,6 +23,9 @@ import java.util.List;
 public class UserController extends BaseController {
 
 
+    /**
+     * The Service.
+     */
     @Autowired
     private UserManagementService service;
 
@@ -42,7 +45,7 @@ public class UserController extends BaseController {
     /**
      * Update user user dto.
      *
-     * @param userId  the user id
+     * @param userId the user id
      * @param request the request
      * @return the user dto
      */
