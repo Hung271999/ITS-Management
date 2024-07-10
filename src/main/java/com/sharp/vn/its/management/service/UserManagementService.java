@@ -1,6 +1,7 @@
 package com.sharp.vn.its.management.service;
 
 import com.sharp.vn.its.management.constants.FilterType;
+import com.sharp.vn.its.management.constants.MessageCode;
 import com.sharp.vn.its.management.constants.Role;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.entity.*;
@@ -53,8 +54,13 @@ public class UserManagementService extends BaseService {
     @Autowired
     private RoleRepository roleRepository;
 
+    /**
+     * The Task repository.
+     */
     @Autowired
     private TaskRepository taskRepository;
+
+    
     /**
      * The Authentication service.
      */
@@ -77,11 +83,14 @@ public class UserManagementService extends BaseService {
         // Check if username or email already exists
         if (StringUtils.isEmpty(userName) || userRepository.existsByUsername(userName,
                 userId)) {
-            throw new DataValidationException("Username " + userName + " already exists");
+            log.error("Username {} already exists", userName);
+            throw new DataValidationException(MessageCode.ERROR_USER_USER_NAME_ALREADY_EXIT);
         }
         if (StringUtils.isEmpty(email) || userRepository.existsByEmail(email, userId)) {
-            throw new DataValidationException("Email " + email + " already exists");
+            log.error("Email {} already exists", email);
+            throw new DataValidationException(MessageCode.ERROR_USER_EMAIL_ALREADY_EXIT);
         }
+
         // set properties
         UserEntity user = new UserEntity();
         if (userId != null) {
@@ -97,15 +106,20 @@ public class UserManagementService extends BaseService {
         UserSecurityDetails authenticatedUser = authenticationService.getUser();
         if (authenticatedUser != null) {
             UserEntity currentUser = userRepository.findById(authenticatedUser.getId())
-                    .orElseThrow(() -> new ObjectNotFoundException(
-                            "User not found with id " + authenticatedUser.getId()));
+                    .orElseThrow(() -> {
+                        log.error("User not found with id {}", authenticatedUser.getId());
+                        return new ObjectNotFoundException(MessageCode.ERROR_USER_ID_NOT_FOUND);
+                    });
             user.setCreatedBy(currentUser);
             user.setUpdatedBy(currentUser);
         }
         final Role itsRole = request.getRole();
         final RoleEntity role = roleRepository.findByRoleName(itsRole)
-                .orElseThrow(() -> new ObjectNotFoundException(
-                        "Can't find role with name: " + itsRole.name()));
+                .orElseThrow(() -> {
+                    log.error("Can't find role with name: {}", itsRole.name());
+                    return new ObjectNotFoundException(
+                            MessageCode.ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME);
+                });
         UserRoleEntity userRole = new UserRoleEntity(user, role);
         user.getRoles().add(userRole);
         UserDTO result = new UserDTO(userRepository.save(user));
@@ -121,19 +135,16 @@ public class UserManagementService extends BaseService {
      */
     public void deleteUser(Long id) {
         if (id == null) {
-            throw new DataValidationException("User ID is null or empty");
+            log.error("User ID is null or empty");
+            throw new DataValidationException(MessageCode.ERROR_USER_ID_EMPTY_OR_NULL);
         }
-        try {
-            Boolean hasTasks = taskRepository.existsByPersonInChargeId(id);
-            if (hasTasks) {
-
-                throw new DataValidationException("Cannot delete user with associate tasks.");
-            }
-            userRepository.deleteById(id);
-            log.info("User with id {} deleted successfully.", id);
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Cannot delete user due to existing dependencies.");
+        Boolean hasTasks = taskRepository.existsByPersonInChargeId(id);
+        if (hasTasks) {
+            log.error("User with id {} can not delete because task associate", id);
+            throw new DataValidationException(MessageCode.ERROR_USER_WITH_FOREIGN_KEY_TO_TASK);
         }
+        userRepository.deleteById(id);
+        log.info("User with id {} deleted successfully.", id);
     }
 
 
@@ -159,11 +170,13 @@ public class UserManagementService extends BaseService {
      */
     public UserDTO getUserDetail(Long id) {
         if (id == null) {
-            throw new DataValidationException("User id not found");
+            log.error("User ID is null or empty.");
+            throw new DataValidationException(MessageCode.ERROR_USER_ID_EMPTY_OR_NULL);
         }
         log.info("Fetching user detail for id: {}", id);
         final UserDTO userDTO = new UserDTO(userRepository.findById(id).orElseThrow(() -> {
-            return new ObjectNotFoundException("User not found with id: " + id);
+            log.error("User not found with id: {}", id);
+            return new ObjectNotFoundException(MessageCode.ERROR_USER_ID_NOT_FOUND);
         }));
         log.info("User detail fetched successfully for id: {}", id);
         return userDTO;
@@ -183,7 +196,8 @@ public class UserManagementService extends BaseService {
         buildSortCondition(sort);
 
         Specification<UserEntity> specification = buildFilterCondition(searchParam);
-        Page<UserEntity> pageable = userRepository.findAll(specification, request.getFilter().getPageable());
+        Page<UserEntity> pageable =
+                userRepository.findAll(specification, request.getFilter().getPageable());
         log.info("All users fetched successfully.");
         return pageable.map(UserDTO::new);
     }
@@ -213,7 +227,12 @@ public class UserManagementService extends BaseService {
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
     }
-    ;
+
+    /**
+     * Build sort condition.
+     *
+     * @param sort the sort
+     */
     private void buildSortCondition(Map<String, SortCriteria> sort) {
         if (sort == null || sort.isEmpty()) {
             sort.put("id", new SortCriteria("id", SortType.DESC.getText()));

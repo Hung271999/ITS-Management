@@ -1,5 +1,6 @@
 package com.sharp.vn.its.management.service;
 
+import com.sharp.vn.its.management.constants.MessageCode;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.dto.system.SystemDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
@@ -44,6 +45,9 @@ public class SystemService extends BaseService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * The Task repository.
+     */
     @Autowired
     private TaskRepository taskRepository;
 
@@ -81,11 +85,13 @@ public class SystemService extends BaseService {
      */
     public SystemDTO getSystemDetail(Long id) {
         if (id == null) {
-            throw new DataValidationException("System id not found");
+            log.error("System id not found");
+            throw new DataValidationException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
         }
         log.info("Fetching system detail for id: {}", id);
         final SystemDTO systemDTO = new SystemDTO(systemRepository.findById(id).orElseThrow(() -> {
-            return new ObjectNotFoundException("System not found with id: " + id);
+            log.error("System not found");
+            return new ObjectNotFoundException(MessageCode.ERROR_SYSTEM_NOT_FOUND);
         }));
         log.info("System detail fetched successfully for id: {}", id);
         return systemDTO;
@@ -94,15 +100,16 @@ public class SystemService extends BaseService {
     /**
      * Delete system.
      *
-     *
      * @param id the id
      */
     public void deleteSystem(Long id) {
         if (id == null) {
-            throw new DataValidationException("System id not found");
+            log.error("System id not found");
+            throw new DataValidationException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
         }
         if(taskRepository.existsBySystemId(id)){
-           throw new DataValidationException("Cannot delete system");
+            log.error("System with {} cannot delete because the task associated", id);
+           throw new DataValidationException(MessageCode.ERROR_SYSTEM_WITH_FOREIGN_KEY_TO_TASK);
         }
         systemRepository.deleteById(id);
         log.info("System with id {} deleted successfully.", id);
@@ -122,9 +129,12 @@ public class SystemService extends BaseService {
 
         // update when system id is not null
         if (systemId != null) {
-            systemEntity = systemRepository.findById(systemId).orElseThrow(
-                    () -> new DataValidationException("System not found with id: " + systemId));
+            systemEntity = systemRepository.findById(systemId).orElseThrow(() -> {
+                log.error("System with id {} not found.", systemId);
+                return new DataValidationException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
+            });
         }
+
         final String userName = authenticationService.getUser().getUsername();
         if (userName == null) {
             throw new ObjectNotFoundException("User not found");

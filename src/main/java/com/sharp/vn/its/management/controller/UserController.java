@@ -23,6 +23,9 @@ import java.util.List;
 public class UserController extends BaseController {
 
 
+    /**
+     * The Service.
+     */
     @Autowired
     private UserManagementService service;
 
@@ -42,7 +45,7 @@ public class UserController extends BaseController {
     /**
      * Update user user dto.
      *
-     * @param userId  the user id
+     * @param userId the user id
      * @param request the request
      * @return the user dto
      */
@@ -60,6 +63,7 @@ public class UserController extends BaseController {
      * @return the user detail
      */
     @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO getUserDetail(@PathVariable(required = true) Long userId) {
         return service.getUserDetail(userId);
     }
@@ -96,6 +100,7 @@ public class UserController extends BaseController {
      * @param request the request
      * @return the page
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/all")
     public Page<UserDTO> loadAllUsers(@RequestBody UserDTO request) {
         return service.getListUsersData(request);
