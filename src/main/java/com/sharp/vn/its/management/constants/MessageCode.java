@@ -17,5 +17,6 @@ public class MessageCode {
     public static final String ERROR_USER_ID_NOT_FOUND = "MSG_USER_0004";
     public static final String ERROR_USER_ID_EMPTY_OR_NULL = "MSG_USER_0005";
     public static final String ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME = "MSG_USER_0006";
+    public static final String ERROR_USER_PASSWORD_TOO_SHORT = "MSG_USER_0007";
 
 }

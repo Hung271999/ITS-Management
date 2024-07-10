@@ -96,6 +96,7 @@ public class UserController extends BaseController {
      * @param request the request
      * @return the page
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/all")
     public Page<UserDTO> loadAllUsers(@RequestBody UserDTO request) {
         return service.getListUsersData(request);
