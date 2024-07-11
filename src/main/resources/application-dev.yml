@@ -1,7 +1,7 @@
 its:
     app:
         jwtCookieName: its
-        jwtExpirationMs: 900000
+        jwtExpirationMs: 3600000
         jwtSecret: ======================ITS=VN===========================
 server:
     port: 8080
