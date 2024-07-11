@@ -102,7 +102,12 @@ public class UserManagementService extends BaseService {
         user.setLastName(request.getLastName());
         user.setFullName(user.getFirstName() + " " + user.getLastName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        if (!(userId != null && StringUtils.isEmpty(password))) {
+            if (password.length() < 6) {
+                throw new DataValidationException("MSG_USER_0007");
+            }
+            user.setPassword(request.getPassword());
+        }
         UserSecurityDetails authenticatedUser = authenticationService.getUser();
         if (authenticatedUser != null) {
             UserEntity currentUser = userRepository.findById(authenticatedUser.getId())
