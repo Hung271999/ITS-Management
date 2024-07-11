@@ -122,7 +122,7 @@ public class TaskController extends BaseController {
         if (file.isEmpty()) {
             return new ResponseEntity<>("Please to a file to upload!", HttpStatus.BAD_REQUEST);
         }
-        taskService.uploadFile(file);
+        taskService.uploadFileExcel(file);
         return new ResponseEntity<>("Uploaded and processed CSV file successfully!", HttpStatus.OK);
     }
 }

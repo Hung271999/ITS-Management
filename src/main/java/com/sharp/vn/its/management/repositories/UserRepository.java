@@ -36,4 +36,12 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
      * @return the boolean
      */
     Boolean existsByEmail(String email);
+
+    /**
+     * Find user by first name.
+     *
+     * @param firstName the firstName
+     * @return user entity
+     */
+    UserEntity findByFirstName(String firstName);
 }

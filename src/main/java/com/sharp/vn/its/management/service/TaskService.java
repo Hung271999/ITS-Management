@@ -296,7 +296,12 @@ public class TaskService extends BaseService {
 
     }
 
-    public void uploadFile(MultipartFile file) throws IOException, CsvException {
+    /**
+     * upload file csv.
+     *
+     * @param file the file
+     */
+    public void uploadFileCSV(MultipartFile file) throws IOException, CsvException {
         InputStream inputStream = file.getInputStream();
         Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         CSVReader csvReader = new CSVReader(reader);
@@ -306,7 +311,8 @@ public class TaskService extends BaseService {
         List<TaskEntity> taskEntityList = new ArrayList<>();
         for (String[] row : rows) {
             TaskEntity task = new TaskEntity();
-            task.setPersonInCharge(userRepository.findById(Long.parseLong(row[1])).orElseThrow());
+            task.setId(Long.parseLong(row[0]));
+            task.setPersonInCharge(userRepository.findByFirstName(row[2]));
             try {
                 task.setReceiveDate(DateTimeUtil.toLocalDateTime(row[2], dateTimeFormatter));
                 task.setExpiredDate(DateTimeUtil.toLocalDateTime(row[3], dateTimeFormatter));
@@ -316,7 +322,7 @@ public class TaskService extends BaseService {
                 task.setStatus(Integer.parseInt(row[7]));
                 if(!row[9].isEmpty())
                     task.setCost(Double.parseDouble(row[9]));
-                task.setSystem(systemRepository.findById(Long.parseLong(row[10])).orElseThrow());
+                task.setSystem(systemRepository.findBySystemName(row[10]));
                 task.setType(Integer.parseInt(row[11]));
                 task.setTicketNumber(row[12].trim());
                 task.setTicketURL(row[13].trim());
@@ -334,4 +340,61 @@ public class TaskService extends BaseService {
         csvReader.close();
     }
 
+
+    /**
+     * upload file excel.
+     *
+     * @param file the file
+     */
+    public void uploadFileExcel(MultipartFile file) throws IOException {
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet sheet = workbook.getSheetAt(0);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        Iterator<Row> rowIterator = sheet.iterator();
+        List<TaskEntity> taskEntityList = new ArrayList<>();
+
+        if (rowIterator.hasNext()) {
+            rowIterator.next();
+        }
+
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            TaskEntity task = new TaskEntity();
+            try {
+//                task.setId((long) row.getCell(0).getNumericCellValue());
+                task.setPersonInCharge(userRepository.findByFirstName(row.getCell(1).getStringCellValue()));
+                if (row.getCell(2) != null && !row.getCell(2).getStringCellValue().isEmpty()) {
+                    task.setReceiveDate(DateTimeUtil.toLocalDateTime(row.getCell(2).getStringCellValue(), dateTimeFormatter));
+                }
+                if (row.getCell(3) != null && !row.getCell(3).getStringCellValue().isEmpty()) {
+                    task.setExpiredDate(DateTimeUtil.toLocalDateTime(row.getCell(3).getStringCellValue(), dateTimeFormatter));
+                }
+                if (row.getCell(4) != null && !row.getCell(4).getStringCellValue().isEmpty()) {
+                    task.setStartDate(DateTimeUtil.toLocalDateTime(row.getCell(4).getStringCellValue(), dateTimeFormatter));
+                }
+                if (row.getCell(5) != null && !row.getCell(5).getStringCellValue().isEmpty()) {
+                    task.setEndDate(DateTimeUtil.toLocalDateTime(row.getCell(5).getStringCellValue(), dateTimeFormatter));
+                }
+                task.setContent(row.getCell(6).getStringCellValue().trim());
+                task.setStatus((int) row.getCell(7).getNumericCellValue());
+                task.setCost(row.getCell(8).getNumericCellValue());
+                task.setSystem(systemRepository.findBySystemName(row.getCell(9).getStringCellValue()));
+                task.setType((int) row.getCell(10).getNumericCellValue());
+                task.setTicketNumber(row.getCell(11).getStringCellValue().trim());
+                task.setTicketURL(row.getCell(12).getStringCellValue().trim());
+                task.setNote(row.getCell(13).getStringCellValue().trim());
+//              task.setCreatedBy(userRepository.findById((long) row.getCell(14).getNumericCellValue()).orElseThrow());
+//              task.setUpdatedBy(userRepository.findById((long) row.getCell(15).getNumericCellValue()).orElseThrow());
+//              task.setCreatedDate(LocalDateTime.parse(row.getCell(16).getStringCellValue(), dateTimeFormatter));
+//              task.setUpdatedDate(LocalDateTime.parse(row.getCell(17).getStringCellValue(), dateTimeFormatter));
+                taskEntityList.add(task);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        taskRepository.saveAll(taskEntityList);
+        workbook.close();
+    }
 }
