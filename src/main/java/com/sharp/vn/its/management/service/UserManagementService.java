@@ -106,7 +106,7 @@ public class UserManagementService extends BaseService {
         user.setEmail(request.getEmail());
         if (!(userId != null && StringUtils.isEmpty(password))) {
             if (password.length() < 6) {
-                throw new DataValidationException("MSG_USER_0007");
+                throw new DataValidationException(MessageCode.ERROR_USER_PASSWORD_TOO_SHORT);
             }
             user.setPassword(request.getPassword());
         }
