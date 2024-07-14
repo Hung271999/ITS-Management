@@ -104,10 +104,7 @@ public class UserManagementService extends BaseService {
         user.setLastName(request.getLastName());
         user.setFullName(user.getFirstName() + " " + user.getLastName());
         user.setEmail(request.getEmail());
-        if (!(userId != null && StringUtils.isEmpty(password))) {
-            if (password.length() < 6) {
-                throw new DataValidationException(MessageCode.ERROR_USER_PASSWORD_TOO_SHORT);
-            }
+        if (isValidPassword(userId, password)) {
             user.setPassword(request.getPassword());
         }
         UserSecurityDetails authenticatedUser = authenticationService.getUser();
@@ -267,7 +264,7 @@ public class UserManagementService extends BaseService {
     /**
      * Save User Role
      *
-     * @param user the UserEntity
+     * @param user    the UserEntity
      * @param itsRole the Role
      */
     private void saveUserRole(UserEntity user, Role itsRole) {
@@ -286,4 +283,15 @@ public class UserManagementService extends BaseService {
         roles.clear();
         roles.add(userRole);
     }
+
+    private boolean isValidPassword(Long userId, final String password) {
+        if (userId != null && StringUtils.isEmpty(password)) {
+            return false;
+        }
+        if (password.length() < 6) {
+            throw new DataValidationException(MessageCode.ERROR_USER_PASSWORD_TOO_SHORT);
+        }
+        return true;
+    }
+
 }
