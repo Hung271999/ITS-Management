@@ -32,6 +32,8 @@ import com.sharp.vn.its.management.filter.SortCriteria;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -60,7 +62,7 @@ public class UserManagementService extends BaseService {
     @Autowired
     private TaskRepository taskRepository;
 
-    
+
     /**
      * The Authentication service.
      */
@@ -119,14 +121,7 @@ public class UserManagementService extends BaseService {
             user.setUpdatedBy(currentUser);
         }
         final Role itsRole = request.getRole();
-        final RoleEntity role = roleRepository.findByRoleName(itsRole)
-                .orElseThrow(() -> {
-                    log.error("Can't find role with name: {}", itsRole.name());
-                    return new ObjectNotFoundException(
-                            MessageCode.ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME);
-                });
-        UserRoleEntity userRole = new UserRoleEntity(user, role);
-        user.getRoles().add(userRole);
+        saveUserRole(user, itsRole);
         UserDTO result = new UserDTO(userRepository.save(user));
         log.info("User saved successfully.");
         return result;
@@ -267,5 +262,28 @@ public class UserManagementService extends BaseService {
                     break;
             }
         });
+    }
+
+    /**
+     * Save User Role
+     *
+     * @param user the UserEntity
+     * @param itsRole the Role
+     */
+    private void saveUserRole(UserEntity user, Role itsRole) {
+        final RoleEntity role = roleRepository.findByRoleName(itsRole)
+                .orElseThrow(() -> {
+                    log.error("Can't find role with name: {}", itsRole.name());
+                    return new ObjectNotFoundException(
+                            MessageCode.ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME);
+                });
+        Set<UserRoleEntity> roles = user.getRoles();
+        UserRoleEntity userRole = new UserRoleEntity(user, role);
+        if (roles.isEmpty()) {
+            user.getRoles().add(userRole);
+            return;
+        }
+        roles.clear();
+        roles.add(userRole);
     }
 }
