@@ -234,7 +234,7 @@ public class UserManagementService extends BaseService {
      * @param sort the sort
      */
     private void buildSortCondition(Map<String, SortCriteria> sort) {
-        if (sort == null || sort.isEmpty()) {
+        if (sort.isEmpty()) {
             sort.put("id", new SortCriteria("id", SortType.DESC.getText()));
             return;
         }
