@@ -235,7 +235,7 @@ public class UserManagementService extends BaseService {
      */
     private void buildSortCondition(Map<String, SortCriteria> sort) {
         if (sort.isEmpty()) {
-            sort.put("id", new SortCriteria("id", SortType.DESC.getText()));
+            sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
             return;
         }
         sort.forEach((key, criteria) -> {
