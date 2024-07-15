@@ -226,14 +226,14 @@ public class TaskService extends BaseService {
                 ExcelUtils.writeCell(row, 6, task.getContent());
                 TaskStatus taskStatus = TaskStatus.valueOf(task.getStatus());
                 if (taskStatus != null) {
-                    ExcelUtils.writeCell(row, 7, taskStatus.getStatus());
+                    ExcelUtils.writeCell(row, 7, TaskStatus.valueOf(taskStatus.getStatus()).getDescription());
                 }
 
                 ExcelUtils.writeCell(row, 8, task.getCost());
                 ExcelUtils.writeCell(row, 9, task.getSystemName());
                 TaskType taskType = TaskType.valueOf(task.getType());
                 if (taskType != null) {
-                    ExcelUtils.writeCell(row, 10, taskType.getType());
+                    ExcelUtils.writeCell(row, 10, TaskType.valueOf(taskType.getType()).getDescription());
                 }
                 ExcelUtils.writeCell(row, 11, task.getTicketNumber());
                 ExcelUtils.writeCell(row, 12, task.getTicketURL());
