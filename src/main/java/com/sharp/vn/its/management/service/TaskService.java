@@ -218,7 +218,7 @@ public class TaskService extends BaseService {
                 TaskDTO task = data.get(i);
                 Row row = sheet.createRow(i + 1);
                 ExcelUtils.writeCell(row, 0, task.getTaskId());
-                ExcelUtils.writeCell(row, 1, task.getFullName());
+                ExcelUtils.writeCell(row, 1, task.getFirstName());
                 ExcelUtils.writeCell(row, 2, DateTimeUtil.toLocalDateTime(task.getReceiveDate()));
                 ExcelUtils.writeCell(row, 3, DateTimeUtil.toLocalDateTime(task.getExpiredDate()));
                 ExcelUtils.writeCell(row, 4, DateTimeUtil.toLocalDateTime(task.getStartDate()));

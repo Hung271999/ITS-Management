@@ -39,6 +39,11 @@ public class TaskDTO {
     private String fullName;
 
     /**
+     * The First name.
+     */
+    private String firstName;
+
+    /**
      * The Receive date.
      */
     private Long receiveDate;
@@ -152,6 +157,7 @@ public class TaskDTO {
             return;
         }
         this.fullName = userEntity.getFullName();
+        this.firstName = userEntity.getFirstName();
         this.userName = userEntity.getUsername();
         this.userId = userEntity.getId();
         this.createdDate = DateTimeUtil.toEpochMilli(taskEntity.getCreatedDate());
