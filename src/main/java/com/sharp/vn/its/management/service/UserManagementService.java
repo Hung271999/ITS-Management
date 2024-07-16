@@ -3,6 +3,9 @@ package com.sharp.vn.its.management.service;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.MessageCode;
 import com.sharp.vn.its.management.constants.Role;
+import com.sharp.vn.its.management.dto.chart.DataDTO;
+import com.sharp.vn.its.management.dto.chart.TotalItem;
+import com.sharp.vn.its.management.dto.chart.UserDataDTO;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.entity.*;
 import com.sharp.vn.its.management.exception.DataValidationException;
@@ -29,10 +32,7 @@ import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
 import com.sharp.vn.its.management.filter.SortCriteria;
 
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
@@ -294,4 +294,44 @@ public class UserManagementService extends BaseService {
         return true;
     }
 
+
+    public DataDTO getUserTaskData() {
+        List<Object[]> results = userRepository.getUserTaskStatistics();
+
+        List<UserDataDTO> userDataList = results.stream().map(row -> {
+            String fullName = (String) row[0];
+            int notStart = ((Number) row[1]).intValue();
+            int complete = ((Number) row[2]).intValue();
+            int inProgress = ((Number) row[3]).intValue();
+            int onHold = ((Number) row[4]).intValue();
+            int suspended = ((Number) row[5]).intValue();
+            int totalCount = ((Number) row[6]).intValue();
+
+            Map<Integer, Integer> values = new HashMap<>();
+            values.put(1, notStart);
+            values.put(2, complete);
+            values.put(3, inProgress);
+            values.put(4, onHold);
+            values.put(5, suspended);
+            return new UserDataDTO(values, totalCount, fullName);
+        }).collect(Collectors.toList());
+
+        Map<Integer, Integer> totalValues = new HashMap<>();
+        int totalCount = 0;
+        for (UserDataDTO userData : userDataList) {
+            totalCount += userData.getTotalCount();
+            userData.getValues().forEach((key, value) ->
+                    totalValues.merge(key, value, Integer::sum));
+        }
+
+        TotalItem totalItem = new TotalItem();
+        totalItem.setValues(totalValues);
+        totalItem.setTotalCount(totalCount);
+
+        DataDTO dataDTO = new DataDTO();
+        dataDTO.setData(userDataList);
+        dataDTO.setTotal(totalItem);
+
+        return dataDTO;
+    }
 }

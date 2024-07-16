@@ -1,5 +1,6 @@
 package com.sharp.vn.its.management.controller;
 
+import com.sharp.vn.its.management.dto.chart.DataDTO;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.service.UserManagementService;
 import jakarta.validation.Valid;
@@ -10,8 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 
 
-
-
+import javax.persistence.Tuple;
 import java.util.List;
 
 
@@ -45,7 +45,7 @@ public class UserController extends BaseController {
     /**
      * Update user user dto.
      *
-     * @param userId the user id
+     * @param userId  the user id
      * @param request the request
      * @return the user dto
      */
@@ -104,5 +104,26 @@ public class UserController extends BaseController {
     @PostMapping("/all")
     public Page<UserDTO> loadAllUsers(@RequestBody UserDTO request) {
         return service.getListUsersData(request);
+    }
+
+    /**
+     * Test.
+     *
+     * @return the data dto
+     */
+    @GetMapping("/test")
+    public DataDTO test(){
+        return service.getUserTaskData();
+    }
+
+
+    /**
+     * Test 2.
+     *
+     * @param request the request
+     */
+    @PostMapping("/test2")
+    public void test2(@RequestBody DataDTO request){
+        System.out.println("test");
     }
 }
