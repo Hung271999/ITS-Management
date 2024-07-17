@@ -57,17 +57,16 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM UserEntity u WHERE u.email = :email AND (:id IS NULL OR u.id <> :id)")
     Boolean existsByEmail(@Param("email") String email, @Param("id") Long id);
 
-    @Query(value = "SELECT " +
-            "iu.full_name AS Name, " +
-            "COUNT(CASE WHEN it.status_id = 1 THEN 1 END) AS Not_start, " +
-            "COUNT(CASE WHEN it.status_id = 2 THEN 1 END) AS Complete, " +
-            "COUNT(CASE WHEN it.status_id = 3 THEN 1 END) AS In_Progress, " +
-            "COUNT(CASE WHEN it.status_id = 4 THEN 1 END) AS On_hold, " +
-            "COUNT(CASE WHEN it.status_id = 5 THEN 1 END) AS Suspended, " +
-            "COUNT(*) AS Total " +
+    /**
+     * Gets user task statistics.
+     *
+     * @param userIds the user ids
+     * @return the user task statistics
+     */
+    @Query(value = "SELECT iu.first_name, it.status_id, COUNT(it.status_id) as total " +
             "FROM its_user iu " +
             "JOIN its_task it ON iu.id = it.user_id " +
-            "GROUP BY iu.full_name",
-            nativeQuery = true)
-    List<Object[]> getUserTaskStatistics();
+            "WHERE (:userIds IS NULL OR it.user_id IN :userIds) " +
+            "GROUP BY iu.first_name, it.status_id", nativeQuery = true)
+    List<Object[]> getUserTaskStatistics(@Param("userIds") List<Integer> userIds);
 }

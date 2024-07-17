@@ -295,26 +295,29 @@ public class UserManagementService extends BaseService {
     }
 
 
-    public DataDTO getUserTaskData() {
-        List<Object[]> results = userRepository.getUserTaskStatistics();
+    /**
+     * Gets user task data.
+     *
+     * @return the user task data
+     */
+    public DataDTO getUserTaskData(List<Integer> userIds) {
+        List<Object[]> results = userRepository.getUserTaskStatistics(userIds);
+        Map<String, UserDataDTO> userDataMap = new HashMap<>();
 
-        List<UserDataDTO> userDataList = results.stream().map(row -> {
-            String fullName = (String) row[0];
-            int notStart = ((Number) row[1]).intValue();
-            int complete = ((Number) row[2]).intValue();
-            int inProgress = ((Number) row[3]).intValue();
-            int onHold = ((Number) row[4]).intValue();
-            int suspended = ((Number) row[5]).intValue();
-            int totalCount = ((Number) row[6]).intValue();
+        for (Object[] row : results) {
+            String firstName = (String) row[0];
+            int statusId = ((Number) row[1]).intValue();
+            int total = ((Number) row[2]).intValue();
 
-            Map<Integer, Integer> values = new HashMap<>();
-            values.put(1, notStart);
-            values.put(2, complete);
-            values.put(3, inProgress);
-            values.put(4, onHold);
-            values.put(5, suspended);
-            return new UserDataDTO(values, totalCount, fullName);
-        }).collect(Collectors.toList());
+            UserDataDTO userData = userDataMap.getOrDefault(firstName, new UserDataDTO(null, null, firstName, 0, null, new HashMap<>(), 0));
+            userData.getValues().put(statusId, total);
+            userData.setTotalCount(userData.getTotalCount() + total);
+            userDataMap.put(firstName, userData);
+        }
+
+        List<UserDataDTO> userDataList = new ArrayList<>(userDataMap.values());
+
+
 
         Map<Integer, Integer> totalValues = new HashMap<>();
         int totalCount = 0;
@@ -327,6 +330,7 @@ public class UserManagementService extends BaseService {
         TotalItem totalItem = new TotalItem();
         totalItem.setValues(totalValues);
         totalItem.setTotalCount(totalCount);
+
 
         DataDTO dataDTO = new DataDTO();
         dataDTO.setData(userDataList);

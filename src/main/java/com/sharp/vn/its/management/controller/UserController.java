@@ -111,19 +111,8 @@ public class UserController extends BaseController {
      *
      * @return the data dto
      */
-    @GetMapping("/test")
-    public DataDTO test(){
-        return service.getUserTaskData();
-    }
-
-
-    /**
-     * Test 2.
-     *
-     * @param request the request
-     */
-    @PostMapping("/test2")
-    public void test2(@RequestBody DataDTO request){
-        System.out.println("test");
+    @PostMapping("/test")
+    public DataDTO test(@RequestBody List<Integer> userIds){
+        return service.getUserTaskData(userIds);
     }
 }
