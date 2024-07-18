@@ -2,7 +2,9 @@ package com.sharp.vn.its.management.service;
 
 
 import com.sharp.vn.its.management.constants.*;
+import com.sharp.vn.its.management.dto.chart.TotalDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
+import com.sharp.vn.its.management.dto.chart.ChartDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -33,16 +35,20 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -95,6 +101,7 @@ public class TaskService extends BaseService {
     /**
      * Gets all tasks.
      *
+     * @param request the request
      * @return the all tasks
      */
     public Page<TaskDTO> getAllTasks(TaskDTO request) {
@@ -248,6 +255,9 @@ public class TaskService extends BaseService {
         }
     }
 
+
+
+
     /**
      * Build filter condition specification.
      *
@@ -302,7 +312,7 @@ public class TaskService extends BaseService {
     /**
      * Duplicate task.
      *
-     * @param taskId the taskId
+     * @param taskId        the taskId
      * @param numberOfTasks the number of tasks
      */
     public void cloneTask(Long taskId, int numberOfTasks){
@@ -353,4 +363,52 @@ public class TaskService extends BaseService {
         });
     }
 
+    /**
+     * Gets task counts by status and system.
+     *
+     * @return the task counts by status and system
+     */
+    public List<Object[]> getTaskCountsBySystemAndStatus(List<Integer> systemIds, List<Integer> year) {
+        List<Long> systemIdsLong = systemIds == null ? null : systemIds.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+
+        return taskRepository.countTasksBySystemAndStatusAndYear(systemIdsLong, year);
+    }
+private int getCurrentYear()
+{
+    LocalDate currentDate = LocalDate.now();
+    return currentDate.getYear();
 }
+    /**
+     * Count tasks by system name and status list.
+     *
+     * @return the list
+     */
+    public List<ChartDTO> countTasksBySystemAndStatusAndYear(List<Long> systemIds, List<Integer> year) {
+        if (systemIds.isEmpty()) {
+            systemIds = systemRepository.findAllSystemId();
+        }
+        if (year == null || year.isEmpty()) {
+            year.add(getCurrentYear());
+        }
+
+        List<Object[]> results = taskRepository.countTasksBySystemAndStatusAndYear(systemIds, year);
+        Map<String, ChartDTO> chartDataMap = new HashMap<>();
+
+        for (Object[] row : results) {
+            String systemName = (String) row[0];
+            Integer statusId = ((Number) row[1]).intValue();
+            Integer count = ((Number) row[2]).intValue();
+
+            ChartDTO chartData = chartDataMap.getOrDefault(systemName, new ChartDTO(null, systemName, new HashMap<>(), 0));
+            chartData.getValue().put(statusId, count);
+            chartData.setTotalCount(chartData.getTotalCount() + count);
+            chartDataMap.put(systemName, chartData);
+        }
+
+        return new ArrayList<>(chartDataMap.values());
+    }
+}
+
+

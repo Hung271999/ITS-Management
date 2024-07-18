@@ -1,6 +1,8 @@
 package com.sharp.vn.its.management.controller;
 
 
+import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.chart.RequestDTO;
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
@@ -21,7 +23,9 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Task controller.
@@ -122,5 +126,13 @@ public class TaskController extends BaseController {
     public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request){
         taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
+    }
+
+
+
+
+    @PostMapping("/chartData")
+    public List<ChartDTO> getChartData(@RequestBody RequestDTO requestDTO) {
+        return taskService.countTasksBySystemAndStatusAndYear(requestDTO.getSystemIds(), requestDTO.getYear());
     }
 }
