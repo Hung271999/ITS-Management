@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * The type Data dto.
+ */
 @Data
 public class DataDTO {
     private List<UserDataDTO> data;

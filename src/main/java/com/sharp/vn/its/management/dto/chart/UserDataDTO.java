@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+/**
+ * The type User data dto.
+ */
 @Data
 public class UserDataDTO {
     private String userName;
@@ -16,11 +19,17 @@ public class UserDataDTO {
     private Map<Integer, Integer> values;
     private int totalCount;
 
-    public UserDataDTO(Map<Integer, Integer> values, int totalCount, String fullName) {
-        this.values = values;
-        this.totalCount = totalCount;
-        this.fullName = fullName;
-    }
+    /**
+     * Instantiates a new User data dto.
+     *
+     * @param userName   the user name
+     * @param fullName   the full name
+     * @param firstName  the first name
+     * @param systemId   the system id
+     * @param systemName the system name
+     * @param values     the values
+     * @param totalCount the total count
+     */
     public UserDataDTO(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
         this.userName = userName;
         this.fullName = fullName;
@@ -31,6 +40,9 @@ public class UserDataDTO {
         this.totalCount = totalCount;
     }
 
+    /**
+     * Instantiates a new User data dto.
+     */
     public UserDataDTO() {
     }
 }

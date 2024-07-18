@@ -32,6 +32,7 @@ import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
 import com.sharp.vn.its.management.filter.SortCriteria;
 
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -295,13 +296,23 @@ public class UserManagementService extends BaseService {
     }
 
 
+    private int getCurrentYear(){
+        LocalDate currentDate = LocalDate.now();
+        return  currentDate.getYear();
+    }
     /**
      * Gets user task data.
      *
      * @return the user task data
      */
-    public DataDTO getUserTaskData(List<Integer> userIds) {
-        List<Object[]> results = userRepository.getUserTaskStatistics(userIds);
+    public DataDTO getUserTaskData(List<Long> userIds, List<Integer> years) {
+        if (userIds.isEmpty()) {
+           userIds = userRepository.findAllUserId();
+        }
+        if(years.isEmpty()){
+            years.add(getCurrentYear());
+        }
+        List<Object[]> results = userRepository.getUserTaskStatistics(userIds, years);
         Map<String, UserDataDTO> userDataMap = new HashMap<>();
 
         for (Object[] row : results) {
@@ -317,8 +328,6 @@ public class UserManagementService extends BaseService {
 
         List<UserDataDTO> userDataList = new ArrayList<>(userDataMap.values());
 
-
-
         Map<Integer, Integer> totalValues = new HashMap<>();
         int totalCount = 0;
         for (UserDataDTO userData : userDataList) {
@@ -330,7 +339,6 @@ public class UserManagementService extends BaseService {
         TotalItem totalItem = new TotalItem();
         totalItem.setValues(totalValues);
         totalItem.setTotalCount(totalCount);
-
 
         DataDTO dataDTO = new DataDTO();
         dataDTO.setData(userDataList);

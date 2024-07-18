@@ -66,7 +66,15 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
     @Query(value = "SELECT iu.first_name, it.status_id, COUNT(it.status_id) as total " +
             "FROM its_user iu " +
             "JOIN its_task it ON iu.id = it.user_id " +
-            "WHERE (:userIds IS NULL OR it.user_id IN :userIds) " +
+            "WHERE it.user_id IN :userIds AND EXTRACT(year from it.created_date) IN :years "  +
             "GROUP BY iu.first_name, it.status_id", nativeQuery = true)
-    List<Object[]> getUserTaskStatistics(@Param("userIds") List<Integer> userIds);
+    List<Object[]> getUserTaskStatistics(@Param("userIds") List<Long> userIds, @Param("years") List<Integer> years);
+
+    /**
+     * Find all user ids list.
+     *
+     * @return the list
+     */
+    @Query(value = "SELECT id FROM its_user", nativeQuery = true)
+    List<Long> findAllUserId();
 }

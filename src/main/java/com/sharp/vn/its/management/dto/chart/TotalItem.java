@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+/**
+ * The type Total item.
+ */
 @Data
 @NoArgsConstructor
 public class TotalItem {
