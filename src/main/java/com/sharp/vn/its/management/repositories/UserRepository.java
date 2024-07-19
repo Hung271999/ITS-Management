@@ -18,7 +18,7 @@ import java.util.Optional;
  * The interface User repository.
  */
 @Transactional
-public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
+public interface UserRepository extends BaseJpaRepository<UserEntity, Long>, UserRepositoryCustom {
 
     /**
      * Find by username optional.

@@ -2,7 +2,6 @@ package com.sharp.vn.its.management.dto.chart;
 
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import java.util.Map;
  * The type User data dto.
  */
 @Data
-public class UserDataDTO {
+public class DataItemChart {
     private String userName;
     private String fullName;
     private String firstName;
@@ -30,7 +29,7 @@ public class UserDataDTO {
      * @param values     the values
      * @param totalCount the total count
      */
-    public UserDataDTO(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
+    public DataItemChart(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
         this.userName = userName;
         this.fullName = fullName;
         this.firstName = firstName;
@@ -43,6 +42,6 @@ public class UserDataDTO {
     /**
      * Instantiates a new User data dto.
      */
-    public UserDataDTO() {
+    public DataItemChart() {
     }
 }

@@ -1,18 +1,17 @@
 package com.sharp.vn.its.management.dto.chart;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.List;
 
 /**
- * The type Request dto.
+ * The type Data dto.
  */
-@Getter
-@Setter
-public class RequestDTO {
+@Data
+public class ChartDTO {
+    private List<DataItemChart> data;
+    private TotalItemChart total;
+
     private List<Long> userIds;
     private List <Integer> years;
 }
-

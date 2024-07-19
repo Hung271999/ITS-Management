@@ -3,9 +3,9 @@ package com.sharp.vn.its.management.service;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.MessageCode;
 import com.sharp.vn.its.management.constants.Role;
-import com.sharp.vn.its.management.dto.chart.DataDTO;
-import com.sharp.vn.its.management.dto.chart.TotalItem;
-import com.sharp.vn.its.management.dto.chart.UserDataDTO;
+import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.chart.TotalItemChart;
+import com.sharp.vn.its.management.dto.chart.DataItemChart;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.entity.*;
 import com.sharp.vn.its.management.exception.DataValidationException;
@@ -21,12 +21,10 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import com.sharp.vn.its.management.constants.SortType;
-import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
 import com.sharp.vn.its.management.filter.SortCriteria;
@@ -34,7 +32,6 @@ import com.sharp.vn.its.management.filter.SortCriteria;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -305,45 +302,40 @@ public class UserManagementService extends BaseService {
      *
      * @return the user task data
      */
-    public DataDTO getUserTaskData(List<Long> userIds, List<Integer> years) {
-        if (userIds.isEmpty()) {
-           userIds = userRepository.findAllUserId();
-        }
-        if(years.isEmpty()){
-            years.add(getCurrentYear());
-        }
-        List<Object[]> results = userRepository.getUserTaskStatistics(userIds, years);
-        Map<String, UserDataDTO> userDataMap = new HashMap<>();
+    public ChartDTO getUserTaskData(List<Long> userIds, List<Integer> years) {
+
+        List<Object[]> results = userRepository.buildFilterChartCondition(userIds, years);
+        Map<String, DataItemChart> userDataMap = new HashMap<>();
 
         for (Object[] row : results) {
             String firstName = (String) row[0];
             int statusId = ((Number) row[1]).intValue();
             int total = ((Number) row[2]).intValue();
 
-            UserDataDTO userData = userDataMap.getOrDefault(firstName, new UserDataDTO(null, null, firstName, 0, null, new HashMap<>(), 0));
+            DataItemChart userData = userDataMap.getOrDefault(firstName, new DataItemChart(null, null, firstName, 0, null, new HashMap<>(), 0));
             userData.getValues().put(statusId, total);
             userData.setTotalCount(userData.getTotalCount() + total);
             userDataMap.put(firstName, userData);
         }
 
-        List<UserDataDTO> userDataList = new ArrayList<>(userDataMap.values());
+        List<DataItemChart> userDataList = new ArrayList<>(userDataMap.values());
 
         Map<Integer, Integer> totalValues = new HashMap<>();
         int totalCount = 0;
-        for (UserDataDTO userData : userDataList) {
+        for (DataItemChart userData : userDataList) {
             totalCount += userData.getTotalCount();
             userData.getValues().forEach((key, value) ->
                     totalValues.merge(key, value, Integer::sum));
         }
 
-        TotalItem totalItem = new TotalItem();
-        totalItem.setValues(totalValues);
-        totalItem.setTotalCount(totalCount);
+        TotalItemChart totalItemChart = new TotalItemChart();
+        totalItemChart.setValues(totalValues);
+        totalItemChart.setTotalCount(totalCount);
 
-        DataDTO dataDTO = new DataDTO();
-        dataDTO.setData(userDataList);
-        dataDTO.setTotal(totalItem);
+        ChartDTO chartDTO = new ChartDTO();
+        chartDTO.setData(userDataList);
+        chartDTO.setTotal(totalItemChart);
 
-        return dataDTO;
+        return chartDTO;
     }
 }
