@@ -1,6 +1,5 @@
 package com.sharp.vn.its.management.repositories;
 
-import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -9,7 +8,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -54,11 +52,12 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
             "JOIN its_task it ON iu.id = it.user_id " +
             "JOIN its_system s ON it.system_id = s.id " +
             "WHERE s.id IN (:systemIds) " +
-            "AND EXTRACT(YEAR FROM it.created_date) = :year " +
+            "AND EXTRACT(YEAR FROM it.created_date) = :years " +
             "GROUP BY s.system_name, it.status_id", nativeQuery = true)
-    List<Object[]> countTasksBySystemAndStatusAndYear(@Param("systemIds") List<Long> systemIds, @Param("year") List<Integer> year);
+    List<Object[]> countTasksBySystemAndStatusAndYear(@Param("systemIds") List<Long> systemIds, @Param("years") List<Integer> years);
 
-    @Query("SELECT t.createdDate FROM TaskEntity t WHERE t.system.id = :systemId")
-    LocalDateTime findCreateDateById(@Param("systemId") Long systemId);
+    @Query(value="select id from its_system", nativeQuery = true)
+    List<Long> findAllSystemId();
+
 
 }

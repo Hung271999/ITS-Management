@@ -3,6 +3,7 @@ package com.sharp.vn.its.management.service;
 
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.dto.chart.TotalDTO;
+import com.sharp.vn.its.management.dto.chart.TotalItem;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.dto.chart.ChartDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
@@ -43,11 +44,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
@@ -368,12 +365,12 @@ public class TaskService extends BaseService {
      *
      * @return the task counts by status and system
      */
-    public List<Object[]> getTaskCountsBySystemAndStatus(List<Integer> systemIds, List<Integer> year) {
+    public List<Object[]> getTaskCountsBySystemAndStatus(List<Integer> systemIds, List<Integer> years) {
         List<Long> systemIdsLong = systemIds == null ? null : systemIds.stream()
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
 
-        return taskRepository.countTasksBySystemAndStatusAndYear(systemIdsLong, year);
+        return taskRepository.countTasksBySystemAndStatusAndYear(systemIdsLong, years);
     }
 private int getCurrentYear()
 {
@@ -385,16 +382,18 @@ private int getCurrentYear()
      *
      * @return the list
      */
-    public List<ChartDTO> countTasksBySystemAndStatusAndYear(List<Long> systemIds, List<Integer> year) {
+    public TotalItem countTasksBySystemAndStatusAndYear(List<Long> systemIds, List<Integer> years) {
         if (systemIds.isEmpty()) {
-            systemIds = systemRepository.findAllSystemId();
+            systemIds = taskRepository.findAllSystemId();
         }
-        if (year == null || year.isEmpty()) {
-            year.add(getCurrentYear());
+        if (years.isEmpty()) {
+            years.add(getCurrentYear());
         }
 
-        List<Object[]> results = taskRepository.countTasksBySystemAndStatusAndYear(systemIds, year);
+        List<Object[]> results = taskRepository.countTasksBySystemAndStatusAndYear(systemIds, years);
         Map<String, ChartDTO> chartDataMap = new HashMap<>();
+        Map<Integer, Integer> totalValueMap = new HashMap<>();
+        int totalCount = 0;
 
         for (Object[] row : results) {
             String systemName = (String) row[0];
@@ -405,10 +404,21 @@ private int getCurrentYear()
             chartData.getValue().put(statusId, count);
             chartData.setTotalCount(chartData.getTotalCount() + count);
             chartDataMap.put(systemName, chartData);
+
+            totalValueMap.put(statusId, totalValueMap.getOrDefault(statusId, 0) + count);
+            totalCount += count;
         }
 
-        return new ArrayList<>(chartDataMap.values());
+        List<ChartDTO> chartDataList = new ArrayList<>(chartDataMap.values());
+        TotalDTO totalDTO = new TotalDTO(totalValueMap, totalCount);
+
+        TotalItem totalItem = new TotalItem();
+        totalItem.setData(chartDataList);
+        totalItem.setTotal(totalDTO);
+
+        return totalItem;
     }
+
 }
 
 

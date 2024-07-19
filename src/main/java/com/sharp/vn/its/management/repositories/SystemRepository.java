@@ -24,8 +24,7 @@ public interface SystemRepository extends BaseJpaRepository<SystemEntity, Long> 
 //    @Query("SELECT s FROM SystemEntity s WHERE s.systemName LIKE %:searchParam%")
     Page<SystemEntity> findBySystemNameContains(@Param("searchParam") String searchParam, Pageable pageable);
 
-    @Query(value="select id from its_system", nativeQuery = true)
-    List<Long> findAllSystemId();
+
 
 }
 
