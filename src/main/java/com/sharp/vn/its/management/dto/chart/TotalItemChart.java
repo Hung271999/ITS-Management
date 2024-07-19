@@ -14,4 +14,9 @@ import java.util.Map;
 public class TotalItemChart {
     private Map<Integer, Integer> values;
     private int totalCount;
+
+    public TotalItemChart(Map<Integer, Integer> values, int totalCount) {
+        this.values = values;
+        this.totalCount = totalCount;
+    }
 }

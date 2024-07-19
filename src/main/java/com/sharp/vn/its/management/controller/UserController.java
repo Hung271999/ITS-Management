@@ -1,6 +1,7 @@
 package com.sharp.vn.its.management.controller;
 
 import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.chart.ChartFilter;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.service.UserManagementService;
 import jakarta.validation.Valid;
@@ -111,7 +112,7 @@ public class UserController extends BaseController {
      * @return the data dto
      */
     @PostMapping("/test")
-    public ChartDTO test(@RequestBody ChartDTO requestDTO){
-        return service.getUserTaskData(requestDTO.getUserIds(), requestDTO.getYears());
+    public ChartDTO test(@RequestBody ChartFilter filter){
+        return service.getUserTaskData(filter);
     }
 }

@@ -12,6 +12,8 @@ public class ChartDTO {
     private List<DataItemChart> data;
     private TotalItemChart total;
 
-    private List<Long> userIds;
-    private List <Integer> years;
+    public ChartDTO(TotalItemChart total, List<DataItemChart> data) {
+        this.total = total;
+        this.data = data;
+    }
 }

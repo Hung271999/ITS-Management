@@ -3,7 +3,9 @@ package com.sharp.vn.its.management.service;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.MessageCode;
 import com.sharp.vn.its.management.constants.Role;
+import com.sharp.vn.its.management.data.ChartData;
 import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.chart.ChartFilter;
 import com.sharp.vn.its.management.dto.chart.TotalItemChart;
 import com.sharp.vn.its.management.dto.chart.DataItemChart;
 import com.sharp.vn.its.management.dto.user.UserDTO;
@@ -32,6 +34,7 @@ import com.sharp.vn.its.management.filter.SortCriteria;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -293,49 +296,38 @@ public class UserManagementService extends BaseService {
     }
 
 
-    private int getCurrentYear(){
+    private int getCurrentYear() {
         LocalDate currentDate = LocalDate.now();
-        return  currentDate.getYear();
+        return currentDate.getYear();
     }
+
     /**
      * Gets user task data.
      *
      * @return the user task data
      */
-    public ChartDTO getUserTaskData(List<Long> userIds, List<Integer> years) {
-
-        List<Object[]> results = userRepository.buildFilterChartCondition(userIds, years);
-        Map<String, DataItemChart> userDataMap = new HashMap<>();
-
-        for (Object[] row : results) {
-            String firstName = (String) row[0];
-            int statusId = ((Number) row[1]).intValue();
-            int total = ((Number) row[2]).intValue();
-
-            DataItemChart userData = userDataMap.getOrDefault(firstName, new DataItemChart(null, null, firstName, 0, null, new HashMap<>(), 0));
-            userData.getValues().put(statusId, total);
-            userData.setTotalCount(userData.getTotalCount() + total);
-            userDataMap.put(firstName, userData);
-        }
-
-        List<DataItemChart> userDataList = new ArrayList<>(userDataMap.values());
-
-        Map<Integer, Integer> totalValues = new HashMap<>();
-        int totalCount = 0;
-        for (DataItemChart userData : userDataList) {
-            totalCount += userData.getTotalCount();
-            userData.getValues().forEach((key, value) ->
-                    totalValues.merge(key, value, Integer::sum));
-        }
-
-        TotalItemChart totalItemChart = new TotalItemChart();
-        totalItemChart.setValues(totalValues);
-        totalItemChart.setTotalCount(totalCount);
-
-        ChartDTO chartDTO = new ChartDTO();
-        chartDTO.setData(userDataList);
-        chartDTO.setTotal(totalItemChart);
-
-        return chartDTO;
+    public ChartDTO getUserTaskData(ChartFilter filter) {
+        List<ChartData> data = userRepository.findUserGroupByNameAndStatus(filter.getUserIds(), filter.getYears());
+        Map<Long, List<ChartData>> mapGroupByUserid = data.stream()
+                .collect(Collectors.groupingBy(ChartData::getId));
+        List<DataItemChart> dataItemCharts = new ArrayList<>();
+        mapGroupByUserid.forEach((id, chartDataList) -> {
+            DataItemChart item = new DataItemChart();
+            item.setFirstName(chartDataList.get(0).getFirstName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            dataItemCharts.add(item);
+        });
+        TotalItemChart total = new TotalItemChart(data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getStatus,
+                        Collectors.summingInt(ChartData::getTotal)
+                )), dataItemCharts.stream()
+                .mapToInt(DataItemChart::getTotalCount)
+                .sum());
+        return new ChartDTO(total,dataItemCharts);
     }
 }
