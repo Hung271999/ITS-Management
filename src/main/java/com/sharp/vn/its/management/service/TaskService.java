@@ -2,10 +2,12 @@ package com.sharp.vn.its.management.service;
 
 
 import com.sharp.vn.its.management.constants.*;
+import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.chart.ChartFilter;
 import com.sharp.vn.its.management.dto.chart.TotalDTO;
 import com.sharp.vn.its.management.dto.chart.TotalItem;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
-import com.sharp.vn.its.management.dto.chart.ChartDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -21,11 +23,7 @@ import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.util.CollectionUtils;
 import com.sharp.vn.its.management.util.DateTimeUtil;
 import com.sharp.vn.its.management.util.ExcelUtils;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,15 +34,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
@@ -360,18 +358,6 @@ public class TaskService extends BaseService {
         });
     }
 
-    /**
-     * Gets task counts by status and system.
-     *
-     * @return the task counts by status and system
-     */
-    public List<Object[]> getTaskCountsBySystemAndStatus(List<Integer> systemIds, List<Integer> years) {
-        List<Long> systemIdsLong = systemIds == null ? null : systemIds.stream()
-                .map(Long::valueOf)
-                .collect(Collectors.toList());
-
-        return taskRepository.countTasksBySystemAndStatusAndYear(systemIdsLong, years);
-    }
 private int getCurrentYear()
 {
     LocalDate currentDate = LocalDate.now();
@@ -382,42 +368,66 @@ private int getCurrentYear()
      *
      * @return the list
      */
-    public TotalItem countTasksBySystemAndStatusAndYear(List<Long> systemIds, List<Integer> years) {
-        if (systemIds.isEmpty()) {
-            systemIds = taskRepository.findAllSystemId();
-        }
-        if (years.isEmpty()) {
-            years.add(getCurrentYear());
-        }
+    public TotalItem countTasksBySystemAndStatusAndYear(ChartFilter filter) {
+       List<ChartData> data = taskRepository.findTaskGroupBySystemNameAndStatus(filter.getSystemIds(), filter.getYears());
+       Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
+               .collect(Collectors.groupingBy(ChartData::getId));
+       List<ChartDTO> chartDTOS = new ArrayList<>();
+       mapGroupBySystemid.forEach((id, chartDataList)->{
+       ChartDTO item = new ChartDTO();
+       item.setSystemName(chartDataList.get(0).getSystemName());
+       item.setValue(chartDataList.stream()
+               .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+       item.setTotalCount(chartDataList.stream()
+               .mapToInt(ChartData::getTotal)
+               .sum());
+       chartDTOS.add(item);
+       });
+        TotalDTO total = new TotalDTO(
+                data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getStatus,
+                        Collectors.summingInt(ChartData::getTotal)
+                )), chartDTOS.stream()
+                        .mapToInt(ChartDTO::getTotalCount)
+                        .sum());
+        return new TotalItem(chartDTOS,total);
 
-        List<Object[]> results = taskRepository.countTasksBySystemAndStatusAndYear(systemIds, years);
-        Map<String, ChartDTO> chartDataMap = new HashMap<>();
-        Map<Integer, Integer> totalValueMap = new HashMap<>();
-        int totalCount = 0;
 
-        for (Object[] row : results) {
-            String systemName = (String) row[0];
-            Integer statusId = ((Number) row[1]).intValue();
-            Integer count = ((Number) row[2]).intValue();
-
-            ChartDTO chartData = chartDataMap.getOrDefault(systemName, new ChartDTO(null, systemName, new HashMap<>(), 0));
-            chartData.getValue().put(statusId, count);
-            chartData.setTotalCount(chartData.getTotalCount() + count);
-            chartDataMap.put(systemName, chartData);
-
-            totalValueMap.put(statusId, totalValueMap.getOrDefault(statusId, 0) + count);
-            totalCount += count;
-        }
-
-        List<ChartDTO> chartDataList = new ArrayList<>(chartDataMap.values());
-        TotalDTO totalDTO = new TotalDTO(totalValueMap, totalCount);
-
-        TotalItem totalItem = new TotalItem();
-        totalItem.setData(chartDataList);
-        totalItem.setTotal(totalDTO);
-
-        return totalItem;
     }
+
+
+
+
+
+//        List<Object[]> results = taskRepository.countTasksBySystemAndStatusAndYear(systemIds, years);
+//        Map<String, ChartDTO> chartDataMap = new HashMap<>();
+//        Map<Integer, Integer> totalValueMap = new HashMap<>();
+//        int totalCount = 0;
+//
+//        for (Object[] row : results) {
+//            String systemName = (String) row[0];
+//            Integer statusId = ((Number) row[1]).intValue();
+//            Integer count = ((Number) row[2]).intValue();
+//
+//            ChartDTO chartData = chartDataMap.getOrDefault(systemName, new ChartDTO(null, systemName, new HashMap<>(), 0));
+//            chartData.getValue().put(statusId, count);
+//            chartData.setTotalCount(chartData.getTotalCount() + count);
+//            chartDataMap.put(systemName, chartData);
+//
+//            totalValueMap.put(statusId, totalValueMap.getOrDefault(statusId, 0) + count);
+//            totalCount += count;
+//        }
+//
+//        List<ChartDTO> chartDataList = new ArrayList<>(chartDataMap.values());
+//        TotalDTO totalDTO = new TotalDTO(totalValueMap, totalCount);
+//
+//        TotalItem totalItem = new TotalItem();
+//        totalItem.setData(chartDataList);
+//        totalItem.setTotal(totalDTO);
+//
+//        return totalItem;
+//    }
 
 }
 

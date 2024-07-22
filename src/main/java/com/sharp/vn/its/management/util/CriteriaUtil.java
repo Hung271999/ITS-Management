@@ -4,22 +4,16 @@ import com.sharp.vn.its.management.constants.DateTimeFilterType;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.NumberFilterType;
 import com.sharp.vn.its.management.constants.TextFilterType;
-import com.sharp.vn.its.management.filter.BooleanCriteriaFilter;
-import com.sharp.vn.its.management.filter.CriteriaFilterItem;
-import com.sharp.vn.its.management.filter.DateTimeCriteriaFilter;
-import com.sharp.vn.its.management.filter.NumberCriteriaFilter;
-import com.sharp.vn.its.management.filter.TextCriteriaFilter;
+import com.sharp.vn.its.management.filter.*;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.*;
+import com.sharp.vn.its.management.constants.*;
+import com.sharp.vn.its.management.filter.*;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class CriteriaUtil {
 
@@ -194,4 +188,15 @@ public final class CriteriaUtil {
         }
     }
 
+    public static List<Order> buildOrders(CriteriaBuilder criteriaBuilder, Root<?> root,
+                                          Map<String, SortCriteria> sort) {
+        return sort.values().stream()
+                .map(sortCriteria -> {
+                    if (sortCriteria.getSortType().equals(SortType.ASC.getText())) {
+                        return criteriaBuilder.asc(root.get(sortCriteria.getFieldName()));
+                    }
+                    return criteriaBuilder.desc(root.get(sortCriteria.getFieldName()));
+                })
+                .collect(Collectors.toList());
+    }
 }

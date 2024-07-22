@@ -14,7 +14,7 @@ import java.util.List;
  * The interface Task repository.
  */
 @Transactional
-public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
+public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, TaskRepositoryCustom {
 
     /**
      * Find all page.

@@ -16,26 +16,32 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "its_system")
-public class SystemEntity extends BaseEntity{
+public class SystemEntity extends BaseEntity {
     /**
      * The Id.
      */
     @Id
-    @Column(name="id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     /**
      * The System name.
      */
-    @Column(name =  "system_name")
+    @Column(name = "system_name")
     private String systemName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy")
     private UserEntity createdBy;
 
-    /** The updated by. */
+    /**
+     * The updated by.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UpdatedBy")
     private UserEntity updatedBy;
+
+
+    @OneToMany(mappedBy = "system", fetch = FetchType.LAZY)
+    private Set<TaskEntity> tasks;
 }
