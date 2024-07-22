@@ -1,7 +1,6 @@
 package com.sharp.vn.its.management.repositories;
 
 import com.sharp.vn.its.management.data.ChartData;
-import com.sharp.vn.its.management.dto.chart.DataItemChart;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import jakarta.persistence.EntityManager;
@@ -10,11 +9,9 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 

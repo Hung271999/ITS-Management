@@ -9,7 +9,7 @@ import java.util.Map;
  * The type User data dto.
  */
 @Data
-public class DataItemChart {
+public class ChartIDataItem {
     private String userName;
     private String fullName;
     private String firstName;
@@ -29,7 +29,7 @@ public class DataItemChart {
      * @param values     the values
      * @param totalCount the total count
      */
-    public DataItemChart(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
+    public ChartIDataItem(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
         this.userName = userName;
         this.fullName = fullName;
         this.firstName = firstName;
@@ -42,6 +42,6 @@ public class DataItemChart {
     /**
      * Instantiates a new User data dto.
      */
-    public DataItemChart() {
+    public ChartIDataItem() {
     }
 }

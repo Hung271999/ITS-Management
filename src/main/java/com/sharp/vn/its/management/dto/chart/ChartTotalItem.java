@@ -11,11 +11,17 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class TotalItemChart {
+public class ChartTotalItem {
     private Map<Integer, Integer> values;
     private int totalCount;
 
-    public TotalItemChart(Map<Integer, Integer> values, int totalCount) {
+    /**
+     * Instantiates a new Chart item total.
+     *
+     * @param values     the values
+     * @param totalCount the total count
+     */
+    public ChartTotalItem(Map<Integer, Integer> values, int totalCount) {
         this.values = values;
         this.totalCount = totalCount;
     }

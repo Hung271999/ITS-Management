@@ -107,12 +107,13 @@ public class UserController extends BaseController {
     }
 
     /**
-     * Test.
+     * Load users group by name and status chart dto.
      *
-     * @return the data dto
+     * @param filter the filter
+     * @return the chart dto
      */
-    @PostMapping("/test")
-    public ChartDTO test(@RequestBody ChartFilter filter){
-        return service.getUserTaskData(filter);
+    @PostMapping("/chart/groupByNameAndStatus")
+    public ChartDTO loadUsersGroupByNameAndStatus(@RequestBody ChartFilter filter){
+        return service.getUsersGroupByNameAndStatus(filter);
     }
 }

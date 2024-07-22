@@ -9,10 +9,16 @@ import java.util.List;
  */
 @Data
 public class ChartDTO {
-    private List<DataItemChart> data;
-    private TotalItemChart total;
+    private List<ChartIDataItem> data;
+    private ChartTotalItem total;
 
-    public ChartDTO(TotalItemChart total, List<DataItemChart> data) {
+    /**
+     * Instantiates a new Chart dto.
+     *
+     * @param total the total
+     * @param data  the data
+     */
+    public ChartDTO(ChartTotalItem total, List<ChartIDataItem> data) {
         this.total = total;
         this.data = data;
     }
