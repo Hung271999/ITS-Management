@@ -45,6 +45,8 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, Tas
     /**
      * Count tasks by status and system list.
      *
+     * @param systemIds the system ids
+     * @param years     the years
      * @return the list
      */
     @Query(value = "SELECT s.system_name, it.status_id, COUNT(it.status_id) AS statusCount " +
@@ -56,8 +58,19 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, Tas
             "GROUP BY s.system_name, it.status_id", nativeQuery = true)
     List<Object[]> countTasksBySystemAndStatusAndYear(@Param("systemIds") List<Long> systemIds, @Param("years") List<Integer> years);
 
-    @Query(value="select id from its_system", nativeQuery = true)
+    /**
+     * Find all system id list.
+     *
+     * @return the list
+     */
+    @Query(value = "select id from its_system", nativeQuery = true)
     List<Long> findAllSystemId();
 
-
+    /**
+     * Find all years list.
+     *
+     * @return the list
+     */
+    @Query(value = "SELECT DISTINCT EXTRACT(YEAR FROM expired_date) AS year FROM its_task", nativeQuery = true)
+    List<Integer> findAllYears();
 }

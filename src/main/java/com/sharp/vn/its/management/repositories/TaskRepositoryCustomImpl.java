@@ -39,17 +39,22 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         if (!systemIds.isEmpty()) {
             predicates.add(systemRoot.get("id").in(systemIds));
         }
-        years.forEach(t -> {
-            final Year year = Year.of(t);
-            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
-            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
-            Predicate datePredicate = cb.between(
-                    taskJoin.get("createdDate").as(LocalDateTime.class),
-                    startDateTime,
-                    endDateTime
-            );
-            predicates.add(datePredicate);
-        });
+        if (!years.isEmpty()) {
+            List<Predicate> yearPredicates = new ArrayList<>();
+            years.forEach(t -> {
+                final Year year = Year.of(t);
+                LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
+                LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
+                Predicate datePredicate = cb.between(
+                        taskJoin.get("expiredDate").as(LocalDateTime.class),
+                        startDateTime,
+                        endDateTime
+                );
+                yearPredicates.add(datePredicate);
+            });
+            Predicate finalDatePredicate = cb.or(yearPredicates.toArray(new Predicate[0]));
+            predicates.add(finalDatePredicate);
+        }
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.groupBy(systemRoot.get("systemName"), taskJoin.get("status"), systemRoot.get("id"));

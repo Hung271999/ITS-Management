@@ -159,9 +159,9 @@ public class TaskService extends BaseService {
         // update when task id is not null
         if (taskId != null) {
             taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
-                        log.error("Task not found with id: {}", taskId);
-                        return new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
-                    });
+                log.error("Task not found with id: {}", taskId);
+                return new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+            });
         }
         final String userName = authenticationService.getUser().getUsername();
         if (userName == null) {
@@ -251,8 +251,6 @@ public class TaskService extends BaseService {
     }
 
 
-
-
     /**
      * Build filter condition specification.
      *
@@ -310,7 +308,7 @@ public class TaskService extends BaseService {
      * @param taskId        the taskId
      * @param numberOfTasks the number of tasks
      */
-    public void cloneTask(Long taskId, int numberOfTasks){
+    public void cloneTask(Long taskId, int numberOfTasks) {
         if (taskId == null) {
             log.error("Task id not found");
             throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
@@ -321,7 +319,7 @@ public class TaskService extends BaseService {
             return new ObjectNotFoundException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         });
         List<TaskEntity> taskEntities = new ArrayList<>();
-        for (int i = 0 ; i < numberOfTasks; i++){
+        for (int i = 0; i < numberOfTasks; i++) {
             TaskEntity taskClone = new TaskEntity();
             BeanUtils.copyProperties(taskEntity, taskClone);
             taskClone.setId(null);
@@ -358,77 +356,45 @@ public class TaskService extends BaseService {
         });
     }
 
-private int getCurrentYear()
-{
-    LocalDate currentDate = LocalDate.now();
-    return currentDate.getYear();
-}
+    //Get current year.
+    private int getCurrentYear() {
+        LocalDate currentDate = LocalDate.now();
+        return currentDate.getYear();
+    }
+
     /**
      * Count tasks by system name and status list.
      *
+     * @param filter the filter
      * @return the list
      */
     public TotalItem countTasksBySystemAndStatusAndYear(ChartFilter filter) {
-       List<ChartData> data = taskRepository.findTaskGroupBySystemNameAndStatus(filter.getSystemIds(), filter.getYears());
-       Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
-               .collect(Collectors.groupingBy(ChartData::getId));
-       List<ChartDTO> chartDTOS = new ArrayList<>();
-       mapGroupBySystemid.forEach((id, chartDataList)->{
-       ChartDTO item = new ChartDTO();
-       item.setSystemName(chartDataList.get(0).getSystemName());
-       item.setValue(chartDataList.stream()
-               .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
-       item.setTotalCount(chartDataList.stream()
-               .mapToInt(ChartData::getTotal)
-               .sum());
-       chartDTOS.add(item);
-       });
+        List<ChartData> data = taskRepository.findTaskGroupBySystemNameAndStatus(filter.getSystemIds(), filter.getYears());
+        Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
+                .collect(Collectors.groupingBy(ChartData::getId));
+        List<ChartDTO> chartDTOS = new ArrayList<>();
+        mapGroupBySystemid.forEach((id, chartDataList) -> {
+            ChartDTO item = new ChartDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValue(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            chartDTOS.add(item);
+        });
         TotalDTO total = new TotalDTO(
                 data.stream()
-                .collect(Collectors.groupingBy(
-                        ChartData::getStatus,
-                        Collectors.summingInt(ChartData::getTotal)
-                )), chartDTOS.stream()
-                        .mapToInt(ChartDTO::getTotalCount)
-                        .sum());
-        return new TotalItem(chartDTOS,total);
+                        .collect(Collectors.groupingBy(
+                                ChartData::getStatus,
+                                Collectors.summingInt(ChartData::getTotal)
+                        )), chartDTOS.stream()
+                .mapToInt(ChartDTO::getTotalCount)
+                .sum());
+        return new TotalItem(chartDTOS, total);
 
 
     }
-
-
-
-
-
-//        List<Object[]> results = taskRepository.countTasksBySystemAndStatusAndYear(systemIds, years);
-//        Map<String, ChartDTO> chartDataMap = new HashMap<>();
-//        Map<Integer, Integer> totalValueMap = new HashMap<>();
-//        int totalCount = 0;
-//
-//        for (Object[] row : results) {
-//            String systemName = (String) row[0];
-//            Integer statusId = ((Number) row[1]).intValue();
-//            Integer count = ((Number) row[2]).intValue();
-//
-//            ChartDTO chartData = chartDataMap.getOrDefault(systemName, new ChartDTO(null, systemName, new HashMap<>(), 0));
-//            chartData.getValue().put(statusId, count);
-//            chartData.setTotalCount(chartData.getTotalCount() + count);
-//            chartDataMap.put(systemName, chartData);
-//
-//            totalValueMap.put(statusId, totalValueMap.getOrDefault(statusId, 0) + count);
-//            totalCount += count;
-//        }
-//
-//        List<ChartDTO> chartDataList = new ArrayList<>(chartDataMap.values());
-//        TotalDTO totalDTO = new TotalDTO(totalValueMap, totalCount);
-//
-//        TotalItem totalItem = new TotalItem();
-//        totalItem.setData(chartDataList);
-//        totalItem.setTotal(totalDTO);
-//
-//        return totalItem;
-//    }
-
 }
 
 
