@@ -123,4 +123,10 @@ public class TaskController extends BaseController {
         taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/allYears")
+    public List<Integer> getAllYears(){
+        return taskService.getAllYears();
+    }
 }
+

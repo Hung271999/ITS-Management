@@ -353,4 +353,12 @@ public class TaskService extends BaseService {
         });
     }
 
+    /**
+     * Get all years list.
+     *
+     * @return the list
+     */
+    public List<Integer> getAllYears(){
+        return taskRepository.findAllYears();
+    }
 }

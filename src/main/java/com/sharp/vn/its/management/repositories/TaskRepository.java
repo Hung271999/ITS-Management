@@ -5,6 +5,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 /**
  * The interface Task repository.
@@ -32,4 +35,11 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
      */
     Boolean existsByPersonInChargeId(Long userId);
 
+    /**
+     * Find all years list.
+     *
+     * @return the list
+     */
+    @Query(value = "SELECT DISTINCT EXTRACT(YEAR FROM expired_date) AS year FROM its_task", nativeQuery = true)
+    List<Integer> findAllYears();
 }
