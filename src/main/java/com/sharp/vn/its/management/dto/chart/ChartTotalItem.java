@@ -9,12 +9,12 @@ import lombok.*;
  */
 @Data
 
-public class TotalDTO {
-    private Map<Integer, Integer> value;
+public class ChartTotalItem {
+    private Map<Integer, Integer> values;
     private int totalCount;
 
-    public TotalDTO(Map<Integer, Integer> value, int totalCount) {
+    public ChartTotalItem(Map<Integer, Integer> values, int totalCount) {
         this.totalCount = totalCount;
-        this.value = value;
+        this.values = values;
     }
 }

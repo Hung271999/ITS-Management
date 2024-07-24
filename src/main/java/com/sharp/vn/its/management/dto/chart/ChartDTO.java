@@ -1,44 +1,25 @@
 package com.sharp.vn.its.management.dto.chart;
-
 import lombok.*;
 
-
-import java.util.Map;
+import java.util.List;
 
 /**
- * The type Chart dto.
+ * The type Total item.
  */
 @Data
+
 public class ChartDTO {
-    private Long systemId;
-    private String systemName;
-    private Map<Integer, Integer> value;
-    private int totalCount;
-
+    private List<ChartDataItem> data;
+    private ChartTotalItem total;
 
     /**
-     * Instantiates a new Chart dto.
+     * Instantiates a new Total item.
      *
-     * @param systemId   the system id
-     * @param systemName the system name
-     * @param totalCount the total count
-     * @param value      the value
+     * @param data  the data
+     * @param total the total
      */
-    public ChartDTO(Long systemId, String systemName, int totalCount, Map<Integer, Integer> value) {
-        this.systemId = systemId;
-        this.systemName = systemName;
-        this.totalCount = totalCount;
-        this.value = value;
+    public ChartDTO(List<ChartDataItem> data, ChartTotalItem total) {
+        this.data = data;
+        this.total = total;
     }
-
-    /**
-     * Instantiates a new Chart dto.
-     */
-    public ChartDTO()
-    {}
 }
-
-
-
-
-

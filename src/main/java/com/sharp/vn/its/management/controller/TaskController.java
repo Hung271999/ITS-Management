@@ -2,7 +2,7 @@ package com.sharp.vn.its.management.controller;
 
 
 import com.sharp.vn.its.management.dto.chart.ChartFilter;
-import com.sharp.vn.its.management.dto.chart.TotalItem;
+import com.sharp.vn.its.management.dto.chart.ChartDTO;
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
@@ -13,6 +13,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -120,8 +122,13 @@ public class TaskController extends BaseController {
 
 
     @PostMapping("/chartData")
-    public TotalItem getChartData(@RequestBody ChartFilter filter) {
+    public ChartDTO getChartData(@RequestBody ChartFilter filter) {
         return taskService.countTasksBySystemAndStatusAndYear(filter);
+    }
+
+    @GetMapping("/allYears")
+    public List<Integer> getAllYears(){
+        return taskService.getAllYears();
     }
 
 }

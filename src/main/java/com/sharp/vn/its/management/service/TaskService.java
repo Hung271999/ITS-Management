@@ -3,10 +3,10 @@ package com.sharp.vn.its.management.service;
 
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.data.ChartData;
-import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.chart.ChartDataItem;
 import com.sharp.vn.its.management.dto.chart.ChartFilter;
-import com.sharp.vn.its.management.dto.chart.TotalDTO;
-import com.sharp.vn.its.management.dto.chart.TotalItem;
+import com.sharp.vn.its.management.dto.chart.ChartTotalItem;
+import com.sharp.vn.its.management.dto.chart.ChartDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
@@ -368,32 +368,36 @@ public class TaskService extends BaseService {
      * @param filter the filter
      * @return the list
      */
-    public TotalItem countTasksBySystemAndStatusAndYear(ChartFilter filter) {
+    public ChartDTO countTasksBySystemAndStatusAndYear(ChartFilter filter) {
         List<ChartData> data = taskRepository.findTaskGroupBySystemNameAndStatus(filter.getSystemIds(), filter.getYears());
         Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
                 .collect(Collectors.groupingBy(ChartData::getId));
-        List<ChartDTO> chartDTOS = new ArrayList<>();
+        List<ChartDataItem> chartDataItems = new ArrayList<>();
         mapGroupBySystemid.forEach((id, chartDataList) -> {
-            ChartDTO item = new ChartDTO();
+            ChartDataItem item = new ChartDataItem();
             item.setSystemName(chartDataList.get(0).getSystemName());
-            item.setValue(chartDataList.stream()
+            item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
             item.setTotalCount(chartDataList.stream()
                     .mapToInt(ChartData::getTotal)
                     .sum());
-            chartDTOS.add(item);
+            chartDataItems.add(item);
         });
-        TotalDTO total = new TotalDTO(
+        ChartTotalItem total = new ChartTotalItem(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 ChartData::getStatus,
                                 Collectors.summingInt(ChartData::getTotal)
-                        )), chartDTOS.stream()
-                .mapToInt(ChartDTO::getTotalCount)
+                        )), chartDataItems.stream()
+                .mapToInt(ChartDataItem::getTotalCount)
                 .sum());
-        return new TotalItem(chartDTOS, total);
+        return new ChartDTO(chartDataItems, total);
 
 
+    }
+
+    public List<Integer> getAllYears(){
+        return taskRepository.findAllYears();
     }
 }
 
