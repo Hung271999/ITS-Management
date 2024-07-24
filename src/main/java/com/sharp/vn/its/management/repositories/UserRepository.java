@@ -18,7 +18,7 @@ import java.util.Optional;
  * The interface User repository.
  */
 @Transactional
-public interface UserRepository extends BaseJpaRepository<UserEntity, Long>, UserRepositoryCustom {
+public interface UserRepository extends BaseJpaRepository<UserEntity, Long> {
 
     /**
      * Find by username optional.
@@ -56,25 +56,4 @@ public interface UserRepository extends BaseJpaRepository<UserEntity, Long>, Use
      */
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM UserEntity u WHERE u.email = :email AND (:id IS NULL OR u.id <> :id)")
     Boolean existsByEmail(@Param("email") String email, @Param("id") Long id);
-
-    /**
-     * Gets user task statistics.
-     *
-     * @param userIds the user ids
-     * @return the user task statistics
-     */
-    @Query(value = "SELECT iu.first_name, it.status_id, COUNT(it.status_id) as total " +
-            "FROM its_user iu " +
-            "JOIN its_task it ON iu.id = it.user_id " +
-            "WHERE it.user_id IN :userIds AND EXTRACT(year from it.created_date) IN :years "  +
-            "GROUP BY iu.first_name, it.status_id", nativeQuery = true)
-    List<Object[]> getUserTaskStatistics(@Param("userIds") List<Long> userIds, @Param("years") List<Integer> years);
-
-    /**
-     * Find all user ids list.
-     *
-     * @return the list
-     */
-    @Query(value = "SELECT id FROM its_user", nativeQuery = true)
-    List<Long> findAllUserId();
 }

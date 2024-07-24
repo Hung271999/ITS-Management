@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
  * The type Task repository custom.
  */
 @Repository
-public class UserRepositoryCustomImpl implements UserRepositoryCustom {
+public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;
 
     @Override
-    public List<ChartData> findUserGroupByNameAndStatus(List<Long> userIds, List<Integer> years) {
+    public List<ChartData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<UserEntity> userRoot = cq.from(UserEntity.class);

@@ -2,6 +2,11 @@ package com.sharp.vn.its.management.service;
 
 
 import com.sharp.vn.its.management.constants.*;
+import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.dto.task.TaskDataDTO;
+import com.sharp.vn.its.management.dto.task.TaskFilter;
+import com.sharp.vn.its.management.dto.task.TaskDataItem;
+import com.sharp.vn.its.management.dto.task.TaskStatistics;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
@@ -34,15 +39,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -351,6 +355,38 @@ public class TaskService extends BaseService {
                     break;
             }
         });
+    }
+
+    /**
+     * Gets users group by name and status.
+     *
+     * @param filter the filter
+     * @return the users group by name and status
+     */
+    public TaskDataDTO getTaskByPersonInCharge(TaskFilter filter) {
+        List<ChartData> data = taskRepository.findTaskByPersonInCharge(filter.getUserIds(), filter.getYears());
+        Map<Long, List<ChartData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+
+        List<TaskDataItem> taskDataItemList = new ArrayList<>();
+        mapGroupByUserId.forEach((id, chartDataList) -> {
+            TaskDataItem item = new TaskDataItem();
+            item.setFirstName(chartDataList.get(0).getFirstName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            taskDataItemList.add(item);
+        });
+
+        TaskStatistics total = new TaskStatistics(data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getStatus,
+                        Collectors.summingInt(ChartData::getTotal)
+                )), taskDataItemList.stream()
+                .mapToInt(TaskDataItem::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total, taskDataItemList);
     }
 
     /**

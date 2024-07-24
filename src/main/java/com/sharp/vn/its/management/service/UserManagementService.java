@@ -3,11 +3,6 @@ package com.sharp.vn.its.management.service;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.MessageCode;
 import com.sharp.vn.its.management.constants.Role;
-import com.sharp.vn.its.management.data.ChartData;
-import com.sharp.vn.its.management.dto.chart.ChartDTO;
-import com.sharp.vn.its.management.dto.chart.ChartFilter;
-import com.sharp.vn.its.management.dto.chart.ChartTotalItem;
-import com.sharp.vn.its.management.dto.chart.ChartIDataItem;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.entity.*;
 import com.sharp.vn.its.management.exception.DataValidationException;
@@ -33,7 +28,6 @@ import com.sharp.vn.its.management.filter.SortCriteria;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -292,37 +286,5 @@ public class UserManagementService extends BaseService {
             throw new DataValidationException(MessageCode.ERROR_USER_PASSWORD_TOO_SHORT);
         }
         return true;
-    }
-
-    /**
-     * Gets users group by name and status.
-     *
-     * @param filter the filter
-     * @return the users group by name and status
-     */
-    public ChartDTO getUsersGroupByNameAndStatus(ChartFilter filter) {
-        List<ChartData> data = userRepository.findUserGroupByNameAndStatus(filter.getUserIds(), filter.getYears());
-        Map<Long, List<ChartData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
-
-        List<ChartIDataItem> chartIDataItemList = new ArrayList<>();
-        mapGroupByUserId.forEach((id, chartDataList) -> {
-            ChartIDataItem item = new ChartIDataItem();
-            item.setFirstName(chartDataList.get(0).getFirstName());
-            item.setValues(chartDataList.stream()
-                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
-            item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
-                    .sum());
-            chartIDataItemList.add(item);
-        });
-
-        ChartTotalItem total = new ChartTotalItem(data.stream()
-                .collect(Collectors.groupingBy(
-                        ChartData::getStatus,
-                        Collectors.summingInt(ChartData::getTotal)
-                )), chartIDataItemList.stream()
-                .mapToInt(ChartIDataItem::getTotalCount)
-                .sum());
-        return new ChartDTO(total, chartIDataItemList);
     }
 }

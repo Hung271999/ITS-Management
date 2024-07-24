@@ -7,6 +7,6 @@ import java.util.List;
 /**
  * The interface Task repository custom.
  */
-public interface UserRepositoryCustom {
-    List<ChartData> findUserGroupByNameAndStatus(List<Long> userIds, List<Integer> years);
+public interface TaskRepositoryCustom {
+    List<ChartData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years);
 }

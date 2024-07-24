@@ -1,4 +1,4 @@
-package com.sharp.vn.its.management.dto.chart;
+package com.sharp.vn.its.management.dto.task;
 
 
 import lombok.Data;
@@ -7,21 +7,21 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 /**
- * The type Total item.
+ * The type Task statistics.
  */
 @Data
 @NoArgsConstructor
-public class ChartTotalItem {
+public class TaskStatistics {
     private Map<Integer, Integer> values;
     private int totalCount;
 
     /**
-     * Instantiates a new Chart item total.
+     * Instantiates a new Task statistics.
      *
      * @param values     the values
      * @param totalCount the total count
      */
-    public ChartTotalItem(Map<Integer, Integer> values, int totalCount) {
+    public TaskStatistics(Map<Integer, Integer> values, int totalCount) {
         this.values = values;
         this.totalCount = totalCount;
     }

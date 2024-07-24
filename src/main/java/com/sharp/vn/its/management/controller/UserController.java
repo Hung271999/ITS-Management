@@ -1,7 +1,5 @@
 package com.sharp.vn.its.management.controller;
 
-import com.sharp.vn.its.management.dto.chart.ChartDTO;
-import com.sharp.vn.its.management.dto.chart.ChartFilter;
 import com.sharp.vn.its.management.dto.user.UserDTO;
 import com.sharp.vn.its.management.service.UserManagementService;
 import jakarta.validation.Valid;
@@ -104,16 +102,5 @@ public class UserController extends BaseController {
     @PostMapping("/all")
     public Page<UserDTO> loadAllUsers(@RequestBody UserDTO request) {
         return service.getListUsersData(request);
-    }
-
-    /**
-     * Load users group by name and status chart dto.
-     *
-     * @param filter the filter
-     * @return the chart dto
-     */
-    @PostMapping("/chart/groupByNameAndStatus")
-    public ChartDTO loadUsersGroupByNameAndStatus(@RequestBody ChartFilter filter){
-        return service.getUsersGroupByNameAndStatus(filter);
     }
 }

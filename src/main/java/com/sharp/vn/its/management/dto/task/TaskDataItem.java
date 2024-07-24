@@ -1,4 +1,4 @@
-package com.sharp.vn.its.management.dto.chart;
+package com.sharp.vn.its.management.dto.task;
 
 
 import lombok.Data;
@@ -6,10 +6,10 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * The type User data dto.
+ * The type Task data item.
  */
 @Data
-public class ChartIDataItem {
+public class TaskDataItem {
     private String userName;
     private String fullName;
     private String firstName;
@@ -19,7 +19,7 @@ public class ChartIDataItem {
     private int totalCount;
 
     /**
-     * Instantiates a new User data dto.
+     * Instantiates a new Task data item.
      *
      * @param userName   the user name
      * @param fullName   the full name
@@ -29,7 +29,7 @@ public class ChartIDataItem {
      * @param values     the values
      * @param totalCount the total count
      */
-    public ChartIDataItem(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
+    public TaskDataItem(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
         this.userName = userName;
         this.fullName = fullName;
         this.firstName = firstName;
@@ -40,8 +40,8 @@ public class ChartIDataItem {
     }
 
     /**
-     * Instantiates a new User data dto.
+     * Instantiates a new Task data item.
      */
-    public ChartIDataItem() {
+    public TaskDataItem() {
     }
 }

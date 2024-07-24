@@ -1,14 +1,14 @@
-package com.sharp.vn.its.management.dto.chart;
+package com.sharp.vn.its.management.dto.task;
 import com.sharp.vn.its.management.filter.SortCriteria;
 import lombok.Data;
 import java.util.List;
 import java.util.Map;
 
 /**
- * The type Chart filter.
+ * The type Task filter.
  */
 @Data
-public class ChartFilter {
+public class TaskFilter {
     private List<Long> userIds;
     private List<Integer> years;
     private Map<String, SortCriteria> sort;
