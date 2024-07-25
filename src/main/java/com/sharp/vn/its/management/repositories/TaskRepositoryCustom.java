@@ -15,5 +15,5 @@ public interface TaskRepositoryCustom {
      * @param years     the years
      * @return the list
      */
-    List<ChartData> findTaskGroupBySystemNameAndStatus(List<Long> SystemIds, List<Integer> years);
+    List<ChartData> findTaskBySystem(List<Long> SystemIds, List<Integer> years);
 }

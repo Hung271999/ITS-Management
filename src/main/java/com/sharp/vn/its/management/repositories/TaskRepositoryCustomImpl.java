@@ -22,7 +22,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     private EntityManager entityManager;
 
     @Override
-    public List<ChartData> findTaskGroupBySystemNameAndStatus(List<Long> systemIds, List<Integer> years) {
+    public List<ChartData> findTaskBySystem(List<Long> systemIds, List<Integer> years) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);

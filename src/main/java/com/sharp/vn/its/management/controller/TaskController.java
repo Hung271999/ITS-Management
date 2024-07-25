@@ -1,8 +1,8 @@
 package com.sharp.vn.its.management.controller;
 
 
-import com.sharp.vn.its.management.dto.chart.ChartFilter;
-import com.sharp.vn.its.management.dto.chart.ChartDTO;
+import com.sharp.vn.its.management.dto.task.TaskFilter;
+import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
@@ -80,6 +80,7 @@ public class TaskController extends BaseController {
     /**
      * Load all tasks list.
      *
+     * @param request the request
      * @return the list
      */
     @PostMapping("/all")
@@ -113,21 +114,30 @@ public class TaskController extends BaseController {
      * @return the response entity
      */
     @PostMapping("/cloneTask")
-    public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request){
+    public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request) {
         taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
 
 
-
-
-    @PostMapping("/chartData")
-    public ChartDTO getChartData(@RequestBody ChartFilter filter) {
-        return taskService.countTasksBySystemAndStatusAndYear(filter);
+    /**
+     * Load task statistics by system task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statisticsBySystem")
+    public TaskDataDTO loadTaskStatisticsBySystem(@RequestBody TaskFilter filter) {
+        return taskService.getTaskBySystem(filter);
     }
 
+    /**
+     * Get all years list.
+     *
+     * @return the list
+     */
     @GetMapping("/allYears")
-    public List<Integer> getAllYears(){
+    public List<Integer> getAllYears() {
         return taskService.getAllYears();
     }
 

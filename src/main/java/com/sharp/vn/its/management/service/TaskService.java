@@ -3,11 +3,7 @@ package com.sharp.vn.its.management.service;
 
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.data.ChartData;
-import com.sharp.vn.its.management.dto.chart.ChartDataItem;
-import com.sharp.vn.its.management.dto.chart.ChartFilter;
-import com.sharp.vn.its.management.dto.chart.ChartTotalItem;
-import com.sharp.vn.its.management.dto.chart.ChartDTO;
-import com.sharp.vn.its.management.dto.task.TaskDTO;
+import com.sharp.vn.its.management.dto.task.*;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -38,7 +34,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -356,47 +351,47 @@ public class TaskService extends BaseService {
         });
     }
 
-    //Get current year.
-    private int getCurrentYear() {
-        LocalDate currentDate = LocalDate.now();
-        return currentDate.getYear();
-    }
 
     /**
-     * Count tasks by system name and status list.
+     * Gets task by system.
      *
      * @param filter the filter
-     * @return the list
+     * @return the task by system
      */
-    public ChartDTO countTasksBySystemAndStatusAndYear(ChartFilter filter) {
-        List<ChartData> data = taskRepository.findTaskGroupBySystemNameAndStatus(filter.getSystemIds(), filter.getYears());
+    public TaskDataDTO getTaskBySystem(TaskFilter filter) {
+        List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
         Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
                 .collect(Collectors.groupingBy(ChartData::getId));
-        List<ChartDataItem> chartDataItems = new ArrayList<>();
+        List<TaskDataItem> taskDataItems = new ArrayList<>();
         mapGroupBySystemid.forEach((id, chartDataList) -> {
-            ChartDataItem item = new ChartDataItem();
+            TaskDataItem item = new TaskDataItem();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
             item.setTotalCount(chartDataList.stream()
                     .mapToInt(ChartData::getTotal)
                     .sum());
-            chartDataItems.add(item);
+            taskDataItems.add(item);
         });
-        ChartTotalItem total = new ChartTotalItem(
+        TaskStatistics total = new TaskStatistics(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 ChartData::getStatus,
                                 Collectors.summingInt(ChartData::getTotal)
-                        )), chartDataItems.stream()
-                .mapToInt(ChartDataItem::getTotalCount)
+                        )), taskDataItems.stream()
+                .mapToInt(TaskDataItem::getTotalCount)
                 .sum());
-        return new ChartDTO(chartDataItems, total);
+        return new TaskDataDTO(taskDataItems, total);
 
 
     }
 
-    public List<Integer> getAllYears(){
+    /**
+     * Gets all years.
+     *
+     * @return the all years
+     */
+    public List<Integer> getAllYears() {
         return taskRepository.findAllYears();
     }
 }

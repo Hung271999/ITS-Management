@@ -1,15 +1,16 @@
-package com.sharp.vn.its.management.dto.chart;
+package com.sharp.vn.its.management.dto.task;
 
 import lombok.*;
 
 
 import java.util.Map;
 
+
 /**
- * The type Chart dto.
+ * The type Task data item.
  */
 @Data
-public class ChartDataItem {
+public class TaskDataItem {
     private Long systemId;
     private String systemName;
     private Map<Integer, Integer> values;
@@ -17,25 +18,26 @@ public class ChartDataItem {
 
 
     /**
-     * Instantiates a new Chart dto.
+     * Instantiates a new Task data item.
      *
      * @param systemId   the system id
      * @param systemName the system name
      * @param totalCount the total count
-     * @param values      the value
+     * @param values     the values
      */
-    public ChartDataItem(Long systemId, String systemName, int totalCount, Map<Integer, Integer> values) {
+    public TaskDataItem(Long systemId, String systemName, int totalCount, Map<Integer, Integer> values) {
         this.systemId = systemId;
         this.systemName = systemName;
         this.totalCount = totalCount;
         this.values = values;
     }
 
+
     /**
-     * Instantiates a new Chart dto.
+     * Instantiates a new Task data item.
      */
-    public ChartDataItem()
-    {}
+    public TaskDataItem() {
+    }
 }
 
 
