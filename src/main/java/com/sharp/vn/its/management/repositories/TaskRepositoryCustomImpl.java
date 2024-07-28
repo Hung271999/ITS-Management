@@ -42,20 +42,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(userRoot.get("id").in(userIds));
         }
         if (!years.isEmpty()) {
-            List<Predicate> yearPredicates = new ArrayList<>();
-            years.forEach(t -> {
-                final Year year = Year.of(t);
-                LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
-                LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
-                Predicate datePredicate = cb.between(
-                        taskJoin.get("expiredDate").as(LocalDateTime.class),
-                        startDateTime,
-                        endDateTime
-                );
-                yearPredicates.add(datePredicate);
-            });
-            Predicate finalDatePredicate = cb.or(yearPredicates.toArray(new Predicate[0]));
-            predicates.add(finalDatePredicate);
+            predicates.add(createYearPredicate(cb, taskJoin, years));
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.groupBy(userRoot.get("firstName"), taskJoin.get("status"), userRoot.get("id"));
@@ -68,5 +55,21 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             chartData.setTotal(((Number) row[3]).intValue());
             return chartData;
         }).collect(Collectors.toList());
+    }
+
+    private Predicate createYearPredicate(CriteriaBuilder cb, Join<UserEntity, TaskEntity> taskJoin, List<Integer> years) {
+        List<Predicate> yearPredicates = new ArrayList<>();
+        years.forEach(t -> {
+            final Year year = Year.of(t);
+            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
+            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
+            Predicate datePredicate = cb.between(
+                    taskJoin.get("expiredDate").as(LocalDateTime.class),
+                    startDateTime,
+                    endDateTime
+            );
+            yearPredicates.add(datePredicate);
+        });
+        return cb.or(yearPredicates.toArray(new Predicate[0]));
     }
 }
