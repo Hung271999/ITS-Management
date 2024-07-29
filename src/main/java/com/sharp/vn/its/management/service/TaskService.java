@@ -362,37 +362,38 @@ public class TaskService extends BaseService {
         List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
         Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
                 .collect(Collectors.groupingBy(ChartData::getId));
-        List<TaskDataItem> taskDataItems = new ArrayList<>();
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
         mapGroupBySystemid.forEach((id, chartDataList) -> {
-            TaskDataItem item = new TaskDataItem();
+            TaskDetailDTO item = new TaskDetailDTO();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
             item.setTotalCount(chartDataList.stream()
                     .mapToInt(ChartData::getTotal)
                     .sum());
-            taskDataItems.add(item);
+            taskDetailDTOS.add(item);
         });
-        TaskStatistics total = new TaskStatistics(
+        TaskSummaryDTO total = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 ChartData::getStatus,
                                 Collectors.summingInt(ChartData::getTotal)
-                        )), taskDataItems.stream()
-                .mapToInt(TaskDataItem::getTotalCount)
+                        )), taskDetailDTOS.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
-        return new TaskDataDTO(taskDataItems, total);
+        return new TaskDataDTO(taskDetailDTOS, total);
 
 
     }
 
+
     /**
-     * Gets all years.
+     * Gets all years from expired date.
      *
-     * @return the all years
+     * @return the all years from expired date
      */
-    public List<Integer> getAllYears() {
-        return taskRepository.findAllYears();
+    public List<Integer> getAllYearsFromExpiredDate() {
+        return taskRepository.findAllYearsFromExpiredDate();
     }
 }
 

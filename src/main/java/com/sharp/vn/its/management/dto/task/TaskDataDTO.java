@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 
 public class TaskDataDTO {
-    private List<TaskDataItem> data;
-    private TaskStatistics total;
+    private List<TaskDetailDTO> data;
+    private TaskSummaryDTO total;
 
 
     /**
@@ -21,7 +21,7 @@ public class TaskDataDTO {
      * @param data  the data
      * @param total the total
      */
-    public TaskDataDTO(List<TaskDataItem> data, TaskStatistics total) {
+    public TaskDataDTO(List<TaskDetailDTO> data, TaskSummaryDTO total) {
         this.data = data;
         this.total = total;
     }

@@ -6,21 +6,20 @@ import lombok.*;
 
 
 /**
- * The type Task statistics.
+ * The type Task summary dto.
  */
 @Data
-
-public class TaskStatistics {
+public class TaskSummaryDTO {
     private Map<Integer, Integer> values;
     private int totalCount;
 
     /**
-     * Instantiates a new Task statistics.
+     * Instantiates a new Task summary dto.
      *
      * @param values     the values
      * @param totalCount the total count
      */
-    public TaskStatistics(Map<Integer, Integer> values, int totalCount) {
+    public TaskSummaryDTO(Map<Integer, Integer> values, int totalCount) {
         this.totalCount = totalCount;
         this.values = values;
     }
