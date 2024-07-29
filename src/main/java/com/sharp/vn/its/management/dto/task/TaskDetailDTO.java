@@ -9,7 +9,7 @@ import java.util.Map;
  * The type Task data item.
  */
 @Data
-public class TaskDataItem {
+public class TaskDetailDTO {
     private String userName;
     private String fullName;
     private String firstName;
@@ -29,7 +29,7 @@ public class TaskDataItem {
      * @param values     the values
      * @param totalCount the total count
      */
-    public TaskDataItem(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
+    public TaskDetailDTO(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
         this.userName = userName;
         this.fullName = fullName;
         this.firstName = firstName;
@@ -42,6 +42,6 @@ public class TaskDataItem {
     /**
      * Instantiates a new Task data item.
      */
-    public TaskDataItem() {
+    public TaskDetailDTO() {
     }
 }

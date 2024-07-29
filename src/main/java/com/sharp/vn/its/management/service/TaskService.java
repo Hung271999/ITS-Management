@@ -5,8 +5,8 @@ import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.data.ChartData;
 import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.dto.task.TaskFilter;
-import com.sharp.vn.its.management.dto.task.TaskDataItem;
-import com.sharp.vn.its.management.dto.task.TaskStatistics;
+import com.sharp.vn.its.management.dto.task.TaskDetailDTO;
+import com.sharp.vn.its.management.dto.task.TaskSummaryDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
@@ -367,26 +367,26 @@ public class TaskService extends BaseService {
         List<ChartData> data = taskRepository.findTaskByPersonInCharge(filter.getUserIds(), filter.getYears());
         Map<Long, List<ChartData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
 
-        List<TaskDataItem> taskDataItemList = new ArrayList<>();
+        List<TaskDetailDTO> taskDetailDTOList = new ArrayList<>();
         mapGroupByUserId.forEach((id, chartDataList) -> {
-            TaskDataItem item = new TaskDataItem();
+            TaskDetailDTO item = new TaskDetailDTO();
             item.setFirstName(chartDataList.get(0).getFirstName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
             item.setTotalCount(chartDataList.stream()
                     .mapToInt(ChartData::getTotal)
                     .sum());
-            taskDataItemList.add(item);
+            taskDetailDTOList.add(item);
         });
 
-        TaskStatistics total = new TaskStatistics(data.stream()
+        TaskSummaryDTO total = new TaskSummaryDTO(data.stream()
                 .collect(Collectors.groupingBy(
                         ChartData::getStatus,
                         Collectors.summingInt(ChartData::getTotal)
-                )), taskDataItemList.stream()
-                .mapToInt(TaskDataItem::getTotalCount)
+                )), taskDetailDTOList.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
-        return new TaskDataDTO(total, taskDataItemList);
+        return new TaskDataDTO(total, taskDetailDTOList);
     }
 
     /**
@@ -394,7 +394,7 @@ public class TaskService extends BaseService {
      *
      * @return the list
      */
-    public List<Integer> getAllYears(){
-        return taskRepository.findAllYears();
+    public List<Integer> getAllYearsFromExpiredDate(){
+        return taskRepository.findAllYearsFromExpiredDate();
     }
 }

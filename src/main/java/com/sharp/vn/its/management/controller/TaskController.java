@@ -123,8 +123,8 @@ public class TaskController extends BaseController {
      * @return the list
      */
     @GetMapping("/allYears")
-    public List<Integer> getAllYears(){
-        return taskService.getAllYears();
+    public List<Integer> getAllYearsFromExpiredDate(){
+        return taskService.getAllYearsFromExpiredDate();
     }
 
     /**

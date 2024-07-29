@@ -40,6 +40,6 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, Tas
      *
      * @return the list
      */
-    @Query(value = "SELECT DISTINCT EXTRACT(YEAR FROM expired_date) AS year FROM its_task", nativeQuery = true)
-    List<Integer> findAllYears();
+    @Query(value = "SELECT DISTINCT EXTRACT(YEAR FROM t.expiredDate) AS year FROM TaskEntity t")
+    List<Integer> findAllYearsFromExpiredDate();
 }

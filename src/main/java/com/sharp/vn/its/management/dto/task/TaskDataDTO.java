@@ -9,8 +9,9 @@ import java.util.List;
  */
 @Data
 public class TaskDataDTO {
-    private List<TaskDataItem> data;
-    private TaskStatistics total;
+    private List<TaskDetailDTO> data;
+    private TaskSummaryDTO total;
+
 
     /**
      * Instantiates a new Task data dto.
@@ -18,7 +19,7 @@ public class TaskDataDTO {
      * @param total the total
      * @param data  the data
      */
-    public TaskDataDTO(TaskStatistics total, List<TaskDataItem> data) {
+    public TaskDataDTO(TaskSummaryDTO total, List<TaskDetailDTO> data) {
         this.total = total;
         this.data = data;
     }
