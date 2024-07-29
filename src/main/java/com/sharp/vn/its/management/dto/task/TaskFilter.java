@@ -10,6 +10,7 @@ import java.util.Map;
 @Data
 public class TaskFilter {
     private List<Long> userIds;
+    private List<Long> systemIds;
     private List<Integer> years;
     private Map<String, SortCriteria> sort;
 }

@@ -9,4 +9,6 @@ import java.util.List;
  */
 public interface TaskRepositoryCustom {
     List<ChartData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years);
+
+    List<ChartData> findTaskBySystem(List<Long> SystemIds, List<Integer> years);
 }

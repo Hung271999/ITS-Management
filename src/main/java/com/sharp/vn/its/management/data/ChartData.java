@@ -1,7 +1,5 @@
 package com.sharp.vn.its.management.data;
-
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class ChartData {

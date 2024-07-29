@@ -18,12 +18,18 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, Tas
     /**
      * Find all page.
      *
-     * @param spec the spec
+     * @param spec     the spec
      * @param pageable the pageable
      * @return the page
      */
     Page<TaskEntity> findAll(Specification<TaskEntity> spec, Pageable pageable);
 
+    /**
+     * Exists by system id boolean.
+     *
+     * @param systemId the system id
+     * @return the boolean
+     */
     boolean existsBySystemId(Long systemId);
 
 

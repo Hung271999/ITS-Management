@@ -1,5 +1,6 @@
 package com.sharp.vn.its.management.dto.task;
 
+import lombok.*;
 
 import lombok.Data;
 
@@ -19,7 +20,6 @@ public class TaskDetailDTO {
     private int totalCount;
 
     /**
-     * Instantiates a new Task data item.
      *
      * @param userName   the user name
      * @param fullName   the full name
@@ -40,7 +40,7 @@ public class TaskDetailDTO {
     }
 
     /**
-     * Instantiates a new Task data item.
+     * Instantiates a new Task detail dto.
      */
     public TaskDetailDTO() {
     }

@@ -1,16 +1,14 @@
 package com.sharp.vn.its.management.dto.task;
 
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Map;
+
+import lombok.*;
+
 
 /**
  * The type Task summary dto.
  */
 @Data
-@NoArgsConstructor
 public class TaskSummaryDTO {
     private Map<Integer, Integer> values;
     private int totalCount;

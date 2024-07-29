@@ -8,6 +8,8 @@ import com.sharp.vn.its.management.dto.task.TaskFilter;
 import com.sharp.vn.its.management.dto.task.TaskDetailDTO;
 import com.sharp.vn.its.management.dto.task.TaskSummaryDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
+import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.dto.task.*;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -23,11 +25,7 @@ import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.util.CollectionUtils;
 import com.sharp.vn.its.management.util.DateTimeUtil;
 import com.sharp.vn.its.management.util.ExcelUtils;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -39,11 +37,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -358,6 +358,15 @@ public class TaskService extends BaseService {
     }
 
     /**
+     * Get all years list.
+     *
+     * @return the list
+     */
+    public List<Integer> getAllYearsFromExpiredDate(){
+        return taskRepository.findAllYearsFromExpiredDate();
+    }
+
+    /**
      * Gets users group by name and status.
      *
      * @param filter the filter
@@ -390,11 +399,34 @@ public class TaskService extends BaseService {
     }
 
     /**
-     * Get all years list.
+     * Gets task by system.
      *
-     * @return the list
+     * @param filter the filter
+     * @return the task by system
      */
-    public List<Integer> getAllYearsFromExpiredDate(){
-        return taskRepository.findAllYearsFromExpiredDate();
+    public TaskDataDTO getTaskBySystem(TaskFilter filter) {
+        List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
+        Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
+                .collect(Collectors.groupingBy(ChartData::getId));
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        mapGroupBySystemid.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            taskDetailDTOS.add(item);
+        });
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                ChartData::getStatus,
+                                Collectors.summingInt(ChartData::getTotal)
+                        )), taskDetailDTOS.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total,taskDetailDTOS);
     }
 }
