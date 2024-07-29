@@ -41,7 +41,9 @@ public class SystemEntity extends BaseEntity {
     @JoinColumn(name = "UpdatedBy")
     private UserEntity updatedBy;
 
-
+    /**
+     * The Tasks.
+     */
     @OneToMany(mappedBy = "system", fetch = FetchType.LAZY)
     private Set<TaskEntity> tasks;
 }

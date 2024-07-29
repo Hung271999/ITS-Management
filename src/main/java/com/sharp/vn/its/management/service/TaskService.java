@@ -406,10 +406,10 @@ public class TaskService extends BaseService {
      */
     public TaskDataDTO getTaskBySystem(TaskFilter filter) {
         List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
-        Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
+        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream()
                 .collect(Collectors.groupingBy(ChartData::getId));
         List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
-        mapGroupBySystemid.forEach((id, chartDataList) -> {
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()

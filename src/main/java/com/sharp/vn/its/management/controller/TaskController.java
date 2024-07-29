@@ -147,7 +147,6 @@ public class TaskController extends BaseController {
         return taskService.getTaskByPersonInCharge(filter);
     }
 
-
     /**
      * Load task statistics by system task data dto.
      *

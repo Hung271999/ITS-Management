@@ -1,9 +1,6 @@
 package com.sharp.vn.its.management.dto.task;
 
 import lombok.*;
-
-import lombok.Data;
-
 import java.util.Map;
 
 /**

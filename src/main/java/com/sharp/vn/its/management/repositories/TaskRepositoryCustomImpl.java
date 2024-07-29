@@ -31,20 +31,22 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<UserEntity> userRoot = cq.from(UserEntity.class);
         Join<UserEntity, TaskEntity> taskJoin = userRoot.join("tasks");
-        // Select clause
+
         cq.multiselect(
                 userRoot.get("id"),
                 userRoot.get("firstName"),
                 taskJoin.get("status"),
                 cb.count(taskJoin.get("status"))
         );
+
         List<Predicate> predicates = new ArrayList<>();
         if (!userIds.isEmpty()) {
             predicates.add(userRoot.get("id").in(userIds));
         }
         if (!years.isEmpty()) {
-            predicates.add(createYearPredicate(cb, taskJoin, years));
+            predicates.add(createYearPredicateForUserJoin(cb, taskJoin, years));
         }
+
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.groupBy(userRoot.get("firstName"), taskJoin.get("status"), userRoot.get("id"));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
@@ -77,20 +79,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(systemRoot.get("id").in(systemIds));
         }
         if (!years.isEmpty()) {
-            List<Predicate> yearPredicates = new ArrayList<>();
-            years.forEach(t -> {
-                final Year year = Year.of(t);
-                LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
-                LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
-                Predicate datePredicate = cb.between(
-                        taskJoin.get("expiredDate").as(LocalDateTime.class),
-                        startDateTime,
-                        endDateTime
-                );
-                yearPredicates.add(datePredicate);
-            });
-            Predicate finalDatePredicate = cb.or(yearPredicates.toArray(new Predicate[0]));
-            predicates.add(finalDatePredicate);
+            predicates.add(createYearPredicateForSystemJoin(cb, taskJoin, years));
         }
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -107,7 +96,23 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         }).collect(Collectors.toList());
     }
     
-    private Predicate createYearPredicate(CriteriaBuilder cb, Join<UserEntity, TaskEntity> taskJoin, List<Integer> years) {
+    private Predicate createYearPredicateForUserJoin(CriteriaBuilder cb, Join<UserEntity, TaskEntity> taskJoin, List<Integer> years) {
+        List<Predicate> yearPredicates = new ArrayList<>();
+        years.forEach(t -> {
+            final Year year = Year.of(t);
+            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
+            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
+            Predicate datePredicate = cb.between(
+                    taskJoin.get("expiredDate").as(LocalDateTime.class),
+                    startDateTime,
+                    endDateTime
+            );
+            yearPredicates.add(datePredicate);
+        });
+        return cb.or(yearPredicates.toArray(new Predicate[0]));
+    }
+
+    private Predicate createYearPredicateForSystemJoin(CriteriaBuilder cb, Join<SystemEntity, TaskEntity> taskJoin, List<Integer> years) {
         List<Predicate> yearPredicates = new ArrayList<>();
         years.forEach(t -> {
             final Year year = Year.of(t);
