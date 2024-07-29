@@ -88,6 +88,7 @@ public class TaskController extends BaseController {
     /**
      * Load all tasks list.
      *
+     * @param request the request
      * @return the list
      */
     @PostMapping("/all")
@@ -156,5 +157,15 @@ public class TaskController extends BaseController {
     @PostMapping("/statisticsBySystem")
     public TaskDataDTO loadTaskStatisticsBySystem(@RequestBody TaskFilter filter) {
         return taskService.getTaskBySystem(filter);
+    }
+
+    @PostMapping("/test")
+    public TaskDataDTO test(@RequestBody TaskFilter filter){
+        return taskService.getTaskUserByWeek(filter);
+    }
+
+    @GetMapping("allWeeks")
+    public List<Integer> getWeeksFromExpiredDate(){
+        return taskService.getWeeksFromExpiredDate();
     }
 }

@@ -429,4 +429,33 @@ public class TaskService extends BaseService {
                 .sum());
         return new TaskDataDTO(total,taskDetailDTOS);
     }
+
+    public TaskDataDTO getTaskUserByWeek(TaskFilter filter){
+        List<ChartData> data = taskRepository.findTaskUserByWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+        Map<Long, List<ChartData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByUserId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setFirstName(chartDataList.get(0).getFirstName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getWeek, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            taskDataItems.add(item);
+        });
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                ChartData::getWeek,
+                                Collectors.summingInt(ChartData::getTotal)
+                        )), taskDataItems.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total,taskDataItems);
+    }
+
+    public List<Integer> getWeeksFromExpiredDate(){
+        return taskRepository.findWeeksFromExpiredDate();
+    }
 }

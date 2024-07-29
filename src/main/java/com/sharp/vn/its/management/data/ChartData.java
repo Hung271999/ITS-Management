@@ -6,6 +6,7 @@ public class ChartData {
     private Long id;
     private String firstName;
     private String systemName;
+    private int week;
     private int status;
     private int total;
 }
