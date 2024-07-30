@@ -159,11 +159,22 @@ public class TaskController extends BaseController {
         return taskService.getTaskBySystem(filter);
     }
 
-    @PostMapping("/test")
-    public TaskDataDTO test(@RequestBody TaskFilter filter){
-        return taskService.getTaskUserByWeek(filter);
+    /**
+     * Load task for person in charge by week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-for-person-in-charge-by-week")
+    public TaskDataDTO loadTaskForPersonInChargeByWeek(@RequestBody TaskFilter filter){
+        return taskService.getTaskForPersonInChargeByWeek(filter);
     }
 
+    /**
+     * Get weeks from expired date list.
+     *
+     * @return the list
+     */
     @GetMapping("all-week")
     public List<Integer> getWeeksFromExpiredDate(){
         return taskService.getWeeksFromExpiredDate();

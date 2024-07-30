@@ -444,20 +444,27 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(total,taskDetailDTOS);
     }
 
-    public TaskDataDTO getTaskUserByWeek(TaskFilter filter){
-        List<ChartData> data = taskRepository.findTaskUserByWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+    /**
+     * Get task for person in charge by week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskForPersonInChargeByWeek(TaskFilter filter){
+        List<ChartData> data = taskRepository.findTaskForPersonInChargeByWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
         Map<Long, List<ChartData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+
+        Map<Long, Integer> totalCountById = groupByChartIdAndSumTotal(data);
         List<TaskDetailDTO> taskDataItems = new ArrayList<>();
         mapGroupByUserId.forEach((id, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setFirstName(chartDataList.get(0).getFirstName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getWeek, ChartData::getTotal)));
-            item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
-                    .sum());
+            item.setTotalCount(totalCountById.get(id));
             taskDataItems.add(item);
         });
+
         TaskSummaryDTO total = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
@@ -469,6 +476,11 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(total,taskDataItems);
     }
 
+    /**
+     * Get weeks from expired date list.
+     *
+     * @return the list
+     */
     public List<Integer> getWeeksFromExpiredDate(){
         return taskRepository.findWeeksFromExpiredDate();
     }

@@ -97,7 +97,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     }
 
     @Override
-    public List<ChartData> findTaskUserByWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks) {
+    public List<ChartData> findTaskForPersonInChargeByWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<UserEntity> userRoot = cq.from(UserEntity.class);
