@@ -164,7 +164,7 @@ public class TaskController extends BaseController {
         return taskService.getTaskUserByWeek(filter);
     }
 
-    @GetMapping("allWeeks")
+    @GetMapping("all-week")
     public List<Integer> getWeeksFromExpiredDate(){
         return taskService.getWeeksFromExpiredDate();
     }

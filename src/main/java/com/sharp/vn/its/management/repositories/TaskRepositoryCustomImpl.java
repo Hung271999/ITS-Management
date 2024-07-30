@@ -116,7 +116,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(userRoot.get("id").in(userIds));
         }
         if (!years.isEmpty()) {
-            predicates.add(createYearPredicateForUserJoin(cb, taskJoin, years));
+            predicates.add(createYearPredicate(cb, taskJoin, years));
         }
         if (!weeks.isEmpty()) {
             Predicate weekPredicate = week.in(weeks);
