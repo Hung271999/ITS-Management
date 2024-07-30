@@ -11,6 +11,8 @@ import java.util.*;
 @Data
 public class TaskFilter {
     private List<Long> systemIds;
+    private List<Integer> weeks;
     private List<Integer> years;
     private Map<String, SortCriteria> sort;
+
 }

@@ -9,4 +9,5 @@ public class ChartData {
     private String systemName;
     private int status;
     private int total;
+    private Integer week;
 }

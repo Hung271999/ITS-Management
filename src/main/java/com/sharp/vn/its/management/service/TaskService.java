@@ -388,12 +388,63 @@ public class TaskService extends BaseService {
 
 
     /**
+     * Get task system by week task data dto.
+     *
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks) {
+        // Fetch the data from the repository
+        List<ChartData> data = taskRepository.findTaskSystemByWeek(systemIds, weeks);
+
+        // Group data by system ID
+        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+
+        // Create TaskDetailDTO for each system
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getWeek, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            taskDetailDTOS.add(item);
+        });
+
+        // Create TaskSummaryDTO with total data
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                ChartData::getWeek,
+                                Collectors.summingInt(ChartData::getTotal)
+                        )),
+                taskDetailDTOS.stream()
+                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .sum()
+        );
+
+        // Return TaskDataDTO
+        return new TaskDataDTO(taskDetailDTOS, total);
+    }
+
+
+    /**
      * Gets all years from expired date.
      *
      * @return the all years from expired date
      */
     public List<Integer> getAllYearsFromExpiredDate() {
         return taskRepository.findAllYearsFromExpiredDate();
+    }
+
+    /**
+     * Get all weeks from expired date list.
+     *
+     * @return the list
+     */
+    public List<Integer> getAllWeeksFromExpiredDate(){
+        return taskRepository.findWeeksFromExpiredDate();
     }
 }
 
