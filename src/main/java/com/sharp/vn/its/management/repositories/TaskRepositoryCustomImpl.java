@@ -44,7 +44,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(userRoot.get("id").in(userIds));
         }
         if (!years.isEmpty()) {
-            predicates.add(createYearPredicateForUserJoin(cb, taskJoin, years));
+            predicates.add(createYearPredicate(cb, taskJoin, years));
         }
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -79,7 +79,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(systemRoot.get("id").in(systemIds));
         }
         if (!years.isEmpty()) {
-            predicates.add(createYearPredicateForSystemJoin(cb, taskJoin, years));
+            predicates.add(createYearPredicate(cb, taskJoin, years));
         }
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -140,23 +140,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         }).collect(Collectors.toList());
     }
     
-    private Predicate createYearPredicateForUserJoin(CriteriaBuilder cb, Join<UserEntity, TaskEntity> taskJoin, List<Integer> years) {
-        List<Predicate> yearPredicates = new ArrayList<>();
-        years.forEach(t -> {
-            final Year year = Year.of(t);
-            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
-            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
-            Predicate datePredicate = cb.between(
-                    taskJoin.get("expiredDate").as(LocalDateTime.class),
-                    startDateTime,
-                    endDateTime
-            );
-            yearPredicates.add(datePredicate);
-        });
-        return cb.or(yearPredicates.toArray(new Predicate[0]));
-    }
-
-    private Predicate createYearPredicateForSystemJoin(CriteriaBuilder cb, Join<SystemEntity, TaskEntity> taskJoin, List<Integer> years) {
+    private Predicate createYearPredicate(CriteriaBuilder cb, Join<?, TaskEntity> taskJoin, List<Integer> years) {
         List<Predicate> yearPredicates = new ArrayList<>();
         years.forEach(t -> {
             final Year year = Year.of(t);

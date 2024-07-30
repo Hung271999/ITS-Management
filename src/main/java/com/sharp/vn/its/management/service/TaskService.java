@@ -377,14 +377,17 @@ public class TaskService extends BaseService {
         Map<Long, List<ChartData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
 
         List<TaskDetailDTO> taskDetailDTOList = new ArrayList<>();
+        Map<Long, Integer> groupByChartIdAndSumTotal = data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getId,
+                        Collectors.summingInt(ChartData::getTotal)
+                ));
         mapGroupByUserId.forEach((id, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setFirstName(chartDataList.get(0).getFirstName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
-            item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
-                    .sum());
+            item.setTotalCount(groupByChartIdAndSumTotal.get(id));
             taskDetailDTOList.add(item);
         });
 
@@ -409,14 +412,17 @@ public class TaskService extends BaseService {
         Map<Long, List<ChartData>> mapGroupBySystemId = data.stream()
                 .collect(Collectors.groupingBy(ChartData::getId));
         List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        Map<Long, Integer> groupByChartIdAndSumTotal = data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getId,
+                        Collectors.summingInt(ChartData::getTotal)
+                ));
         mapGroupBySystemId.forEach((id, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
-            item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
-                    .sum());
+            item.setTotalCount(groupByChartIdAndSumTotal.get(id));
             taskDetailDTOS.add(item);
         });
         TaskSummaryDTO total = new TaskSummaryDTO(
