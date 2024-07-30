@@ -120,7 +120,7 @@ public class TaskController extends BaseController {
      * @param request the duplicate task dto
      * @return the response entity
      */
-    @PostMapping("/cloneTask")
+    @PostMapping("/clone")
     public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request){
         taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
@@ -131,7 +131,7 @@ public class TaskController extends BaseController {
      *
      * @return the list
      */
-    @GetMapping("/allYears")
+    @GetMapping("/all-year")
     public List<Integer> getAllYearsFromExpiredDate(){
         return taskService.getAllYearsFromExpiredDate();
     }
@@ -142,7 +142,7 @@ public class TaskController extends BaseController {
      * @param filter the filter
      * @return the chart dto
      */
-    @PostMapping("/statisticsByPersonInCharge")
+    @PostMapping("/statistics-by-person-in-charge")
     public TaskDataDTO loadTaskStatisticsByPersonInCharge(@RequestBody TaskFilter filter){
         return taskService.getTaskByPersonInCharge(filter);
     }
@@ -153,7 +153,7 @@ public class TaskController extends BaseController {
      * @param filter the filter
      * @return the task data dto
      */
-    @PostMapping("/statisticsBySystem")
+    @PostMapping("/statistics-by-system")
     public TaskDataDTO loadTaskStatisticsBySystem(@RequestBody TaskFilter filter) {
         return taskService.getTaskBySystem(filter);
     }

@@ -429,4 +429,31 @@ public class TaskService extends BaseService {
                 .sum());
         return new TaskDataDTO(total,taskDetailDTOS);
     }
+
+
+    public TaskDataDTO test(TaskFilter filter) {
+        List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
+        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream()
+                .collect(Collectors.groupingBy(ChartData::getId));
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            taskDetailDTOS.add(item);
+        });
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                ChartData::getStatus,
+                                Collectors.summingInt(ChartData::getTotal)
+                        )), taskDetailDTOS.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total,taskDetailDTOS);
+    }
 }
