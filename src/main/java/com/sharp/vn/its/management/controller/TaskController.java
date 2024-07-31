@@ -132,10 +132,8 @@ public class TaskController extends BaseController {
     }
 
     @PostMapping("/test")
-    public TaskDataDTO test(@RequestBody TaskFilter filter) {
-        List<Long> systemIds = filter.getSystemIds();
-        List<Integer> weeks = filter.getWeeks();
-        return taskService.getTaskSystemByWeek(systemIds, weeks);
+    public TaskDataDTO loadTaskForSystemByWeek(@RequestBody TaskFilter filter) {
+        return taskService.getTaskSystemByWeek(filter);
     }
 
     /**

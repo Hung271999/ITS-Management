@@ -351,6 +351,21 @@ public class TaskService extends BaseService {
         });
     }
 
+    /**
+     * Group by chart id and sum total map.
+     *
+     * @param data the data
+     * @return the map
+     */
+    public Map<Long, Integer> groupByChartIdAndSumTotal(List<ChartData> data) {
+        return data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getId,
+                        Collectors.summingInt(ChartData::getTotal)
+                ));
+    }
+
+
 
     /**
      * Gets task by system.
@@ -360,19 +375,19 @@ public class TaskService extends BaseService {
      */
     public TaskDataDTO getTaskBySystem(TaskFilter filter) {
         List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
-        Map<Long, List<ChartData>> mapGroupBySystemid = data.stream()
-                .collect(Collectors.groupingBy(ChartData::getId));
+        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+
         List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
-        mapGroupBySystemid.forEach((id, chartDataList) -> {
+        Map<Long, Integer> totalCountById = groupByChartIdAndSumTotal(data);
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
-            item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
-                    .sum());
+            item.setTotalCount(totalCountById.get(id));
             taskDetailDTOS.add(item);
         });
+
         TaskSummaryDTO total = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
@@ -381,9 +396,7 @@ public class TaskService extends BaseService {
                         )), taskDetailDTOS.stream()
                 .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
-        return new TaskDataDTO(taskDetailDTOS, total);
-
-
+        return new TaskDataDTO(total,taskDetailDTOS);
     }
 
 
@@ -392,9 +405,9 @@ public class TaskService extends BaseService {
      *
      * @return the task data dto
      */
-    public TaskDataDTO getTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks) {
+    public TaskDataDTO getTaskSystemByWeek(TaskFilter filter) {
         // Fetch the data from the repository
-        List<ChartData> data = taskRepository.findTaskSystemByWeek(systemIds, weeks);
+        List<ChartData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(), filter.getWeeks());
 
         // Group data by system ID
         Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
@@ -425,7 +438,7 @@ public class TaskService extends BaseService {
         );
 
         // Return TaskDataDTO
-        return new TaskDataDTO(taskDetailDTOS, total);
+        return new TaskDataDTO(total, taskDetailDTOS);
     }
 
 

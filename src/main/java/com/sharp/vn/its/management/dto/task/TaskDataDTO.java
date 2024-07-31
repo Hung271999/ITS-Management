@@ -21,7 +21,7 @@ public class TaskDataDTO {
      * @param data  the data
      * @param total the total
      */
-    public TaskDataDTO(List<TaskDetailDTO> data, TaskSummaryDTO total) {
+    public TaskDataDTO(TaskSummaryDTO total,List<TaskDetailDTO> data) {
         this.data = data;
         this.total = total;
     }
