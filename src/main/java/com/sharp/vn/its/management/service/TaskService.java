@@ -406,10 +406,8 @@ public class TaskService extends BaseService {
      * @return the task data dto
      */
     public TaskDataDTO getTaskSystemByWeek(TaskFilter filter) {
-        // Fetch the data from the repository
         List<ChartData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(), filter.getWeeks());
 
-        // Group data by system ID
         Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
 
         // Create TaskDetailDTO for each system
@@ -438,6 +436,37 @@ public class TaskService extends BaseService {
         );
 
         // Return TaskDataDTO
+        return new TaskDataDTO(total, taskDetailDTOS);
+    }
+
+    public TaskDataDTO findEffortOfSystemByWeek(TaskFilter filter) {
+        List<ChartData> data = taskRepository.findTotalEffortSystemByWeek(filter.getSystemIds(), filter.getWeeks(), filter.getYears());
+
+        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(ChartData::getWeek, ChartData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(ChartData::getTotal)
+                    .sum());
+            taskDetailDTOS.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                ChartData::getWeek,
+                                Collectors.summingInt(ChartData::getTotal)
+                        )),
+                taskDetailDTOS.stream()
+                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .sum()
+        );
+
         return new TaskDataDTO(total, taskDetailDTOS);
     }
 

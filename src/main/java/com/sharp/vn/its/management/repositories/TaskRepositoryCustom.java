@@ -17,4 +17,5 @@ public interface TaskRepositoryCustom {
      */
     List<ChartData> findTaskBySystem(List<Long> SystemIds, List<Integer> years);
     List<ChartData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks);
+    List<ChartData> findTotalEffortSystemByWeek(List<Long> systemIds,List<Integer> years, List<Integer> weeks);
 }

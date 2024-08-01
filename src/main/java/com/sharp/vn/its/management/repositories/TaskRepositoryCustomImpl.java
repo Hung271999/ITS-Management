@@ -71,6 +71,49 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         }).collect(Collectors.toList());
     }
 
+    //findTotalEffortSystemByWeek
+    @Override
+    public List<ChartData> findTotalEffortSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<TaskEntity> taskRoot = cq.from(TaskEntity.class);
+        Join<TaskEntity, SystemEntity> systemJoin = taskRoot.join("system");
+
+        // Extract year and week from startDate using date_part
+        Expression<Integer> yearExpression = cb.function("date_part", Integer.class, cb.literal("year"), taskRoot.get("startDate"));
+        Expression<Integer> weekExpression = cb.function("date_part", Integer.class, cb.literal("week"), taskRoot.get("startDate"));
+
+        // Create predicates for filtering
+        Predicate systemPredicate = systemJoin.get("id").in(systemIds);
+        Predicate yearPredicate = yearExpression.in(years);
+        Predicate weekPredicate = weekExpression.in(weeks);
+
+        // Create the criteria query
+        cq.multiselect(
+                        systemJoin.get("id"),
+                        systemJoin.get("systemName"),
+                        cb.sum(taskRoot.get("cost")),
+                        weekExpression
+                )
+                .where(cb.and(systemPredicate, yearPredicate, weekPredicate))
+                .groupBy(systemJoin.get("id"), systemJoin.get("systemName"), weekExpression)
+                .orderBy(cb.asc(systemJoin.get("systemName")), cb.asc(weekExpression));
+
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        List<Object[]> results = query.getResultList();
+
+        // Transform the result list into a list of ChartData
+        return results.stream().map(result -> {
+            ChartData chartData = new ChartData();
+            chartData.setId((Long) result[0]);
+            chartData.setSystemName((String) result[1]);
+            chartData.setTotal(((Number) result[2]).intValue());
+            chartData.setWeek((Integer) result[3]);
+            return chartData;
+        }).collect(Collectors.toList());
+    }
+
+
     @Override
     public List<ChartData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -118,5 +161,21 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             chartData.setTotal(((Number) row[3]).intValue());
             return chartData;
         }).collect(Collectors.toList());
+    }
+
+    private Predicate createYearPredicate(CriteriaBuilder cb, Join<?, TaskEntity> taskJoin, List<Integer> years) {
+        List<Predicate> yearPredicates = new ArrayList<>();
+        years.forEach(t -> {
+            final Year year = Year.of(t);
+            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
+            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
+            Predicate datePredicate = cb.between(
+                    taskJoin.get("expiredDate").as(LocalDateTime.class),
+                    startDateTime,
+                    endDateTime
+            );
+            yearPredicates.add(datePredicate);
+        });
+        return cb.or(yearPredicates.toArray(new Predicate[0]));
     }
 }
