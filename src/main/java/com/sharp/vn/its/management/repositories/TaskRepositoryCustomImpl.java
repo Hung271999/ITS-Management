@@ -26,7 +26,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     private EntityManager entityManager;
 
     @Override
-    public List<ChartData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years) {
+    public List<TaskData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<UserEntity> userRoot = cq.from(UserEntity.class);
@@ -51,17 +51,17 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         cq.groupBy(userRoot.get("firstName"), taskJoin.get("status"), userRoot.get("id"));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         return query.getResultList().stream().map(row -> {
-            ChartData chartData = new ChartData();
-            chartData.setId(((Number) row[0]).longValue());
-            chartData.setFirstName((String) row[1]);
-            chartData.setStatus(((Number) row[2]).intValue());
-            chartData.setTotal(((Number) row[3]).intValue());
-            return chartData;
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setFirstName((String) row[1]);
+            taskData.setStatus(((Number) row[2]).intValue());
+            taskData.setTotal(((Number) row[3]).intValue());
+            return taskData;
         }).collect(Collectors.toList());
     }
 
     @Override
-    public List<ChartData> findTaskBySystem(List<Long> systemIds, List<Integer> years) {
+    public List<TaskData> findTaskBySystem(List<Long> systemIds, List<Integer> years) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
@@ -87,13 +87,29 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         return query.getResultList().stream().map(row -> {
-            ChartData chartData = new ChartData();
-            chartData.setId(((Number) row[0]).longValue());
-            chartData.setSystemName((String) row[1]);
-            chartData.setStatus(((Number) row[2]).intValue());
-            chartData.setTotal(((Number) row[3]).intValue());
-            return chartData;
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setSystemName((String) row[1]);
+            taskData.setStatus(((Number) row[2]).intValue());
+            taskData.setTotal(((Number) row[3]).intValue());
+            return taskData;
         }).collect(Collectors.toList());
+    }
+    
+    private Predicate createYearPredicate(CriteriaBuilder cb, Join<?, TaskEntity> taskJoin, List<Integer> years) {
+        List<Predicate> yearPredicates = new ArrayList<>();
+        years.forEach(t -> {
+            final Year year = Year.of(t);
+            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
+            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
+            Predicate datePredicate = cb.between(
+                    taskJoin.get("expiredDate").as(LocalDateTime.class),
+                    startDateTime,
+                    endDateTime
+            );
+            yearPredicates.add(datePredicate);
+        });
+        return cb.or(yearPredicates.toArray(new Predicate[0]));
     }
 
     @Override
@@ -138,21 +154,5 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             chartData.setTotal(((Number) row[3]).intValue());
             return chartData;
         }).collect(Collectors.toList());
-    }
-    
-    private Predicate createYearPredicate(CriteriaBuilder cb, Join<?, TaskEntity> taskJoin, List<Integer> years) {
-        List<Predicate> yearPredicates = new ArrayList<>();
-        years.forEach(t -> {
-            final Year year = Year.of(t);
-            LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
-            LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
-            Predicate datePredicate = cb.between(
-                    taskJoin.get("expiredDate").as(LocalDateTime.class),
-                    startDateTime,
-                    endDateTime
-            );
-            yearPredicates.add(datePredicate);
-        });
-        return cb.or(yearPredicates.toArray(new Predicate[0]));
     }
 }
