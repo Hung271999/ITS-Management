@@ -1,6 +1,10 @@
 package com.sharp.vn.its.management.controller;
 
 
+import com.sharp.vn.its.management.dto.task.TaskDataDTO;
+import com.sharp.vn.its.management.dto.task.TaskFilter;
+import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
+
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
@@ -118,9 +122,41 @@ public class TaskController extends BaseController {
      * @param request the duplicate task dto
      * @return the response entity
      */
-    @PostMapping("/cloneTask")
+    @PostMapping("/clone")
     public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request){
         taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Get all years list.
+     *
+     * @return the list
+     */
+    @GetMapping("/all-year")
+    public List<Integer> getAllYearsFromExpiredDate(){
+        return taskService.getAllYearsFromExpiredDate();
+    }
+
+    /**
+     * Load users group by name and status chart dto.
+     *
+     * @param filter the filter
+     * @return the chart dto
+     */
+    @PostMapping("/statistics-by-person-in-charge")
+    public TaskDataDTO loadTaskStatisticsByPersonInCharge(@RequestBody TaskFilter filter){
+        return taskService.getTaskByPersonInCharge(filter);
+    }
+
+    /**
+     * Load task statistics by system task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-by-system")
+    public TaskDataDTO loadTaskStatisticsBySystem(@RequestBody TaskFilter filter) {
+        return taskService.getTaskBySystem(filter);
     }
 }

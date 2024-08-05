@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -80,5 +81,11 @@ public class UserEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "updated_by")
     private UserEntity updatedBy;
+
+    /**
+     * The Tasks.
+     */
+    @OneToMany(mappedBy = "personInCharge")
+    private List<TaskEntity> tasks;
 
 }

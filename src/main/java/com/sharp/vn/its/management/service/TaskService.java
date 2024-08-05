@@ -2,6 +2,12 @@ package com.sharp.vn.its.management.service;
 
 
 import com.sharp.vn.its.management.constants.*;
+import com.sharp.vn.its.management.data.TaskData;
+import com.sharp.vn.its.management.dto.task.TaskDataDTO;
+import com.sharp.vn.its.management.dto.task.TaskFilter;
+import com.sharp.vn.its.management.dto.task.TaskDetailDTO;
+import com.sharp.vn.its.management.dto.task.TaskSummaryDTO;
+import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -22,11 +28,7 @@ import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.util.CollectionUtils;
 import com.sharp.vn.its.management.util.DateTimeUtil;
 import com.sharp.vn.its.management.util.ExcelUtils;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -47,6 +49,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -99,6 +102,7 @@ public class TaskService extends BaseService {
     /**
      * Gets all tasks.
      *
+     * @param request the request
      * @return the all tasks
      */
     public Page<TaskDTO> getAllTasks(TaskDTO request) {
@@ -357,4 +361,90 @@ public class TaskService extends BaseService {
         });
     }
 
+    /**
+     * Get all years list.
+     *
+     * @return the list
+     */
+    public List<Integer> getAllYearsFromExpiredDate(){
+        return taskRepository.findAllYearsFromExpiredDate();
+    }
+
+
+    /**
+     * Group by chart id and sum total map.
+     *
+     * @param data the data
+     * @return the map
+     */
+    public Map<Long, Integer> groupByTaskDataIdAndSumTotal(List<TaskData> data) {
+        return data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getId,
+                        Collectors.summingInt(TaskData::getTotal)
+                ));
+    }
+
+    /**
+     * Gets users group by name and status.
+     *
+     * @param filter the filter
+     * @return the users group by name and status
+     */
+    public TaskDataDTO getTaskByPersonInCharge(TaskFilter filter) {
+        List<TaskData> data = taskRepository.findTaskByPersonInCharge(filter.getUserIds(), filter.getYears());
+        Map<Long, List<TaskData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
+
+        Map<Long, Integer> totalCountById = groupByTaskDataIdAndSumTotal(data);
+        List<TaskDetailDTO> taskDetailDTOList = new ArrayList<>();
+        mapGroupByUserId.forEach((id, taskDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setFirstName(taskDataList.get(0).getFirstName());
+            item.setValues(taskDataList.stream()
+                    .collect(Collectors.toMap(TaskData::getStatus, TaskData::getTotal)));
+            item.setTotalCount(totalCountById.get(id));
+            taskDetailDTOList.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getStatus,
+                        Collectors.summingInt(TaskData::getTotal)
+                )), taskDetailDTOList.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total, taskDetailDTOList);
+    }
+
+    /**
+     * Gets task by system.
+     *
+     * @param filter the filter
+     * @return the task by system
+     */
+    public TaskDataDTO getTaskBySystem(TaskFilter filter) {
+        List<TaskData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
+        Map<Long, List<TaskData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
+
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        Map<Long, Integer> totalCountById = groupByTaskDataIdAndSumTotal(data);
+        mapGroupBySystemId.forEach((id, taskDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(taskDataList.get(0).getSystemName());
+            item.setValues(taskDataList.stream()
+                    .collect(Collectors.toMap(TaskData::getStatus, TaskData::getTotal)));
+            item.setTotalCount(totalCountById.get(id));
+            taskDetailDTOS.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                TaskData::getStatus,
+                                Collectors.summingInt(TaskData::getTotal)
+                        )), taskDetailDTOS.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total,taskDetailDTOS);
+    }
 }

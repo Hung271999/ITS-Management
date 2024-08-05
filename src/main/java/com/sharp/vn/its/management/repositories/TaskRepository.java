@@ -6,13 +6,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 /**
  * The interface Task repository.
  */
 @Transactional
-public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
+public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> , TaskRepositoryCustom{
 
     /**
      * Find all page.
@@ -23,6 +26,12 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
      */
     Page<TaskEntity> findAll(Specification<TaskEntity> spec, Pageable pageable);
 
+    /**
+     * Exists by system id boolean.
+     *
+     * @param systemId the system id
+     * @return the boolean
+     */
     boolean existsBySystemId(Long systemId);
 
 
@@ -34,4 +43,11 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
      */
     Boolean existsByPersonInChargeId(Long userId);
 
+    /**
+     * Find all years list.
+     *
+     * @return the list
+     */
+    @Query(value = "SELECT DISTINCT EXTRACT(YEAR FROM t.expiredDate) AS year FROM TaskEntity t")
+    List<Integer> findAllYearsFromExpiredDate();
 }
