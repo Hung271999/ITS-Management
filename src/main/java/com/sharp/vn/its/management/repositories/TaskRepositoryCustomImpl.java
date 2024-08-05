@@ -1,6 +1,6 @@
 package com.sharp.vn.its.management.repositories;
 
-import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -113,7 +113,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     }
 
     @Override
-    public List<ChartData> findTaskForPersonInChargeByWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks) {
+    public List<TaskData> findTaskForPersonInChargeByWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<UserEntity> userRoot = cq.from(UserEntity.class);
@@ -147,12 +147,12 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         query.getResultList();
         return query.getResultList().stream().map(row -> {
-            ChartData chartData = new ChartData();
-            chartData.setId(((Number) row[0]).longValue());
-            chartData.setFirstName((String) row[1]);
-            chartData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
-            chartData.setTotal(((Number) row[3]).intValue());
-            return chartData;
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setFirstName((String) row[1]);
+            taskData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
+            taskData.setTotal(((Number) row[3]).intValue());
+            return taskData;
         }).collect(Collectors.toList());
     }
 }
