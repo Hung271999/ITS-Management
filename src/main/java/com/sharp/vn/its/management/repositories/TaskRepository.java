@@ -8,17 +8,19 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The interface Task repository.
  */
 @Transactional
-public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, TaskRepositoryCustom{
+public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> {
 
     /**
      * Find all page.
      *
-     * @param spec     the spec
+     * @param spec the spec
      * @param pageable the pageable
      * @return the page
      */
