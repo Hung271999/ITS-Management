@@ -1,6 +1,7 @@
 package com.sharp.vn.its.management.service;
 
 
+import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -119,11 +120,13 @@ public class TaskService extends BaseService {
      */
     public TaskDTO getTaskDetail(Long id) {
         if (id == null) {
-            throw new DataValidationException("Task id not found");
+            log.error("Task id empty or null");
+            throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         }
         log.info("Fetching task detail for id: {}", id);
         final TaskDTO taskDTO = new TaskDTO(taskRepository.findById(id).orElseThrow(() -> {
-            return new ObjectNotFoundException("Task not found with id: " + id);
+            log.error("Task not found with id: {}", id);
+            return new ObjectNotFoundException(MessageCode.ERROR_TASK_NOT_FOUND);
         }));
         log.info("Task detail fetched successfully for id: {}", id);
         return taskDTO;
@@ -136,7 +139,8 @@ public class TaskService extends BaseService {
      */
     public void deleteTask(Long id) {
         if (id == null) {
-            throw new DataValidationException("Task id not found");
+            log.error("Task id not found");
+            throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         }
         taskRepository.deleteById(id);
         log.info("Task with id {} deleted successfully.", id);
@@ -156,15 +160,20 @@ public class TaskService extends BaseService {
         TaskEntity taskEntity = new TaskEntity();
         // update when task id is not null
         if (taskId != null) {
-            taskEntity = taskRepository.findById(taskId).orElseThrow(
-                    () -> new DataValidationException("Task not found with id: " + taskId));
+            taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
+                        log.error("Task not found with id: {}", taskId);
+                        return new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+                    });
         }
         final String userName = authenticationService.getUser().getUsername();
         if (userName == null) {
             throw new ObjectNotFoundException("User not found");
         }
         final SystemEntity system = systemRepository.findById(systemId).orElseThrow(
-                () -> new ObjectNotFoundException("System not found with id: " + systemId));
+                () -> {
+                    log.error("System not found with id: {}", systemId);
+                    return new ObjectNotFoundException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
+                });
 
         final TaskType taskType = TaskType.valueOf(taskDTO.getType());
 
@@ -213,7 +222,7 @@ public class TaskService extends BaseService {
                 TaskDTO task = data.get(i);
                 Row row = sheet.createRow(i + 1);
                 ExcelUtils.writeCell(row, 0, task.getTaskId());
-                ExcelUtils.writeCell(row, 1, task.getFullName());
+                ExcelUtils.writeCell(row, 1, task.getFirstName());
                 ExcelUtils.writeCell(row, 2, DateTimeUtil.toLocalDateTime(task.getReceiveDate()));
                 ExcelUtils.writeCell(row, 3, DateTimeUtil.toLocalDateTime(task.getExpiredDate()));
                 ExcelUtils.writeCell(row, 4, DateTimeUtil.toLocalDateTime(task.getStartDate()));
@@ -221,14 +230,14 @@ public class TaskService extends BaseService {
                 ExcelUtils.writeCell(row, 6, task.getContent());
                 TaskStatus taskStatus = TaskStatus.valueOf(task.getStatus());
                 if (taskStatus != null) {
-                    ExcelUtils.writeCell(row, 7, taskStatus.getStatus());
+                    ExcelUtils.writeCell(row, 7, TaskStatus.valueOf(taskStatus.getStatus()).getDescription());
                 }
 
                 ExcelUtils.writeCell(row, 8, task.getCost());
                 ExcelUtils.writeCell(row, 9, task.getSystemName());
                 TaskType taskType = TaskType.valueOf(task.getType());
                 if (taskType != null) {
-                    ExcelUtils.writeCell(row, 10, taskType.getType());
+                    ExcelUtils.writeCell(row, 10, TaskType.valueOf(taskType.getType()).getDescription());
                 }
                 ExcelUtils.writeCell(row, 11, task.getTicketNumber());
                 ExcelUtils.writeCell(row, 12, task.getTicketURL());
@@ -280,7 +289,7 @@ public class TaskService extends BaseService {
                         Join<TaskEntity, UserEntity> userJoin = root.join("personInCharge");
                         CollectionUtils.addIfNotEmptyOrNull(predicates,
                                 criteriaBuilder.equal(userJoin.get("id"),
-                                         personInCharge.getFilterNumberValue().getToValue()));
+                                        personInCharge.getFilterNumberValue().getToValue()));
                     }
                     CriteriaFilterItem system = searchParam.get("system");
                     if (system != null) {
@@ -292,6 +301,33 @@ public class TaskService extends BaseService {
                     return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
                 };
 
+    }
+
+    /**
+     * Duplicate task.
+     *
+     * @param taskId the taskId
+     * @param numberOfTasks the number of tasks
+     */
+    public void cloneTask(Long taskId, int numberOfTasks){
+        if (taskId == null) {
+            log.error("Task id not found");
+            throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+        }
+        log.info("Start cloning task: {}", taskId);
+        TaskEntity taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
+            log.error("Task not found with id: {}", taskId);
+            return new ObjectNotFoundException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+        });
+        List<TaskEntity> taskEntities = new ArrayList<>();
+        for (int i = 0 ; i < numberOfTasks; i++){
+            TaskEntity taskClone = new TaskEntity();
+            BeanUtils.copyProperties(taskEntity, taskClone);
+            taskClone.setId(null);
+            taskEntities.add(taskClone);
+        }
+        taskRepository.saveAll(taskEntities);
+        log.info("Clone {} tasks successfully.", numberOfTasks);
     }
 
     /**

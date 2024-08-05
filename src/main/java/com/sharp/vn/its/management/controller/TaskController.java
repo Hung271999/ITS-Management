@@ -1,11 +1,8 @@
 package com.sharp.vn.its.management.controller;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
+
+import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
-import com.sharp.vn.its.management.entity.TaskEntity;
-import com.sharp.vn.its.management.entity.UserEntity;
-import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -96,7 +93,13 @@ public class TaskController extends BaseController {
         return taskService.getAllTasks(request);
     }
 
-    @PostMapping("export")
+    /**
+     * Export task data response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
+    @PostMapping("/export")
     public ResponseEntity exportTaskData(@RequestBody TaskDTO request) {
         byte[] data = taskService.loadTaskData(request);
         HttpHeaders headers = new HttpHeaders();
@@ -107,5 +110,17 @@ public class TaskController extends BaseController {
                 .ok()
                 .headers(headers)
                 .body(data);
+    }
+
+    /**
+     * Clone task response entity.
+     *
+     * @param request the duplicate task dto
+     * @return the response entity
+     */
+    @PostMapping("/cloneTask")
+    public ResponseEntity<?> cloneTask(@RequestBody RequestCloneTaskDTO request){
+        taskService.cloneTask(request.getTaskId(), request.getNumberOfCloneTask());
+        return ResponseEntity.ok().build();
     }
 }

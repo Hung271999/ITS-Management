@@ -34,11 +34,26 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
             throws IOException, ServletException {
         log.error("Unauthorized error: {}", authException.getMessage());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        int statusCode = response.getStatus();
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         ResponseData responseAPI = new ResponseData();
         responseAPI.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         responseAPI.setMessage(authException.getMessage());
-        responseAPI.setError("HTTP Error 401 - Unauthorized");
+        switch (statusCode){
+            case 401: {
+                responseAPI.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                responseAPI.setError("HTTP Error 401 - Unauthorized");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                break;
+            }
+            case 403: {
+                responseAPI.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                responseAPI.setError("HTTP Error 403 - Forbidden");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                break;
+            }
+            default: break;
+        }
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), responseAPI);
     }

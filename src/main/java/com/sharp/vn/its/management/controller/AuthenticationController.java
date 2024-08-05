@@ -2,12 +2,15 @@ package com.sharp.vn.its.management.controller;
 
 import com.sharp.vn.its.management.dto.ResponseData;
 import com.sharp.vn.its.management.dto.user.UserDTO;
+import com.sharp.vn.its.management.exception.AuthenticationException;
+import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import com.sharp.vn.its.management.security.UserSecurityDetails;
 import com.sharp.vn.its.management.service.UserManagementService;
 import com.sharp.vn.its.management.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,16 +69,18 @@ public class AuthenticationController extends BaseController {
      */
     @PostMapping("/login")
     public ResponseData<?> authenticateUser(@RequestBody UserDTO loginRequest) {
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(),
-                        loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserSecurityDetails userDetails = (UserSecurityDetails) authentication.getPrincipal();
-        Long userId = userDetails.getId();
-        String userName = userDetails.getUsername();
-        String jwt = jwtUtils.generateToken(userDetails);
-        return new ResponseData<>(new UserDTO(userDetails.getUsername(), jwt));
+        try {
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUserName(),
+                            loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserSecurityDetails userDetails = (UserSecurityDetails) authentication.getPrincipal();
+            Long userId = userDetails.getId();
+            String userName = userDetails.getUsername();
+            String jwt = jwtUtils.generateToken(userDetails);
+            return new ResponseData<>(new UserDTO(userDetails.getUsername(), jwt));
+        } catch (BadCredentialsException ex){
+            throw new AuthenticationException("Invalid username or password. Please enter again!");
+        }
     }
-
-
 }

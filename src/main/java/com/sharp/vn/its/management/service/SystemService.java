@@ -1,16 +1,24 @@
 package com.sharp.vn.its.management.service;
 
+import com.sharp.vn.its.management.constants.MessageCode;
+import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.dto.system.SystemDTO;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
+import com.sharp.vn.its.management.filter.SortCriteria;
 import com.sharp.vn.its.management.repositories.SystemRepository;
+import com.sharp.vn.its.management.repositories.TaskRepository;
+import com.sharp.vn.its.management.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type System service.
@@ -37,6 +45,12 @@ public class SystemService extends BaseService {
     private UserRepository userRepository;
 
     /**
+     * The Task repository.
+     */
+    @Autowired
+    private TaskRepository taskRepository;
+
+    /**
      * Gets all systems data.
      *
      * @return the all systems data
@@ -52,6 +66,7 @@ public class SystemService extends BaseService {
     /**
      * Gets all systems data by search param and pageable.
      *
+     * @param request the request
      * @return the all systems data
      */
     public Page<SystemDTO> loadAllSystemData(SystemDTO request) {
@@ -69,11 +84,13 @@ public class SystemService extends BaseService {
      */
     public SystemDTO getSystemDetail(Long id) {
         if (id == null) {
-            throw new DataValidationException("System id not found");
+            log.error("System id not found");
+            throw new DataValidationException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
         }
         log.info("Fetching system detail for id: {}", id);
         final SystemDTO systemDTO = new SystemDTO(systemRepository.findById(id).orElseThrow(() -> {
-            return new ObjectNotFoundException("System not found with id: " + id);
+            log.error("System not found");
+            return new ObjectNotFoundException(MessageCode.ERROR_SYSTEM_NOT_FOUND);
         }));
         log.info("System detail fetched successfully for id: {}", id);
         return systemDTO;
@@ -86,7 +103,12 @@ public class SystemService extends BaseService {
      */
     public void deleteSystem(Long id) {
         if (id == null) {
-            throw new DataValidationException("System id not found");
+            log.error("System id not found");
+            throw new DataValidationException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
+        }
+        if(taskRepository.existsBySystemId(id)){
+            log.error("System with {} cannot delete because the task associated", id);
+           throw new DataValidationException(MessageCode.ERROR_SYSTEM_WITH_FOREIGN_KEY_TO_TASK);
         }
         systemRepository.deleteById(id);
         log.info("System with id {} deleted successfully.", id);
@@ -106,9 +128,12 @@ public class SystemService extends BaseService {
 
         // update when system id is not null
         if (systemId != null) {
-            systemEntity = systemRepository.findById(systemId).orElseThrow(
-                    () -> new DataValidationException("System not found with id: " + systemId));
+            systemEntity = systemRepository.findById(systemId).orElseThrow(() -> {
+                log.error("System with id {} not found.", systemId);
+                return new DataValidationException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
+            });
         }
+
         final String userName = authenticationService.getUser().getUsername();
         if (userName == null) {
             throw new ObjectNotFoundException("User not found");

@@ -12,13 +12,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
  * The type Auth token filter.
@@ -38,6 +41,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+
+    /**
+     * The Exception resolver.
+     */
+    @Autowired
+    @Qualifier("handlerExceptionResolver")
+    private HandlerExceptionResolver exceptionResolver;
+
     /**
      * Do filter internal.
      *
@@ -51,25 +62,32 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-        final String jwt = parseJwt(request);
-        if (jwt == null) {
+        try {
+            final String jwt = parseJwt(request);
+            if (jwt == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            final boolean isValidToken = jwtUtils.validateJwtToken(jwt);
+            if (!isValidToken) {
+                throw new AuthenticationException("Access token invalid or expired");
+            }
+            final String username = jwtUtils.getUsernameFromToken(jwt);
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            final UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails,
+                            null,
+                            userDetails.getAuthorities());
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);
-            return;
+        } catch (UsernameNotFoundException | AuthenticationException exception) {
+            log.error(exception.getMessage());
+            exceptionResolver.resolveException(request, response, null,
+                    new AuthenticationException(exception.getMessage()));
         }
-        final boolean isValidToken = jwtUtils.validateJwtToken(jwt);
-        if (!isValidToken) {
-            throw new AuthenticationException("Access token invalid or expired");
-        }
-        final String username = jwtUtils.getUsernameFromToken(jwt);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        final UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(userDetails,
-                        null,
-                        userDetails.getAuthorities());
-        authentication.setDetails(
-                new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        filterChain.doFilter(request, response);
+
     }
 
     /**
