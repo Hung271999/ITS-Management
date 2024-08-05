@@ -11,8 +11,10 @@ import java.util.Map;
 public class TaskDetailDTO {
     private Long systemId;
     private String systemName;
+    private String week;
     private Map<Integer, Integer> values;
     private int totalCount;
+
 
     /**
      * Instantiates a new Task detail dto.

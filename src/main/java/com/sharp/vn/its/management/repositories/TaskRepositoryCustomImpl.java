@@ -41,20 +41,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(systemRoot.get("id").in(systemIds));
         }
         if (!years.isEmpty()) {
-            List<Predicate> yearPredicates = new ArrayList<>();
-            years.forEach(t -> {
-                final Year year = Year.of(t);
-                LocalDateTime startDateTime = year.atDay(1).atStartOfDay();
-                LocalDateTime endDateTime = year.atDay(year.length()).atStartOfDay();
-                Predicate datePredicate = cb.between(
-                        taskJoin.get("expiredDate").as(LocalDateTime.class),
-                        startDateTime,
-                        endDateTime
-                );
-                yearPredicates.add(datePredicate);
-            });
-            Predicate finalDatePredicate = cb.or(yearPredicates.toArray(new Predicate[0]));
-            predicates.add(finalDatePredicate);
+            predicates.add(createYearPredicate(cb, taskJoin, years));
         }
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -76,39 +63,44 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     public List<ChartData> findTotalEffortSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
-        Root<TaskEntity> taskRoot = cq.from(TaskEntity.class);
-        Join<TaskEntity, SystemEntity> systemJoin = taskRoot.join("system");
+        Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
+        Join<SystemEntity, TaskEntity> taskJoin = systemRoot.join("tasks");
 
-        // Extract year and week from startDate using date_part
-        Expression<Integer> yearExpression = cb.function("date_part", Integer.class, cb.literal("year"), taskRoot.get("startDate"));
-        Expression<Integer> weekExpression = cb.function("date_part", Integer.class, cb.literal("week"), taskRoot.get("startDate"));
-
-        // Create predicates for filtering
-        Predicate systemPredicate = systemJoin.get("id").in(systemIds);
-        Predicate yearPredicate = yearExpression.in(years);
-        Predicate weekPredicate = weekExpression.in(weeks);
-
-        // Create the criteria query
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), taskJoin.get("expiredDate"));
+        // Select clause
         cq.multiselect(
-                        systemJoin.get("id"),
-                        systemJoin.get("systemName"),
-                        cb.sum(taskRoot.get("cost")),
-                        weekExpression
-                )
-                .where(cb.and(systemPredicate, yearPredicate, weekPredicate))
-                .groupBy(systemJoin.get("id"), systemJoin.get("systemName"), weekExpression)
-                .orderBy(cb.asc(systemJoin.get("systemName")), cb.asc(weekExpression));
+                        systemRoot.get("id"),
+                        systemRoot.get("systemName"),
+                        week,
+                        cb.sum(systemRoot.get("id"))
+
+                );
+        List<Predicate> predicates = new ArrayList<>();
+        if (!systemIds.isEmpty()) {
+            predicates.add(systemRoot.get("id").in(systemIds));
+        }
+        if (!years.isEmpty()) {
+            predicates.add(createYearPredicate(cb, taskJoin, years));
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(systemRoot.get("systemName"),systemRoot.get("id"), week);
+        cq.orderBy(
+                cb.asc(systemRoot.get("id")),
+                cb.asc(week)
+        );
 
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
-        List<Object[]> results = query.getResultList();
-
-        // Transform the result list into a list of ChartData
-        return results.stream().map(result -> {
+        query.getResultList();
+        return query.getResultList().stream().map(row -> {
             ChartData chartData = new ChartData();
-            chartData.setId((Long) result[0]);
-            chartData.setSystemName((String) result[1]);
-            chartData.setTotal(((Number) result[2]).intValue());
-            chartData.setWeek((Integer) result[3]);
+            chartData.setId(((Number) row[0]).longValue());
+            chartData.setSystemName((String) row[1]);
+            chartData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
+            chartData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
             return chartData;
         }).collect(Collectors.toList());
     }
@@ -158,7 +150,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             chartData.setId(((Number) row[0]).longValue());
             chartData.setSystemName((String) row[1]);
             chartData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
-            chartData.setTotal(((Number) row[3]).intValue());
+            chartData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
             return chartData;
         }).collect(Collectors.toList());
     }

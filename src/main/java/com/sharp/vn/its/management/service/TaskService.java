@@ -440,34 +440,33 @@ public class TaskService extends BaseService {
     }
 
     public TaskDataDTO findEffortOfSystemByWeek(TaskFilter filter) {
-        List<ChartData> data = taskRepository.findTotalEffortSystemByWeek(filter.getSystemIds(), filter.getWeeks(), filter.getYears());
-
-        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
-
-        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
-        mapGroupBySystemId.forEach((id, chartDataList) -> {
+        List<ChartData> data = taskRepository.findTotalEffortSystemByWeek(filter.getSystemIds(),filter.getYears(),filter.getWeeks() );
+        Map<Integer, List<ChartData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(ChartData::getWeek));
+        Map<Integer, Integer> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        ChartData::getWeek,
+                        Collectors.summingInt(ChartData::getTotal)
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
-            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setWeek("Week " + chartDataList.get(0).getWeek());
             item.setValues(chartDataList.stream()
-                    .collect(Collectors.toMap(ChartData::getWeek, ChartData::getTotal)));
-            item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
-                    .sum());
-            taskDetailDTOS.add(item);
+                    .collect(Collectors.toMap(chartData -> chartData.getId().intValue(), ChartData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
         });
 
         TaskSummaryDTO total = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
-                                ChartData::getWeek,
+                                chartData -> chartData.getId().intValue(),
                                 Collectors.summingInt(ChartData::getTotal)
                         )),
-                taskDetailDTOS.stream()
+                taskDataItems.stream()
                         .mapToInt(TaskDetailDTO::getTotalCount)
-                        .sum()
-        );
-
-        return new TaskDataDTO(total, taskDetailDTOS);
+                        .sum());
+        return new TaskDataDTO(total,taskDataItems);
     }
 
 
