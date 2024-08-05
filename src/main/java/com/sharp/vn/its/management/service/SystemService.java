@@ -12,7 +12,6 @@ import com.sharp.vn.its.management.repositories.SystemRepository;
 import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
