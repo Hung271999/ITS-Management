@@ -72,7 +72,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
                         systemRoot.get("id"),
                         systemRoot.get("systemName"),
                         week,
-                        cb.sum(systemRoot.get("id"))
+                        cb.sum(taskJoin.get("cost"))
 
                 );
         List<Predicate> predicates = new ArrayList<>();
