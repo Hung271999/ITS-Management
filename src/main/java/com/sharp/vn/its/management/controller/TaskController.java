@@ -168,8 +168,8 @@ public class TaskController extends BaseController {
      * @param filter the filter
      * @return the task data dto
      */
-    @PostMapping("/statistics-for-person-in-charge-by-week")
-    public TaskDataDTO loadTaskForPersonInChargeByWeek(@RequestBody TaskFilter filter){
+    @PostMapping("/statistics-by-person-in-charge-per-week")
+    public TaskDataDTO loadTaskByPersonInChargePerWeek(@RequestBody TaskFilter filter){
         return taskService.getTaskForPersonInChargeByWeek(filter);
     }
 
