@@ -521,4 +521,9 @@ public class TaskService extends BaseService {
                         .sum());
         return new TaskDataDTO(total,taskDataItems);
     }
+
+    public void getTaskByGroupPerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findTaskByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
+        data.toArray();
+    }
 }

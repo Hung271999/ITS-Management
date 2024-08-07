@@ -7,6 +7,7 @@ public class TaskData {
     private String firstName;
     private String systemName;
     private int week;
+    private String groupName;
     private int status;
     private int total;
 }

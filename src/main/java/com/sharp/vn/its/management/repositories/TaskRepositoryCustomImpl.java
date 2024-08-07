@@ -1,9 +1,7 @@
 package com.sharp.vn.its.management.repositories;
 
 import com.sharp.vn.its.management.data.TaskData;
-import com.sharp.vn.its.management.entity.SystemEntity;
-import com.sharp.vn.its.management.entity.TaskEntity;
-import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -194,6 +192,51 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             TaskData taskData = new TaskData();
             taskData.setId(((Number) row[0]).longValue());
             taskData.setFirstName((String) row[1]);
+            taskData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
+            taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
+            return taskData;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskData> findTaskByGroupPerWeek(List<Long> groupIds, List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<UserGroupEntity> userGroupRoot = cq.from(UserGroupEntity.class);
+        Join<UserGroupEntity, TaskEntity> taskJoin = userGroupRoot.join("tasks");
+        Join<UserGroupEntity, GroupEntity> groupJoin = userGroupRoot.join("group");
+
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), taskJoin.get("expiredDate"));
+        // Select clause
+        cq.multiselect(
+                userGroupRoot.get("group").get("id"),
+                groupJoin.get("groupName"),
+                week,
+                cb.count(taskJoin.get("id"))
+        );
+        List<Predicate> predicates = new ArrayList<>();
+        if (!groupIds.isEmpty()) {
+            predicates.add(userGroupRoot.get("group").get("id").in(groupIds));
+        }
+        if (!years.isEmpty()) {
+            predicates.add(createYearPredicate(cb, taskJoin, years));
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(userGroupRoot.get("group").get("id") ,groupJoin.get("groupName"), week);
+        cq.orderBy(
+                cb.asc(userGroupRoot.get("group").get("id")),
+                cb.asc(week)
+        );
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        query.getResultList();
+        return query.getResultList().stream().map(row -> {
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setGroupName((String) row[1]);
             taskData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
             taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
             return taskData;

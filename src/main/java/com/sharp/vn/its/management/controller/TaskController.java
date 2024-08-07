@@ -180,4 +180,9 @@ public class TaskController extends BaseController {
     public TaskDataDTO loadEffortByPersonInChargePerWeek(@RequestBody TaskFilter filter){
         return taskService.getEffortByPersonInChargePerWeek(filter);
     }
+
+    @PostMapping("/statistics-task-by-group-per-week")
+    public void loadTaskByGroupPerWeek(@RequestBody TaskFilter filter){
+        taskService.getTaskByGroupPerWeek(filter);
+    }
 }
