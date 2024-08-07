@@ -445,13 +445,13 @@ public class TaskService extends BaseService {
     }
 
     /**
-     * Get task for person in charge by week task data dto.
+     * Get task by person in charge per week task data dto.
      *
      * @param filter the filter
      * @return the task data dto
      */
-    public TaskDataDTO getTaskForPersonInChargeByWeek(TaskFilter filter){
-        List<TaskData> data = taskRepository.findTaskForPersonInChargeByWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+    public TaskDataDTO getTaskByPersonInChargePerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findTaskByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
         Map<Long, List<TaskData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
 
         Map<Long, Integer> totalCountById = groupByTaskDataIdAndSumTotal(data);
