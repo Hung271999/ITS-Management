@@ -13,6 +13,7 @@ public class TaskDetailDTO {
     private String firstName;
     private int systemId;
     private String systemName;
+    private int week;
     private Map<Integer, Integer> values;
     private int totalCount;
 

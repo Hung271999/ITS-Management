@@ -36,4 +36,14 @@ public interface TaskRepositoryCustom {
      * @return the list
      */
     List<TaskData> findTaskByPersonInChargePerWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks);
+
+    /**
+     * Find effort by person in charge per week list.
+     *
+     * @param userIds the user ids
+     * @param years   the years
+     * @param weeks   the weeks
+     * @return the list
+     */
+    List<TaskData> findEffortByPersonInChargePerWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks);
 }
