@@ -111,12 +111,4 @@ public class TaskEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UpdatedBy")
     private UserEntity updatedBy;
-
-    /** The user group. */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false),
-            @JoinColumn(name = "group_id", referencedColumnName = "group_id", insertable = false, updatable = false)
-    })
-    private UserGroupEntity userGroup;
 }

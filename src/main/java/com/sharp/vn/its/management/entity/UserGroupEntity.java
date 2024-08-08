@@ -37,12 +37,6 @@ public class UserGroupEntity {
     private GroupEntity group;
 
     /**
-     * The Tasks.
-     */
-    @OneToMany(mappedBy = "userGroup")
-    private List<TaskEntity> tasks;
-
-    /**
      * Instantiates a new User group entity.
      *
      * @param user the user

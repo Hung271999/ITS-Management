@@ -522,8 +522,34 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(total,taskDataItems);
     }
 
-    public void getTaskByGroupPerWeek(TaskFilter filter){
+    public TaskDataDTO getTaskByGroupPerWeek(TaskFilter filter){
         List<TaskData> data = taskRepository.findTaskByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
-        data.toArray();
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek));
+
+        Map<Integer, Integer> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingInt(TaskData::getTotal)
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, taskDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(taskDataList.get(0).getWeek());
+            item.setValues(taskDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.summingInt(TaskData::getTotal)
+                        )),
+                taskDataItems.stream()
+                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .sum());
+        return new TaskDataDTO(total,taskDataItems);
     }
 }

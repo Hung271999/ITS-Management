@@ -182,7 +182,7 @@ public class TaskController extends BaseController {
     }
 
     @PostMapping("/statistics-task-by-group-per-week")
-    public void loadTaskByGroupPerWeek(@RequestBody TaskFilter filter){
-        taskService.getTaskByGroupPerWeek(filter);
+    public TaskDataDTO loadTaskByGroupPerWeek(@RequestBody TaskFilter filter){
+        return taskService.getTaskByGroupPerWeek(filter);
     }
 }
