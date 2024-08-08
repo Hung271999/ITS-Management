@@ -1,9 +1,8 @@
 package com.sharp.vn.its.management.repositories;
 
-import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
-import com.sharp.vn.its.management.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -23,7 +22,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     private EntityManager entityManager;
 
     @Override
-    public List<ChartData> findTaskBySystem(List<Long> systemIds, List<Integer> years) {
+    public List<TaskData> findTaskBySystem(List<Long> systemIds, List<Integer> years) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
@@ -49,18 +48,18 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         return query.getResultList().stream().map(row -> {
-            ChartData chartData = new ChartData();
-            chartData.setId(((Number) row[0]).longValue());
-            chartData.setSystemName((String) row[1]);
-            chartData.setStatus(((Number) row[2]).intValue());
-            chartData.setTotal(((Number) row[3]).intValue());
-            return chartData;
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setSystemName((String) row[1]);
+            taskData.setStatus(((Number) row[2]).intValue());
+            taskData.setTotal(((Number) row[3]).intValue());
+            return taskData;
         }).collect(Collectors.toList());
     }
 
     //findTotalEffortSystemByWeek
     @Override
-    public List<ChartData> findTotalEffortSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks) {
+    public List<TaskData> findTotalEffortSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
@@ -84,6 +83,9 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         }
         if (!weeks.isEmpty()) {
             Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
             predicates.add(weekPredicate);
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -96,18 +98,18 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         query.getResultList();
         return query.getResultList().stream().map(row -> {
-            ChartData chartData = new ChartData();
-            chartData.setId(((Number) row[0]).longValue());
-            chartData.setSystemName((String) row[1]);
-            chartData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
-            chartData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
-            return chartData;
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setSystemName((String) row[1]);
+            if(row[2] != null)taskData.setWeek(((Number) row[2]).intValue());
+            taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
+            return taskData;
         }).collect(Collectors.toList());
     }
 
 
     @Override
-    public List<ChartData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks) {
+    public List<TaskData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
@@ -129,12 +131,11 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(systemRoot.get("id").in(systemIds));
         }
         if (!weeks.isEmpty()) {
-            List<Predicate> weekPredicates = new ArrayList<>();
-            weeks.forEach(w -> {
-                Predicate weekPredicate = cb.equal(week, w);
-                weekPredicates.add(weekPredicate);
-            });
-            predicates.add(cb.or(weekPredicates.toArray(new Predicate[0])));
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
+            predicates.add(weekPredicate);
         }
 
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -146,12 +147,12 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         return query.getResultList().stream().map(row -> {
-            ChartData chartData = new ChartData();
-            chartData.setId(((Number) row[0]).longValue());
-            chartData.setSystemName((String) row[1]);
-            chartData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
-            chartData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
-            return chartData;
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setSystemName((String) row[1]);
+            if(row[2] != null)taskData.setWeek(((Number) row[2]).intValue());
+            taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
+            return taskData;
         }).collect(Collectors.toList());
     }
 

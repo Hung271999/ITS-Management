@@ -1,7 +1,6 @@
 package com.sharp.vn.its.management.controller;
 
 
-import com.sharp.vn.its.management.data.ChartData;
 import com.sharp.vn.its.management.dto.task.TaskFilter;
 import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
@@ -156,4 +155,6 @@ public class TaskController extends BaseController {
     public TaskDataDTO getEffortOfSystemByWeek(@RequestBody TaskFilter filter) {
         return taskService.findEffortOfSystemByWeek(filter);
     }
+
+
 }

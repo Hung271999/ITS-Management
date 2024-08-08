@@ -1,9 +1,8 @@
 package com.sharp.vn.its.management.data;
 import lombok.Data;
-import lombok.*;
 
 @Data
-public class ChartData {
+public class TaskData {
     private Long id;
     private String firstName;
     private String systemName;
