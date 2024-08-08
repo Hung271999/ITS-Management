@@ -135,10 +135,10 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(createYearPredicate(cb, taskJoin, years));
         }
         if (!weeks.isEmpty()) {
-            Predicate weekPredicate = cb.or(
-                    week.in(weeks),
-                    cb.isNull(week)
-            );
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
             predicates.add(weekPredicate);
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
