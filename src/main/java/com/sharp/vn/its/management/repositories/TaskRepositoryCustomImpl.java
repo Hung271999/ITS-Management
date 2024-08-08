@@ -135,7 +135,10 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             predicates.add(createYearPredicate(cb, taskJoin, years));
         }
         if (!weeks.isEmpty()) {
-            Predicate weekPredicate = week.in(weeks);
+            Predicate weekPredicate = cb.or(
+                    week.in(weeks),
+                    cb.isNull(week)
+            );
             predicates.add(weekPredicate);
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
@@ -150,7 +153,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             TaskData taskData = new TaskData();
             taskData.setId(((Number) row[0]).longValue());
             taskData.setFirstName((String) row[1]);
-            taskData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
+            if(row[2] != null)taskData.setWeek(((Number) row[2]).intValue());
             taskData.setTotal(((Number) row[3]).intValue());
             return taskData;
         }).collect(Collectors.toList());
