@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
  * The interface Task repository.
  */
 @Transactional
-public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, TaskRepositoryCustom{
+public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> , TaskRepositoryCustom{
 
     /**
      * Find all page.
