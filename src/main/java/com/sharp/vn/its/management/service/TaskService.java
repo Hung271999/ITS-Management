@@ -370,6 +370,14 @@ public class TaskService extends BaseService {
         return taskRepository.findAllYearsFromExpiredDate();
     }
 
+    /**
+     * Get all weeks from expired date list.
+     *
+     * @return the list
+     */
+    public List<Integer> getAllWeeksFromExpiredDate(){
+        return taskRepository.findWeeksFromExpiredDate();
+    }
 
     /**
      * Group by chart id and sum total map.
@@ -446,5 +454,37 @@ public class TaskService extends BaseService {
                 .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
         return new TaskDataDTO(total,taskDetailDTOS);
+    }
+
+    /**
+     * Get task system by week task data dto.
+     *
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskSystemByWeek(TaskFilter filter) {
+        List<TaskData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(),filter.getYears(), filter.getWeeks());
+        Map<Long, List<TaskData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
+
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(TaskData::getWeek, TaskData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(TaskData::getTotal)
+                    .sum());
+            taskDetailDTOS.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                TaskData::getWeek,
+                                Collectors.summingInt(TaskData::getTotal)
+                        )), taskDetailDTOS.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total, taskDetailDTOS);
     }
 }

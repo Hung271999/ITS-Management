@@ -95,7 +95,54 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             return taskData;
         }).collect(Collectors.toList());
     }
-    
+
+    @Override
+    public List<TaskData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
+        Join<SystemEntity, TaskEntity> taskJoin = systemRoot.join("tasks");
+
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), taskJoin.get("expiredDate"));
+
+        cq.multiselect(
+                systemRoot.get("id"),
+                systemRoot.get("systemName"),
+                week,
+                cb.count(systemRoot.get("id"))
+        );
+        List<Predicate> predicates = new ArrayList<>();
+        if (!systemIds.isEmpty()) {
+            predicates.add(systemRoot.get("id").in(systemIds));
+        }
+        if (!years.isEmpty()) {
+            predicates.add(createYearPredicate(cb, taskJoin, years));
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(systemRoot.get("systemName"), systemRoot.get("id"), week);
+        cq.orderBy(
+                cb.asc(systemRoot.get("id")),
+                cb.asc(week)
+        );
+
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        return query.getResultList().stream().map(row -> {
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setSystemName((String) row[1]);
+            if(row[2] != null)taskData.setWeek(((Number) row[2]).intValue());
+            taskData.setTotal(((Number) row[3]).intValue());
+            return taskData;
+        }).collect(Collectors.toList());
+    }
+
     private Predicate createYearPredicate(CriteriaBuilder cb, Join<?, TaskEntity> taskJoin, List<Integer> years) {
         List<Predicate> yearPredicates = new ArrayList<>();
         years.forEach(t -> {
