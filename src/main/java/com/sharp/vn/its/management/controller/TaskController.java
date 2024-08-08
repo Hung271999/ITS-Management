@@ -131,7 +131,13 @@ public class TaskController extends BaseController {
         return taskService.getTaskBySystem(filter);
     }
 
-    @PostMapping("/test")
+    /**
+     * Load task for system by week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-by-system-per-week")
     public TaskDataDTO loadTaskForSystemByWeek(@RequestBody TaskFilter filter) {
         return taskService.getTaskSystemByWeek(filter);
     }
@@ -146,9 +152,13 @@ public class TaskController extends BaseController {
         return taskService.getAllYearsFromExpiredDate();
     }
 
+    /**
+     * Gets all weeks from expired date.
+     *
+     * @return the all weeks from expired date
+     */
     @GetMapping("/all-week")
     public List<Integer> getAllWeeksFromExpiredDate() {
         return taskService.getAllWeeksFromExpiredDate();
     }
-
 }

@@ -1,6 +1,6 @@
 package com.sharp.vn.its.management.repositories;
 
-import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.data.TaskData;
 
 import java.util.List;
 
@@ -15,6 +15,6 @@ public interface TaskRepositoryCustom {
      * @param years     the years
      * @return the list
      */
-    List<ChartData> findTaskBySystem(List<Long> SystemIds, List<Integer> years);
-    List<ChartData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> weeks);
+    List<TaskData> findTaskBySystem(List<Long> SystemIds, List<Integer> years);
+    List<TaskData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks);
 }

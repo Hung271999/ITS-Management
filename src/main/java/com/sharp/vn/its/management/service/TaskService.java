@@ -2,7 +2,7 @@ package com.sharp.vn.its.management.service;
 
 
 import com.sharp.vn.its.management.constants.*;
-import com.sharp.vn.its.management.data.ChartData;
+import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.dto.task.*;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
@@ -357,11 +357,11 @@ public class TaskService extends BaseService {
      * @param data the data
      * @return the map
      */
-    public Map<Long, Integer> groupByChartIdAndSumTotal(List<ChartData> data) {
+    public Map<Long, Integer> groupByChartIdAndSumTotal(List<TaskData> data) {
         return data.stream()
                 .collect(Collectors.groupingBy(
-                        ChartData::getId,
-                        Collectors.summingInt(ChartData::getTotal)
+                        TaskData::getId,
+                        Collectors.summingInt(TaskData::getTotal)
                 ));
     }
 
@@ -374,8 +374,8 @@ public class TaskService extends BaseService {
      * @return the task by system
      */
     public TaskDataDTO getTaskBySystem(TaskFilter filter) {
-        List<ChartData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
-        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
+        List<TaskData> data = taskRepository.findTaskBySystem(filter.getSystemIds(), filter.getYears());
+        Map<Long, List<TaskData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
 
         List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
         Map<Long, Integer> totalCountById = groupByChartIdAndSumTotal(data);
@@ -383,7 +383,7 @@ public class TaskService extends BaseService {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()
-                    .collect(Collectors.toMap(ChartData::getStatus, ChartData::getTotal)));
+                    .collect(Collectors.toMap(TaskData::getStatus, TaskData::getTotal)));
             item.setTotalCount(totalCountById.get(id));
             taskDetailDTOS.add(item);
         });
@@ -391,14 +391,13 @@ public class TaskService extends BaseService {
         TaskSummaryDTO total = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
-                                ChartData::getStatus,
-                                Collectors.summingInt(ChartData::getTotal)
+                                TaskData::getStatus,
+                                Collectors.summingInt(TaskData::getTotal)
                         )), taskDetailDTOS.stream()
                 .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
         return new TaskDataDTO(total,taskDetailDTOS);
     }
-
 
     /**
      * Get task system by week task data dto.
@@ -406,41 +405,31 @@ public class TaskService extends BaseService {
      * @return the task data dto
      */
     public TaskDataDTO getTaskSystemByWeek(TaskFilter filter) {
-        // Fetch the data from the repository
-        List<ChartData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(), filter.getWeeks());
+        List<TaskData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(),filter.getYears(), filter.getWeeks());
+        Map<Long, List<TaskData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
 
-        // Group data by system ID
-        Map<Long, List<ChartData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(ChartData::getId));
-
-        // Create TaskDetailDTO for each system
         List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
         mapGroupBySystemId.forEach((id, chartDataList) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setSystemName(chartDataList.get(0).getSystemName());
             item.setValues(chartDataList.stream()
-                    .collect(Collectors.toMap(ChartData::getWeek, ChartData::getTotal)));
+                    .collect(Collectors.toMap(TaskData::getWeek, TaskData::getTotal)));
             item.setTotalCount(chartDataList.stream()
-                    .mapToInt(ChartData::getTotal)
+                    .mapToInt(TaskData::getTotal)
                     .sum());
             taskDetailDTOS.add(item);
         });
 
-        // Create TaskSummaryDTO with total data
         TaskSummaryDTO total = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
-                                ChartData::getWeek,
-                                Collectors.summingInt(ChartData::getTotal)
-                        )),
-                taskDetailDTOS.stream()
+                                TaskData::getWeek,
+                                Collectors.summingInt(TaskData::getTotal)
+                        )), taskDetailDTOS.stream()
                         .mapToInt(TaskDetailDTO::getTotalCount)
-                        .sum()
-        );
-
-        // Return TaskDataDTO
+                        .sum());
         return new TaskDataDTO(total, taskDetailDTOS);
     }
-
 
     /**
      * Gets all years from expired date.
