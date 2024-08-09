@@ -7,7 +7,6 @@ import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.dto.task.TaskFilter;
 import com.sharp.vn.its.management.dto.task.TaskDetailDTO;
 import com.sharp.vn.its.management.dto.task.TaskSummaryDTO;
-import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -40,13 +39,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -370,7 +367,6 @@ public class TaskService extends BaseService {
         return taskRepository.findAllYearsFromExpiredDate();
     }
 
-
     /**
      * Group by chart id and sum total map.
      *
@@ -446,5 +442,46 @@ public class TaskService extends BaseService {
                 .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
         return new TaskDataDTO(total,taskDetailDTOS);
+    }
+
+    /**
+     * Get task by person in charge per week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskByPersonInChargePerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findTaskByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+        Map<Long, List<TaskData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
+
+        Map<Long, Integer> totalCountById = groupByTaskDataIdAndSumTotal(data);
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByUserId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setFirstName(chartDataList.get(0).getFirstName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(TaskData::getWeek, TaskData::getTotal)));
+            item.setTotalCount(totalCountById.get(id));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                TaskData::getWeek,
+                                Collectors.summingInt(TaskData::getTotal)
+                        )), taskDataItems.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total,taskDataItems);
+    }
+
+    /**
+     * Get weeks from expired date list.
+     *
+     * @return the list
+     */
+    public List<Integer> getWeeksFromExpiredDate(){
+        return taskRepository.findWeeksFromExpiredDate();
     }
 }

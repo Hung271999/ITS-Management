@@ -50,4 +50,12 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> , Ta
      */
     @Query(value = "SELECT DISTINCT EXTRACT(YEAR FROM t.expiredDate) AS year FROM TaskEntity t")
     List<Integer> findAllYearsFromExpiredDate();
+
+    /**
+     * Find distinct weeks from expired date list.
+     *
+     * @return the list
+     */
+    @Query("SELECT DISTINCT FUNCTION('date_part', 'week', it.expiredDate) as Week FROM TaskEntity it ORDER BY Week")
+    List<Integer> findWeeksFromExpiredDate();
 }

@@ -4,27 +4,16 @@ package com.sharp.vn.its.management.controller;
 import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.dto.task.TaskFilter;
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
-
-import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
 import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -158,5 +147,26 @@ public class TaskController extends BaseController {
     @PostMapping("/statistics-by-system")
     public TaskDataDTO loadTaskStatisticsBySystem(@RequestBody TaskFilter filter) {
         return taskService.getTaskBySystem(filter);
+    }
+
+    /**
+     * Load task for person in charge by week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-by-person-in-charge-per-week")
+    public TaskDataDTO loadTaskByPersonInChargePerWeek(@RequestBody TaskFilter filter){
+        return taskService.getTaskByPersonInChargePerWeek(filter);
+    }
+
+    /**
+     * Get weeks from expired date list.
+     *
+     * @return the list
+     */
+    @GetMapping("all-week")
+    public List<Integer> getWeeksFromExpiredDate(){
+        return taskService.getWeeksFromExpiredDate();
     }
 }

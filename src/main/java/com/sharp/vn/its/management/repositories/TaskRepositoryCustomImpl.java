@@ -111,4 +111,51 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         });
         return cb.or(yearPredicates.toArray(new Predicate[0]));
     }
+
+    @Override
+    public List<TaskData> findTaskByPersonInChargePerWeek(List<Long> userIds, List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<UserEntity> userRoot = cq.from(UserEntity.class);
+        Join<UserEntity, TaskEntity> taskJoin = userRoot.join("tasks");
+
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), taskJoin.get("expiredDate"));
+        // Select clause
+        cq.multiselect(
+                userRoot.get("id"),
+                userRoot.get("firstName"),
+                week,
+                cb.count(userRoot.get("id"))
+        );
+        List<Predicate> predicates = new ArrayList<>();
+        if (!userIds.isEmpty()) {
+            predicates.add(userRoot.get("id").in(userIds));
+        }
+        if (!years.isEmpty()) {
+            predicates.add(createYearPredicate(cb, taskJoin, years));
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(userRoot.get("firstName"),userRoot.get("id"), week);
+        cq.orderBy(
+                cb.asc(userRoot.get("id")),
+                cb.asc(week)
+        );
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        query.getResultList();
+        return query.getResultList().stream().map(row -> {
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setFirstName((String) row[1]);
+            if(row[2] != null)taskData.setWeek(((Number) row[2]).intValue());
+            taskData.setTotal(((Number) row[3]).intValue());
+            return taskData;
+        }).collect(Collectors.toList());
+    }
 }
