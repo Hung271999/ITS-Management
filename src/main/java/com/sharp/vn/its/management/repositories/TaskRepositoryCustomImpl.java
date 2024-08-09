@@ -3,6 +3,7 @@ package com.sharp.vn.its.management.repositories;
 import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
+import com.sharp.vn.its.management.entity.UserGroupEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -119,4 +120,98 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
                 return taskData;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<TaskData> findTotalEffortSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<SystemEntity> systemRoot = cq.from(SystemEntity.class);
+        Join<SystemEntity, TaskEntity> taskJoin = systemRoot.join("tasks");
+
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), taskJoin.get("expiredDate"));
+        cq.multiselect(
+                systemRoot.get("id"),
+                systemRoot.get("systemName"),
+                week,
+                cb.sum(taskJoin.get("cost"))
+
+        );
+        List<Predicate> predicates = new ArrayList<>();
+        if (!systemIds.isEmpty()) {
+            predicates.add(systemRoot.get("id").in(systemIds));
+        }
+        if (!years.isEmpty()) {
+            predicates.add(createYearPredicate(cb, taskJoin, years));
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(systemRoot.get("systemName"),systemRoot.get("id"), week);
+        cq.orderBy(
+                cb.asc(systemRoot.get("id")),
+                cb.asc(week)
+        );
+
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        query.getResultList();
+        return query.getResultList().stream().map(row -> {
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            taskData.setSystemName((String) row[1]);
+            if(row[2] != null)taskData.setWeek(((Number) row[2]).intValue());
+            taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
+            return taskData;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskData> findEffortByGroupPerWeek(List<Long> groupIds, List<Integer> years, List<Integer> weeks) {
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+            Root<UserGroupEntity> userGroupRoot = cq.from(UserGroupEntity.class);
+            Join<UserGroupEntity, TaskEntity> taskJoin = userGroupRoot.join("user", JoinType.INNER).join("tasks", JoinType.INNER);
+
+            Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), taskJoin.get("expiredDate"));
+            // Select clause
+            cq.multiselect(
+                    userGroupRoot.get("group").get("id"),
+                    week,
+                    cb.sum(taskJoin.get("cost"))
+            );
+            List<Predicate> predicates = new ArrayList<>();
+            if (!groupIds.isEmpty()) {
+                predicates.add(userGroupRoot.get("group").get("id").in(groupIds));
+            }
+            if (!years.isEmpty()) {
+                predicates.add(createYearPredicate(cb, taskJoin, years));
+            }
+            if (!weeks.isEmpty()) {
+                Predicate weekPredicate = week.in(weeks);
+                if (weeks.contains(0)) {
+                    weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+                }
+                predicates.add(weekPredicate);
+            }
+            cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            cq.groupBy(userGroupRoot.get("group").get("id"), week);
+            cq.orderBy(
+                    cb.asc(userGroupRoot.get("group").get("id")),
+                    cb.asc(week)
+            );
+            TypedQuery<Object[]> query = entityManager.createQuery(cq);
+            query.getResultList();
+            return query.getResultList().stream().map(row -> {
+                TaskData taskData = new TaskData();
+                taskData.setId(((Number) row[0]).longValue());
+                if(row[1] != null)taskData.setWeek(((Number) row[1]).intValue());
+                if(row[2] != null )taskData.setTotal(((Number) row[2]).intValue());
+                return taskData;
+            }).collect(Collectors.toList());
+        }
 }
+

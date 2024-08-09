@@ -431,6 +431,67 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(total, taskDetailDTOS);
     }
 
+    public TaskDataDTO findEffortOfSystemByWeek(TaskFilter filter) {
+        List<TaskData> data = taskRepository.findTotalEffortSystemByWeek(filter.getSystemIds(),filter.getYears(),filter.getWeeks() );
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek));
+        Map<Integer, Integer> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingInt(TaskData::getTotal)
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(chartDataList.get(0).getWeek());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.summingInt(TaskData::getTotal)
+                        )),
+                taskDataItems.stream()
+                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .sum());
+        return new TaskDataDTO(total,taskDataItems);
+    }
+
+    public TaskDataDTO getEffortByGroupPerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findEffortByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek));
+
+        Map<Integer, Integer> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingInt(TaskData::getTotal)
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, taskDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(taskDataList.get(0).getWeek());
+            item.setValues(taskDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.summingInt(TaskData::getTotal)
+                        )),
+                taskDataItems.stream()
+                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .sum());
+        return new TaskDataDTO(total,taskDataItems);
+    }
+
     /**
      * Gets all years from expired date.
      *

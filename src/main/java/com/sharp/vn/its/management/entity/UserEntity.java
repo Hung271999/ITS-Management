@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -81,4 +82,15 @@ public class UserEntity extends BaseEntity {
     @JoinColumn(name = "updated_by")
     private UserEntity updatedBy;
 
+    /**
+     * The Tasks.
+     */
+    @OneToMany(mappedBy = "personInCharge")
+    private List<TaskEntity> tasks;
+
+    /**
+     * The Groups.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<UserGroupEntity> userGroups = new HashSet<>();
 }

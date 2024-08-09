@@ -6,7 +6,8 @@ public class TaskData {
     private Long id;
     private String firstName;
     private String systemName;
+    private String groupName;
+    private int week;
     private int status;
     private int total;
-    private int week;
 }

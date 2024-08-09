@@ -142,6 +142,16 @@ public class TaskController extends BaseController {
         return taskService.getTaskSystemByWeek(filter);
     }
 
+    @PostMapping("/total-effort-of-system-by-week")
+    public TaskDataDTO getEffortOfSystemByWeek(@RequestBody TaskFilter filter) {
+        return taskService.findEffortOfSystemByWeek(filter);
+    }
+
+    @PostMapping("/statistics-effort-by-group-per-week")
+    public TaskDataDTO loadEffortByGroupPerWeek(@RequestBody TaskFilter filter){
+        return taskService.getEffortByGroupPerWeek(filter);
+    }
+
     /**
      * Get all years list.
      *
