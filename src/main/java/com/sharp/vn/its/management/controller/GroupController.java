@@ -9,12 +9,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * The type Group controller.
+ */
 @RestController()
 @RequestMapping(value = "/groups")
 public class GroupController {
+    /**
+     * The Service.
+     */
     @Autowired
     private GroupService service;
 
+    /**
+     * Load all groups data list.
+     *
+     * @return the list
+     */
     @GetMapping()
     public List<GroupDTO> loadAllGroupsData() {
         return service.getAllGroupsData();

@@ -9,12 +9,23 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * The type Group service.
+ */
 @Service
 @Slf4j
 public class GroupService {
+    /**
+     * The Group repository.
+     */
     @Autowired
     private GroupRepository groupRepository;
 
+    /**
+     * Gets all groups data.
+     *
+     * @return the all groups data
+     */
     public List<GroupDTO> getAllGroupsData() {
         log.info("Fetching all groups...");
         final List<GroupDTO> groups = groupRepository.findAll().stream()
