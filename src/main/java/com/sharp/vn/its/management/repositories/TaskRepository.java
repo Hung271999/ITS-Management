@@ -52,7 +52,7 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> , Ta
     List<Integer> findAllYearsFromExpiredDate();
 
     /**
-     * Find distinct weeks from expired date list.
+     * Find weeks from expired date list.
      *
      * @return the list
      */

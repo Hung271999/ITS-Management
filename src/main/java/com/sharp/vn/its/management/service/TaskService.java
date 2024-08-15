@@ -7,6 +7,7 @@ import com.sharp.vn.its.management.dto.task.TaskDataDTO;
 import com.sharp.vn.its.management.dto.task.TaskFilter;
 import com.sharp.vn.its.management.dto.task.TaskDetailDTO;
 import com.sharp.vn.its.management.dto.task.TaskSummaryDTO;
+import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -39,11 +40,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -368,6 +371,15 @@ public class TaskService extends BaseService {
     }
 
     /**
+     * Get all weeks from expired date list.
+     *
+     * @return the list
+     */
+    public List<Integer> getAllWeeksFromExpiredDate(){
+        return taskRepository.findWeeksFromExpiredDate();
+    }
+
+    /**
      * Group by chart id and sum total map.
      *
      * @param data the data
@@ -445,6 +457,38 @@ public class TaskService extends BaseService {
     }
 
     /**
+     * Get task system by week task data dto.
+     *
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskSystemByWeek(TaskFilter filter) {
+        List<TaskData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(),filter.getYears(), filter.getWeeks());
+        Map<Long, List<TaskData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
+
+        List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
+        mapGroupBySystemId.forEach((id, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setSystemName(chartDataList.get(0).getSystemName());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(TaskData::getWeek, TaskData::getTotal)));
+            item.setTotalCount(chartDataList.stream()
+                    .mapToInt(TaskData::getTotal)
+                    .sum());
+            taskDetailDTOS.add(item);
+        });
+
+        TaskSummaryDTO total = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                TaskData::getWeek,
+                                Collectors.summingInt(TaskData::getTotal)
+                        )), taskDetailDTOS.stream()
+                .mapToInt(TaskDetailDTO::getTotalCount)
+                .sum());
+        return new TaskDataDTO(total, taskDetailDTOS);
+    }
+
+    /**
      * Get task by person in charge per week task data dto.
      *
      * @param filter the filter
@@ -474,14 +518,5 @@ public class TaskService extends BaseService {
                 .mapToInt(TaskDetailDTO::getTotalCount)
                 .sum());
         return new TaskDataDTO(total,taskDataItems);
-    }
-
-    /**
-     * Get weeks from expired date list.
-     *
-     * @return the list
-     */
-    public List<Integer> getWeeksFromExpiredDate(){
-        return taskRepository.findWeeksFromExpiredDate();
     }
 }
