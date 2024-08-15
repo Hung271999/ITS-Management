@@ -11,6 +11,7 @@ import java.util.Map;
 public class TaskFilter {
     private List<Long> userIds;
     private List<Long> systemIds;
+    private List<Integer> weeks;
     private List<Integer> years;
     private Map<String, SortCriteria> sort;
 }
