@@ -13,6 +13,5 @@ public class TaskFilter {
     private List<Long> systemIds;
     private List<Integer> weeks;
     private List<Integer> years;
-    private List<Integer> weeks;
     private Map<String, SortCriteria> sort;
 }
