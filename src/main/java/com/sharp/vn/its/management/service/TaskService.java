@@ -557,6 +557,12 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(total,taskDataItems);
     }
 
+    /**
+     * Get task by group per week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
     public TaskDataDTO getTaskByGroupPerWeek(TaskFilter filter){
         List<TaskData> data = taskRepository.findTaskByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
         Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek));
