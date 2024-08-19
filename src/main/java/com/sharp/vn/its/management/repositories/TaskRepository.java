@@ -15,7 +15,7 @@ import org.springframework.data.repository.query.Param;
  * The interface Task repository.
  */
 @Transactional
-public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, TaskRepositoryCustom{
+public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long> , TaskRepositoryCustom{
 
     /**
      * Find all page.
@@ -52,7 +52,7 @@ public interface TaskRepository extends BaseJpaRepository<TaskEntity, Long>, Tas
     List<Integer> findAllYearsFromExpiredDate();
 
     /**
-     * Find distinct weeks from expired date list.
+     * Find weeks from expired date list.
      *
      * @return the list
      */
