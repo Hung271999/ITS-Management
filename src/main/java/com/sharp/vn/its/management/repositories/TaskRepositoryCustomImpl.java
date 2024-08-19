@@ -235,10 +235,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.groupBy(userRoot.get("firstName"),userRoot.get("id"), week);
-        cq.orderBy(
-                cb.asc(userRoot.get("id")),
-                cb.asc(week)
-        );
+        cq.orderBy(cb.asc(week));
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         query.getResultList();
         return query.getResultList().stream().map(row -> {

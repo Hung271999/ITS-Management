@@ -44,11 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
@@ -528,7 +524,7 @@ public class TaskService extends BaseService {
      */
     public TaskDataDTO getEffortByPersonInChargePerWeek(TaskFilter filter){
         List<TaskData> data = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
-        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek));
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
         Map<Integer, Integer> totalCountByWeek = data.stream()
                 .collect(Collectors.groupingBy(
@@ -565,7 +561,7 @@ public class TaskService extends BaseService {
      */
     public TaskDataDTO getTaskByGroupPerWeek(TaskFilter filter){
         List<TaskData> data = taskRepository.findTaskByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
-        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek));
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
         Map<Integer, Integer> totalCountByWeek = data.stream()
                 .collect(Collectors.groupingBy(

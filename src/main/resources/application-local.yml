@@ -12,7 +12,7 @@ spring:
         name: its-management
     datasource:
         username: postgres
-        password: postgresql
+        password: 123
         url: jdbc:postgresql://localhost:5432/its_management
     jpa:
         hibernate:
