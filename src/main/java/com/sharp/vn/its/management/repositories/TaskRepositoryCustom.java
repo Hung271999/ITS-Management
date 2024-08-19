@@ -26,6 +26,16 @@ public interface TaskRepositoryCustom {
      */
     List<TaskData> findTaskBySystem(List<Long> SystemIds, List<Integer> years);
 
+    /**
+     * Find task system by week list.
+     *
+     * @param systemIds the system ids
+     * @param years     the years
+     * @param weeks     the weeks
+     * @return the list
+     */
+    List<TaskData> findTaskSystemByWeek(List<Long> systemIds, List<Integer> years, List<Integer> weeks);
+
 
     /**
      * Find task by person in charge per week list.
