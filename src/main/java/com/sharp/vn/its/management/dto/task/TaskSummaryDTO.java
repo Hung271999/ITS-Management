@@ -10,8 +10,8 @@ import lombok.*;
  */
 @Data
 public class TaskSummaryDTO {
-    private Map<Integer, Integer> values;
-    private int totalCount;
+    private Map<Integer, Number> values;
+    private Number totalCount;
 
     /**
      * Instantiates a new Task summary dto.
@@ -19,7 +19,7 @@ public class TaskSummaryDTO {
      * @param values     the values
      * @param totalCount the total count
      */
-    public TaskSummaryDTO(Map<Integer, Integer> values, int totalCount) {
+    public TaskSummaryDTO(Map<Integer, Number> values, Number totalCount) {
         this.values = values;
         this.totalCount = totalCount;
     }
