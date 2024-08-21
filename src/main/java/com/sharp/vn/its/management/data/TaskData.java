@@ -8,5 +8,5 @@ public class TaskData {
     private String systemName;
     private int week;
     private int status;
-    private int total;
+    private Number total;
 }

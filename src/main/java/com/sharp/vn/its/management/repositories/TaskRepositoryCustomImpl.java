@@ -248,7 +248,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             taskData.setId(((Number) row[0]).longValue());
             taskData.setFirstName((String) row[1]);
             taskData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
-            taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
+            taskData.setTotal(row[3] != null ? ((Number) row[3]).doubleValue() : 0);
             return taskData;
         }).collect(Collectors.toList());
     }

@@ -385,7 +385,7 @@ public class TaskService extends BaseService {
         return data.stream()
                 .collect(Collectors.groupingBy(
                         TaskData::getId,
-                        Collectors.summingInt(TaskData::getTotal)
+                        Collectors.summingInt(taskData -> taskData.getTotal().intValue())
                 ));
     }
 
@@ -410,14 +410,14 @@ public class TaskService extends BaseService {
             taskDetailDTOList.add(item);
         });
 
-        TaskSummaryDTO total = new TaskSummaryDTO(data.stream()
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(data.stream()
                 .collect(Collectors.groupingBy(
                         TaskData::getStatus,
-                        Collectors.summingInt(TaskData::getTotal)
+                        Collectors.collectingAndThen(Collectors.summingInt(taskData -> taskData.getTotal().intValue()), total -> total)
                 )), taskDetailDTOList.stream()
-                .mapToInt(TaskDetailDTO::getTotalCount)
+                .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                 .sum());
-        return new TaskDataDTO(total, taskDetailDTOList);
+        return new TaskDataDTO(taskSummaryDTO, taskDetailDTOList);
     }
 
     /**
@@ -441,15 +441,15 @@ public class TaskService extends BaseService {
             taskDetailDTOS.add(item);
         });
 
-        TaskSummaryDTO total = new TaskSummaryDTO(
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 TaskData::getStatus,
-                                Collectors.summingInt(TaskData::getTotal)
+                                Collectors.collectingAndThen(Collectors.summingInt(taskData -> taskData.getTotal().intValue()), total -> total)
                         )), taskDetailDTOS.stream()
-                .mapToInt(TaskDetailDTO::getTotalCount)
+                .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                 .sum());
-        return new TaskDataDTO(total,taskDetailDTOS);
+        return new TaskDataDTO(taskSummaryDTO,taskDetailDTOS);
     }
 
     /**
@@ -468,20 +468,20 @@ public class TaskService extends BaseService {
             item.setValues(chartDataList.stream()
                     .collect(Collectors.toMap(TaskData::getWeek, TaskData::getTotal)));
             item.setTotalCount(chartDataList.stream()
-                    .mapToInt(TaskData::getTotal)
+                    .mapToInt(taskData -> taskData.getTotal().intValue())
                     .sum());
             taskDetailDTOS.add(item);
         });
 
-        TaskSummaryDTO total = new TaskSummaryDTO(
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 TaskData::getWeek,
-                                Collectors.summingInt(TaskData::getTotal)
+                                Collectors.collectingAndThen(Collectors.summingInt(taskData -> taskData.getTotal().intValue()), total -> total)
                         )), taskDetailDTOS.stream()
-                .mapToInt(TaskDetailDTO::getTotalCount)
+                .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                 .sum());
-        return new TaskDataDTO(total, taskDetailDTOS);
+        return new TaskDataDTO(taskSummaryDTO, taskDetailDTOS);
     }
 
     /**
@@ -505,15 +505,15 @@ public class TaskService extends BaseService {
             taskDataItems.add(item);
         });
 
-        TaskSummaryDTO total = new TaskSummaryDTO(
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 TaskData::getWeek,
-                                Collectors.summingInt(TaskData::getTotal)
+                                Collectors.collectingAndThen(Collectors.summingInt(taskData -> taskData.getTotal().intValue()), total -> total)
                         )), taskDataItems.stream()
-                .mapToInt(TaskDetailDTO::getTotalCount)
+                .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                 .sum());
-        return new TaskDataDTO(total,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
 
     /**
@@ -526,10 +526,10 @@ public class TaskService extends BaseService {
         List<TaskData> data = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
         Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
-        Map<Integer, Integer> totalCountByWeek = data.stream()
+        Map<Integer, Double> totalCountByWeek = data.stream()
                 .collect(Collectors.groupingBy(
                         TaskData::getWeek,
-                        Collectors.summingInt(TaskData::getTotal)
+                        Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue())
                 ));
         List<TaskDetailDTO> taskDataItems = new ArrayList<>();
         mapGroupByWeek.forEach((week, chartDataList) -> {
@@ -541,15 +541,15 @@ public class TaskService extends BaseService {
             taskDataItems.add(item);
         });
 
-        TaskSummaryDTO total = new TaskSummaryDTO(
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 taskData -> taskData.getId().intValue(),
-                                Collectors.summingInt(TaskData::getTotal)
+                                Collectors.collectingAndThen(Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue()), total -> total)
                         )),
                 taskDataItems.stream()
-                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
                         .sum());
-        return new TaskDataDTO(total,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
 }
