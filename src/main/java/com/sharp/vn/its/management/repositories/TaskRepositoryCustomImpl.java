@@ -1,7 +1,10 @@
 package com.sharp.vn.its.management.repositories;
 
 import com.sharp.vn.its.management.data.TaskData;
-import com.sharp.vn.its.management.entity.*;
+import com.sharp.vn.its.management.entity.SystemEntity;
+import com.sharp.vn.its.management.entity.TaskEntity;
+import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.entity.UserGroupEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -235,7 +238,10 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.groupBy(userRoot.get("firstName"),userRoot.get("id"), week);
-        cq.orderBy(cb.asc(week));
+        cq.orderBy(
+                cb.asc(userRoot.get("id")),
+                cb.asc(week)
+        );
         TypedQuery<Object[]> query = entityManager.createQuery(cq);
         query.getResultList();
         return query.getResultList().stream().map(row -> {
@@ -243,7 +249,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             taskData.setId(((Number) row[0]).longValue());
             taskData.setFirstName((String) row[1]);
             taskData.setWeek(row[2] != null ? ((Number) row[2]).intValue() : 0);
-            taskData.setTotal(row[3] != null ? ((Number) row[3]).intValue() : 0);
+            taskData.setTotal(row[3] != null ? ((Number) row[3]).doubleValue() : 0);
             return taskData;
         }).collect(Collectors.toList());
     }

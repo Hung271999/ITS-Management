@@ -14,8 +14,8 @@ public class TaskDetailDTO {
     private int systemId;
     private String systemName;
     private int week;
-    private Map<Integer, Integer> values;
-    private int totalCount;
+    private Map<Integer, Number> values;
+    private Number totalCount;
 
     /**
      *
@@ -27,7 +27,7 @@ public class TaskDetailDTO {
      * @param values     the values
      * @param totalCount the total count
      */
-    public TaskDetailDTO(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Integer> values, int totalCount) {
+    public TaskDetailDTO(String userName, String fullName, String firstName, int systemId, String systemName, Map<Integer, Number> values, Number totalCount) {
         this.userName = userName;
         this.fullName = fullName;
         this.firstName = firstName;
