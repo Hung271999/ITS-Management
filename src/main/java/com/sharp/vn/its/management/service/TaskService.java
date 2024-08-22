@@ -554,75 +554,6 @@ public class TaskService extends BaseService {
     }
 
     /**
-     * Get task by person in charge per week task data dto.
-     *
-     * @param filter the filter
-     * @return the task data dto
-     */
-    public TaskDataDTO getTaskByPersonInChargePerWeek(TaskFilter filter){
-        List<TaskData> data = taskRepository.findTaskByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
-        Map<Long, List<TaskData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
-
-        Map<Long, Integer> totalCountById = groupByTaskDataIdAndSumTotal(data);
-        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
-        mapGroupByUserId.forEach((id, chartDataList) -> {
-            TaskDetailDTO item = new TaskDetailDTO();
-            item.setFirstName(chartDataList.get(0).getFirstName());
-            item.setValues(chartDataList.stream()
-                    .collect(Collectors.toMap(TaskData::getWeek, TaskData::getTotal)));
-            item.setTotalCount(totalCountById.get(id));
-            taskDataItems.add(item);
-        });
-
-        TaskSummaryDTO total = new TaskSummaryDTO(
-                data.stream()
-                        .collect(Collectors.groupingBy(
-                                TaskData::getWeek,
-                                Collectors.summingInt(TaskData::getTotal)
-                        )), taskDataItems.stream()
-                .mapToInt(TaskDetailDTO::getTotalCount)
-                .sum());
-        return new TaskDataDTO(total,taskDataItems);
-    }
-
-    /**
-     * Get effort by person in charge per week task data dto.
-     *
-     * @param filter the filter
-     * @return the task data dto
-     */
-    public TaskDataDTO getEffortByPersonInChargePerWeek(TaskFilter filter){
-        List<TaskData> data = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
-        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
-
-        Map<Integer, Integer> totalCountByWeek = data.stream()
-                .collect(Collectors.groupingBy(
-                        TaskData::getWeek,
-                        Collectors.summingInt(TaskData::getTotal)
-                ));
-        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
-        mapGroupByWeek.forEach((week, chartDataList) -> {
-            TaskDetailDTO item = new TaskDetailDTO();
-            item.setWeek(chartDataList.get(0).getWeek());
-            item.setValues(chartDataList.stream()
-                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
-            item.setTotalCount(totalCountByWeek.get(week));
-            taskDataItems.add(item);
-        });
-
-        TaskSummaryDTO total = new TaskSummaryDTO(
-                data.stream()
-                        .collect(Collectors.groupingBy(
-                                taskData -> taskData.getId().intValue(),
-                                Collectors.summingInt(TaskData::getTotal)
-                        )),
-                taskDataItems.stream()
-                        .mapToInt(TaskDetailDTO::getTotalCount)
-                        .sum());
-        return new TaskDataDTO(total,taskDataItems);
-    }
-
-    /**
      * Get task by group per week task data dto.
      *
      * @param filter the filter
@@ -635,7 +566,7 @@ public class TaskService extends BaseService {
         Map<Integer, Integer> totalCountByWeek = data.stream()
                 .collect(Collectors.groupingBy(
                         TaskData::getWeek,
-                        Collectors.summingInt(TaskData::getTotal)
+                        Collectors.summingInt(taskData -> taskData.getTotal().intValue())
                 ));
         List<TaskDetailDTO> taskDataItems = new ArrayList<>();
         mapGroupByWeek.forEach((week, taskDataList) -> {
@@ -647,15 +578,15 @@ public class TaskService extends BaseService {
             taskDataItems.add(item);
         });
 
-        TaskSummaryDTO total = new TaskSummaryDTO(
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
                 data.stream()
                         .collect(Collectors.groupingBy(
                                 taskData -> taskData.getId().intValue(),
-                                Collectors.summingInt(TaskData::getTotal)
+                                Collectors.collectingAndThen(Collectors.summingInt(taskData -> taskData.getTotal().intValue()), total -> total)
                         )),
                 taskDataItems.stream()
-                        .mapToInt(TaskDetailDTO::getTotalCount)
+                        .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                         .sum());
-        return new TaskDataDTO(total,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
 }
