@@ -213,4 +213,15 @@ public class TaskController extends BaseController {
     public TaskDataDTO loadTaskByGroupPerWeek(@RequestBody TaskFilter filter){
         return taskService.getTaskByGroupPerWeek(filter);
     }
+
+    /**
+     * Load task by week for person in charge task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-by-week-for-person-in-charge")
+    public TaskDataDTO loadTaskByWeekForPersonInCharge(@RequestBody TaskFilter filter){
+        return taskService.getTaskByWeekForPersonInCharge(filter);
+    }
 }
