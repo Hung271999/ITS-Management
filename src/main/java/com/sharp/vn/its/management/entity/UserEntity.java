@@ -93,5 +93,4 @@ public class UserEntity extends BaseEntity {
      */
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<UserGroupEntity> userGroups = new HashSet<>();
-
 }
