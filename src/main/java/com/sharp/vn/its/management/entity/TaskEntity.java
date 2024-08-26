@@ -111,4 +111,5 @@ public class TaskEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UpdatedBy")
     private UserEntity updatedBy;
+
 }
