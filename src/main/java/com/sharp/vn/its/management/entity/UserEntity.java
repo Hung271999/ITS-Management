@@ -88,4 +88,9 @@ public class UserEntity extends BaseEntity {
     @OneToMany(mappedBy = "personInCharge")
     private List<TaskEntity> tasks;
 
+    /**
+     * The Groups.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<UserGroupEntity> userGroups = new HashSet<>();
 }

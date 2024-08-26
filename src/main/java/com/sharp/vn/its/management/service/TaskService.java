@@ -552,4 +552,41 @@ public class TaskService extends BaseService {
                         .sum());
         return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
+
+    /**
+     * Get task by group per week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskByGroupPerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findTaskByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, Integer> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingInt(taskData -> taskData.getTotal().intValue())
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, taskDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(taskDataList.get(0).getWeek());
+            item.setValues(taskDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.collectingAndThen(Collectors.summingInt(taskData -> taskData.getTotal().intValue()), total -> total)
+                        )),
+                taskDataItems.stream()
+                        .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
+                        .sum());
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+    }
 }
