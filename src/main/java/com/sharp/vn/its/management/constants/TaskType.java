@@ -84,4 +84,10 @@ public enum TaskType {
         return description;
     }
 
+    public static TaskType valueOfDescription(String description) {
+        return Arrays.stream(values())
+                .filter(taskType -> taskType.getDescription().equals(description))
+                .findFirst()
+                .orElseThrow(() -> new DataValidationException("Invalid task description: " + description));
+    }
 }

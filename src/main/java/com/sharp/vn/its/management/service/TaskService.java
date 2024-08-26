@@ -363,7 +363,7 @@ public class TaskService extends BaseService {
             Row row = rowIterator.next();
             TaskEntity task = new TaskEntity();
             try {
-//                task.setId((long) row.getCell(0).getNumericCellValue());
+                task.setId((long) row.getCell(0).getNumericCellValue());
                 task.setPersonInCharge(userRepository.findByFirstName(row.getCell(1).getStringCellValue()));
                 if (row.getCell(2) != null && !row.getCell(2).getStringCellValue().isEmpty()) {
                     task.setReceiveDate(DateTimeUtil.toLocalDateTime(row.getCell(2).getStringCellValue(), dateTimeFormatter));
@@ -378,10 +378,10 @@ public class TaskService extends BaseService {
                     task.setEndDate(DateTimeUtil.toLocalDateTime(row.getCell(5).getStringCellValue(), dateTimeFormatter));
                 }
                 task.setContent(row.getCell(6).getStringCellValue().trim());
-                task.setStatus((int) row.getCell(7).getNumericCellValue());
+                task.setStatus(TaskStatus.valueOfDescription(row.getCell(7).getStringCellValue().trim()).getStatus());
                 task.setCost(row.getCell(8).getNumericCellValue());
                 task.setSystem(systemRepository.findBySystemName(row.getCell(9).getStringCellValue()));
-                task.setType((int) row.getCell(10).getNumericCellValue());
+                task.setType(TaskType.valueOfDescription(row.getCell(10).getStringCellValue().trim()).getType());
                 task.setTicketNumber(row.getCell(11).getStringCellValue().trim());
                 task.setTicketURL(row.getCell(12).getStringCellValue().trim());
                 task.setNote(row.getCell(13).getStringCellValue().trim());

@@ -82,4 +82,11 @@ public enum TaskStatus {
     public String getDescription() {
         return description;
     }
+
+    public static TaskStatus valueOfDescription(String description) {
+        return Arrays.stream(values())
+                .filter(taskStatus -> taskStatus.getDescription().equals(description))
+                .findFirst()
+                .orElseThrow(() -> new DataValidationException("Invalid task description: " + description));
+    }
 }
