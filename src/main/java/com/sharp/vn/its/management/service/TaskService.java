@@ -589,4 +589,41 @@ public class TaskService extends BaseService {
                         .sum());
         return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
+
+    /**
+     * Get task by week for person in charge task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO getTaskByWeekForPersonInCharge(TaskFilter filter){
+        List<TaskData> data = taskRepository.findTaskByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, Integer> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingInt(taskData -> taskData.getTotal().intValue())
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(chartDataList.get(0).getWeek());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.collectingAndThen(Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue()), total -> total)
+                        )),
+                taskDataItems.stream()
+                        .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
+                        .sum());
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+    }
 }
