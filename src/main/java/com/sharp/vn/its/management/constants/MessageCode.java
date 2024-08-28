@@ -19,4 +19,8 @@ public class MessageCode {
     public static final String ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME = "MSG_USER_0006";
     public static final String ERROR_USER_PASSWORD_TOO_SHORT = "MSG_USER_0007";
 
+    //group
+    public static final String ERROR_GROUP_WITH_FOREIGN_KEY_TO_USER_GROUP = "MSG_GROUP_0001";
+    public static final String ERROR_GROUP_ID_NOT_FOUND = "MSG_GROUP_0002";
+    public static final String ERROR_GROUP_NOT_FOUND = "MSG_GROUP_0003";
 }
