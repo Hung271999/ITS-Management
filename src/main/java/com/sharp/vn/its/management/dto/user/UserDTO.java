@@ -74,6 +74,10 @@ public class UserDTO {
      */
     private String token;
 
+    /**
+     * The Group name.
+     */
+    private String groupName;
 
     /**
      * Instantiates a new User dto.
@@ -92,6 +96,7 @@ public class UserDTO {
                 .orElseThrow(() -> new IllegalStateException("User does not have any roles"))
                 .getRole()
                 .getRoleName();
+        this.groupName = userEntity.getUserGroups().stream().findFirst().map(userGroup -> userGroup.getGroup().getGroupName()).orElse("No Group");
     }
 
     /**
