@@ -8,6 +8,7 @@ import com.sharp.vn.its.management.entity.*;
 import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.filter.CriteriaFilterItem;
+import com.sharp.vn.its.management.repositories.GroupRepository;
 import com.sharp.vn.its.management.repositories.RoleRepository;
 import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
@@ -64,6 +65,12 @@ public class UserManagementService extends BaseService {
     private AuthenticationService authenticationService;
 
     /**
+     * The Group repository.
+     */
+    @Autowired
+    private GroupRepository groupRepository;
+
+    /**
      * Save user user dto.
      *
      * @param request the request
@@ -71,7 +78,7 @@ public class UserManagementService extends BaseService {
      */
     @Transactional
     public UserDTO saveUser(UserDTO request) {
-        log.info("Saving task...");
+        log.info("Saving user...");
         final String userName = request.getUserName();
         final String email = request.getEmail();
         final Long userId = request.getUserId();
@@ -112,6 +119,7 @@ public class UserManagementService extends BaseService {
             user.setUpdatedBy(currentUser);
         }
         final Role itsRole = request.getRole();
+        saveUserGroup(user, request.getGroupIds());
         saveUserRole(user, itsRole);
         UserDTO result = new UserDTO(userRepository.save(user));
         log.info("User saved successfully.");
@@ -286,5 +294,12 @@ public class UserManagementService extends BaseService {
             throw new DataValidationException(MessageCode.ERROR_USER_PASSWORD_TOO_SHORT);
         }
         return true;
+    }
+
+    private void saveUserGroup(UserEntity user, List<Long> groupIds) {
+        List<GroupEntity> groups = groupRepository.findAllById(groupIds);
+        user.getUserGroups().clear();
+        groups.forEach(group -> user.getUserGroups().add(new UserGroupEntity(user, group)));
+        userRepository.save(user);
     }
 }

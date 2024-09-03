@@ -12,8 +12,11 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.sharp.vn.its.management.filter.*;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The type User dto.
@@ -77,7 +80,12 @@ public class UserDTO {
     /**
      * The Group name.
      */
-    private String groupName;
+//    private String groupName;
+
+    /**
+     * The Group ids.
+     */
+    private List<Long> groupIds;
 
     /**
      * Instantiates a new User dto.
@@ -96,7 +104,8 @@ public class UserDTO {
                 .orElseThrow(() -> new IllegalStateException("User does not have any roles"))
                 .getRole()
                 .getRoleName();
-        this.groupName = userEntity.getUserGroups().stream().findFirst().map(userGroup -> userGroup.getGroup().getGroupName()).orElse("No Group");
+//        this.groupName = userEntity.getUserGroups().stream().findFirst().map(userGroup -> userGroup.getGroup().getGroupName()).orElse("No Group");
+        this.groupIds = userEntity.getUserGroups().stream().map(userGroup -> userGroup.getGroup().getId()).collect(Collectors.toList());
     }
 
     /**
