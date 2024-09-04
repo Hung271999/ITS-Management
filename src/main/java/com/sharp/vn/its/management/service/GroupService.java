@@ -10,6 +10,7 @@ import com.sharp.vn.its.management.exception.DataValidationException;
 import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.filter.SortCriteria;
 import com.sharp.vn.its.management.repositories.GroupRepository;
+import com.sharp.vn.its.management.repositories.UserGroupRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -43,6 +44,12 @@ public class GroupService {
      */
     @Autowired
     private AuthenticationService service;
+
+    /**
+     * The User group repository.
+     */
+    @Autowired
+    private UserGroupRepository userGroupRepository;
 
     /**
      * Gets all groups data.
@@ -90,10 +97,10 @@ public class GroupService {
             log.error("Group id not found");
             throw new DataValidationException(MessageCode.ERROR_GROUP_ID_NOT_FOUND);
         }
-//        if(taskRepository.existsBySystemId(id)){
-//            log.error("Group with {} cannot delete because there are still users associated", id);
-//            throw new DataValidationException(MessageCode.ERROR_SYSTEM_WITH_FOREIGN_KEY_TO_TASK);
-//        }
+        if(userGroupRepository.existsByGroupId(id)){
+            log.error("Group with {} cannot delete because there are still users associated", id);
+            throw new DataValidationException(MessageCode.ERROR_GROUP_WITH_FOREIGN_KEY_TO_USER_GROUP);
+        }
         groupRepository.deleteById(id);
         log.info("Group with id {} deleted successfully.", id);
     }
