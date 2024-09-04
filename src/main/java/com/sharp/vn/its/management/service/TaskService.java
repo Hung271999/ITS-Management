@@ -3,16 +3,13 @@ package com.sharp.vn.its.management.service;
 
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.data.TaskData;
-import com.sharp.vn.its.management.dto.task.TaskDataDTO;
-import com.sharp.vn.its.management.dto.task.TaskFilter;
-import com.sharp.vn.its.management.dto.task.TaskDetailDTO;
-import com.sharp.vn.its.management.dto.task.TaskSummaryDTO;
+import com.sharp.vn.its.management.dto.task.*;
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
 import com.sharp.vn.its.management.constants.TaskType;
-import com.sharp.vn.its.management.dto.task.TaskDTO;
+import com.sharp.vn.its.management.entity.SupportEffortEntity;
 import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TaskEntity;
 import com.sharp.vn.its.management.entity.UserEntity;
@@ -22,6 +19,7 @@ import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.filter.CriteriaFilterItem;
 import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
 import com.sharp.vn.its.management.filter.SortCriteria;
+import com.sharp.vn.its.management.repositories.SupportEffortRepository;
 import com.sharp.vn.its.management.repositories.SystemRepository;
 import com.sharp.vn.its.management.repositories.TaskRepository;
 import com.sharp.vn.its.management.repositories.UserRepository;
@@ -81,6 +79,8 @@ public class TaskService extends BaseService {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @Autowired
+    private SupportEffortRepository supportEffortRepository;
     /**
      * The constant HEADERS.
      */
@@ -625,5 +625,50 @@ public class TaskService extends BaseService {
                         .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
                         .sum());
         return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+    }
+
+//    public Page<SupportEffortDTO> getAllSupportEffort(SupportEffortDTO request) {
+//        log.info("Fetching all support effort tasks...");
+//        CriteriaSearchRequest filter = request.getFilter();
+//        Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
+//        Specification<SupportEffortEntity> specification = buildFilterCondition(filter);
+//        Page<SupportEffortEntity> pageable = supportEffortRepository.findAll(specification, request.getFilter()
+//                .getPageable());
+//        log.info("All support effort tasks fetched successfully.");
+//        return pageable.map(SupportEffortDTO::new);
+//    }
+
+    /**
+     * Gets support task detail.
+     *
+     * @param id the id
+     * @return the support task detail
+     */
+    public SupportEffortDTO getSupportTaskDetail(Long id) {
+        if (id == null) {
+            log.error("Support effort task id empty or null");
+            throw new DataValidationException(MessageCode.ERROR_SUPPORT_TASK_ID_NOT_FOUND);
+        }
+        log.info("Fetching support effort task detail for id: {}", id);
+        final SupportEffortDTO supportEffortDTO = new SupportEffortDTO(supportEffortRepository.findById(id).orElseThrow(() -> {
+            log.error("Support effort task not found with id: {}", id);
+            return new ObjectNotFoundException(MessageCode.ERROR_SUPPORT_TASK_NOT_FOUND);
+        }));
+        log.info("Support effort task detail fetched successfully for id: {}", id);
+        return supportEffortDTO;
+    }
+
+    /**
+     * Delete support task.
+     *
+     * @param id the id
+     */
+    public void deleteSupportTask(Long id) {
+        if (id == null) {
+            log.error("Support effort task id not found");
+            throw new DataValidationException(MessageCode.ERROR_SUPPORT_TASK_ID_NOT_FOUND);
+        }
+        supportEffortRepository.deleteById(id);
+        log.info("Support effort task with id {} deleted successfully.", id);
     }
 }

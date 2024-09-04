@@ -9,6 +9,8 @@ public class MessageCode {
     //task
     public static final String ERROR_TASK_ID_NOT_FOUND = "MSG_TASK_0001";
     public static final String ERROR_TASK_NOT_FOUND = "MSG_TASK_0002";
+    public static final String ERROR_SUPPORT_TASK_ID_NOT_FOUND = "MSG_TASK_0003";
+    public static final String ERROR_SUPPORT_TASK_NOT_FOUND = "MSG_TASK_0004";
 
     //user
     public static final String ERROR_USER_WITH_FOREIGN_KEY_TO_TASK = "MSG_USER_0001";
