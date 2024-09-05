@@ -85,4 +85,16 @@ public class SupportEffortEntity extends BaseEntity{
      */
     @Column(name = "comprehensive")
     private Double comprehensive;
+
+    /**
+     * The Created by.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CreatedBy")
+    private UserEntity createdBy;
+
+    /** The updated by. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UpdatedBy")
+    private UserEntity updatedBy;
 }

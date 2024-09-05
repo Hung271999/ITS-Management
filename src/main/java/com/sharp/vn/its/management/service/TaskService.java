@@ -627,16 +627,87 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
 
-//    public Page<SupportEffortDTO> getAllSupportEffort(SupportEffortDTO request) {
-//        log.info("Fetching all support effort tasks...");
-//        CriteriaSearchRequest filter = request.getFilter();
-//        Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
-//        Specification<SupportEffortEntity> specification = buildFilterCondition(filter);
-//        Page<SupportEffortEntity> pageable = supportEffortRepository.findAll(specification, request.getFilter()
-//                .getPageable());
-//        log.info("All support effort tasks fetched successfully.");
-//        return pageable.map(SupportEffortDTO::new);
-//    }
+    /**
+     * Build sort condition for support task.
+     *
+     * @param sort the sort
+     */
+    private void buildSortConditionForSupportTask(Map<String, SortCriteria> sort) {
+        if (sort.isEmpty()) {
+            sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
+            return;
+        }
+        sort.forEach((key, criteria) -> {
+            switch (key) {
+                case "supportId":
+                    criteria.setFieldName("id");
+                    break;
+                case "systemName":
+                    criteria.setFieldName("system.systemName");
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+    /**
+     * Build filter condition for support task specification.
+     *
+     * @param filter the filter
+     * @return the specification
+     */
+    private Specification<SupportEffortEntity> buildFilterConditionForSupportTask(CriteriaSearchRequest filter) {
+        Map<String, CriteriaFilterItem> searchParam = filter.getSearchParam();
+        Map<String, SortCriteria> sort = filter.getSort();
+        buildSortConditionForSupportTask(sort);
+        return
+                (Root<SupportEffortEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) -> {
+                    List<Predicate> predicates = new ArrayList<>();
+                    List<Predicate> subPredicates = new ArrayList<>();
+                    if (searchParam == null) {
+                        return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                    }
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildPredicate(criteriaBuilder, root, searchParam.get("status")));
+
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildPredicate(criteriaBuilder, root, searchParam.get("type")));
+
+                    CollectionUtils.addIfNotEmptyOrNull(predicates,
+                            buildCombinedPredicate(criteriaBuilder, FilterType.OR,
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("content")),
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("participants")),
+                                    buildPredicate(criteriaBuilder, root,
+                                            searchParam.get("implementer"))));
+
+                    CriteriaFilterItem system = searchParam.get("system");
+                    if (system != null) {
+                        Join<SupportEffortEntity, SystemEntity> systemJoin = root.join("system");
+                        CollectionUtils.addIfNotEmptyOrNull(predicates,
+                                criteriaBuilder.equal(systemJoin.get("id"),
+                                        system.getFilterNumberValue().getToValue()));
+                    }
+                    return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+                };
+    }
+
+    /**
+     * Gets all support task.
+     *
+     * @param request the request
+     * @return the all support task
+     */
+    public Page<SupportEffortDTO> getAllSupportTask(SupportEffortDTO request) {
+        log.info("Fetching all support effort tasks...");
+        CriteriaSearchRequest filter = request.getFilter();
+        Specification<SupportEffortEntity> specification = buildFilterConditionForSupportTask(filter);
+        Page<SupportEffortEntity> pageable = supportEffortRepository.findAll(specification, request.getFilter().getPageable());
+        log.info("All support effort tasks fetched successfully.");
+        return pageable.map(SupportEffortDTO::new);
+    }
 
     /**
      * Gets support task detail.
@@ -670,5 +741,42 @@ public class TaskService extends BaseService {
         }
         supportEffortRepository.deleteById(id);
         log.info("Support effort task with id {} deleted successfully.", id);
+    }
+
+    public SupportEffortDTO saveSupportTask(SupportEffortDTO supportEffortDTO) {
+        log.info("Saving support effort task...");
+        final Long supportTaskId = supportEffortDTO.getSupportId();
+        final Long systemId = supportEffortDTO.getSystem();
+        SupportEffortEntity supportEffortEntity = new SupportEffortEntity();
+
+        // update when support effort task id is not null
+        if (supportTaskId != null) {
+            supportEffortEntity = supportEffortRepository.findById(supportTaskId).orElseThrow(() -> {
+                log.error("Support effort task not found with id: {}", supportTaskId);
+                return new DataValidationException(MessageCode.ERROR_SUPPORT_TASK_ID_NOT_FOUND);
+            });
+        }
+        final SystemEntity system = systemRepository.findById(systemId).orElseThrow(
+                () -> {
+                    log.error("System not found with id: {}", systemId);
+                    return new ObjectNotFoundException(MessageCode.ERROR_SYSTEM_ID_NOT_FOUND);
+                });
+        final UserEntity userEntity = userRepository.findById(authenticationService.getUser()
+                .getId()).get();
+        final SupportEffortType supportEffortType = SupportEffortType.valueOf(supportEffortDTO.getType());
+        final SupportEffortStatus supportEffortStatus = SupportEffortStatus.valueOf(supportEffortDTO.getStatus());
+
+        // set properties
+        BeanUtils.copyProperties(supportEffortDTO, supportEffortEntity);
+        supportEffortEntity.setStartDate(DateTimeUtil.toLocalDateTime(supportEffortDTO.getStartDate()));
+        supportEffortEntity.setEndDate(DateTimeUtil.toLocalDateTime(supportEffortDTO.getEndDate()));
+        supportEffortEntity.setSystem(system);
+        supportEffortEntity.setType(supportEffortType.getType());
+        supportEffortEntity.setStatus(supportEffortStatus.getStatus());
+        supportEffortEntity.setCreatedBy(userEntity);
+        supportEffortEntity.setUpdatedBy(userEntity);
+        supportEffortEntity = supportEffortRepository.save(supportEffortEntity);
+        log.info("Support effort task saved successfully.");
+        return new SupportEffortDTO(supportEffortEntity);
     }
 }

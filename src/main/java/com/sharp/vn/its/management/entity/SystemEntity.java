@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.scheduling.config.Task;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -46,4 +47,10 @@ public class SystemEntity extends BaseEntity {
      */
     @OneToMany(mappedBy = "system", fetch = FetchType.LAZY)
     private Set<TaskEntity> tasks;
+
+    /**
+     * The Support effort.
+     */
+    @OneToMany(mappedBy = "system", fetch = FetchType.LAZY)
+    private List<SupportEffortEntity> supportEfforts;
 }

@@ -1,12 +1,9 @@
 package com.sharp.vn.its.management.controller;
 
 
-import com.sharp.vn.its.management.dto.task.TaskDataDTO;
-import com.sharp.vn.its.management.dto.task.TaskFilter;
-import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
+import com.sharp.vn.its.management.dto.task.*;
 
 import com.sharp.vn.its.management.dto.task.RequestCloneTaskDTO;
-import com.sharp.vn.its.management.dto.task.TaskDTO;
 import com.sharp.vn.its.management.service.TaskService;
 import jakarta.validation.Valid;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -223,5 +220,63 @@ public class TaskController extends BaseController {
     @PostMapping("/statistics-by-week-for-person-in-charge")
     public TaskDataDTO loadTaskByWeekForPersonInCharge(@RequestBody TaskFilter filter){
         return taskService.getTaskByWeekForPersonInCharge(filter);
+    }
+
+    /**
+     * Load all support tasks page.
+     *
+     * @param request the request
+     * @return the page
+     */
+    @PostMapping("support-effort/all")
+    public Page<SupportEffortDTO> loadAllSupportTasks(@RequestBody SupportEffortDTO request) {
+        return taskService.getAllSupportTask(request);
+    }
+
+    /**
+     * Gets support task detail.
+     *
+     * @param id the id
+     * @return the support task detail
+     */
+    @GetMapping("support-effort/{id}")
+    public SupportEffortDTO getSupportTaskDetail(@PathVariable(required = true) Long id) {
+        return taskService.getSupportTaskDetail(id);
+    }
+
+    /**
+     * Delete support task response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
+    @DeleteMapping("support-effort/{id}")
+    public ResponseEntity<?> deleteSupportTask(@PathVariable(required = true) Long id) {
+        taskService.deleteSupportTask(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Save support task support effort dto.
+     *
+     * @param request the request
+     * @return the support effort dto
+     */
+    @PostMapping("support-effort")
+    public SupportEffortDTO saveSupportTask(@Valid @RequestBody SupportEffortDTO request) {
+        return taskService.saveSupportTask(request);
+    }
+
+    /**
+     * Update support task support effort dto.
+     *
+     * @param id      the id
+     * @param request the request
+     * @return the support effort dto
+     */
+    @PutMapping("support-effort/{id}")
+    public SupportEffortDTO updateSupportTask(@PathVariable(required = true) Long id,
+                              @RequestBody SupportEffortDTO request) {
+        return taskService.saveSupportTask(request);
     }
 }

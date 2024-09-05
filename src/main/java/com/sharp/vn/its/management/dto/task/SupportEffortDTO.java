@@ -16,6 +16,7 @@ import lombok.Setter;
 @NotNull
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SupportEffortDTO {
+
     /**
      * The Support id.
      */
@@ -69,7 +70,12 @@ public class SupportEffortDTO {
     /**
      * The System.
      */
-    private String system;
+    private Long system;
+
+    /**
+     * The System Name.
+     */
+    private String systemName;
 
     /**
      * The Content.
@@ -93,6 +99,12 @@ public class SupportEffortDTO {
 
     /**
      * Instantiates a new Support effort dto.
+     */
+    public SupportEffortDTO() {
+    }
+
+    /**
+     * Instantiates a new Support effort dto.
      *
      * @param supportEffortEntity the support effort entity
      */
@@ -107,7 +119,7 @@ public class SupportEffortDTO {
         this.participants = supportEffortEntity.getParticipants();
         this.status = supportEffortEntity.getStatus();
         this.type = supportEffortEntity.getType();
-        this.system = supportEffortEntity.getSystem().getSystemName();
+        this.systemName = supportEffortEntity.getSystem() != null ? supportEffortEntity.getSystem().getSystemName() : "";
         this.content = supportEffortEntity.getContent();
         this.note = supportEffortEntity.getNote();
         this.comprehensive = supportEffortEntity.getComprehensive();
