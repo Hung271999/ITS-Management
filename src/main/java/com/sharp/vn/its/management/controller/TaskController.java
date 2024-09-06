@@ -279,4 +279,16 @@ public class TaskController extends BaseController {
                               @RequestBody SupportEffortDTO request) {
         return taskService.saveSupportTask(request);
     }
+
+    /**
+     * Clone support task response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
+    @PostMapping("/support-effort/clone")
+    public ResponseEntity<?> cloneSupportTask(@RequestBody RequestCloneTaskDTO request){
+        taskService.cloneSupportTask(request.getTaskId(), request.getNumberOfCloneTask());
+        return ResponseEntity.ok().build();
+    }
 }

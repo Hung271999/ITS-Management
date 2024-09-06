@@ -44,6 +44,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildCombinedPredicate;
 import static com.sharp.vn.its.management.util.CriteriaUtil.buildPredicate;
@@ -778,5 +779,34 @@ public class TaskService extends BaseService {
         supportEffortEntity = supportEffortRepository.save(supportEffortEntity);
         log.info("Support effort task saved successfully.");
         return new SupportEffortDTO(supportEffortEntity);
+    }
+
+    /**
+     * Clone support task.
+     *
+     * @param supportTaskId the support task id
+     * @param numberOfTasks the number of tasks
+     */
+    public void cloneSupportTask(Long supportTaskId, int numberOfTasks){
+        if (supportTaskId == null) {
+            log.error("Support effort task id not found");
+            throw new DataValidationException(MessageCode.ERROR_SUPPORT_TASK_ID_NOT_FOUND);
+        }
+        log.info("Start cloning support effort task: {}", supportTaskId);
+        SupportEffortEntity supportEffortEntity = supportEffortRepository.findById(supportTaskId).orElseThrow(() -> {
+            log.error("Support effort task not found with id: {}", supportTaskId);
+            return new ObjectNotFoundException(MessageCode.ERROR_SUPPORT_TASK_ID_NOT_FOUND);
+        });
+        supportEffortRepository.saveAll(
+                IntStream.range(0, numberOfTasks)
+                        .mapToObj(i -> {
+                            SupportEffortEntity taskClone = new SupportEffortEntity();
+                            BeanUtils.copyProperties(supportEffortEntity, taskClone);
+                            taskClone.setId(null);
+                            return taskClone;
+                        })
+                        .collect(Collectors.toList())
+        );
+        log.info("Clone {} support effort tasks successfully.", numberOfTasks);
     }
 }

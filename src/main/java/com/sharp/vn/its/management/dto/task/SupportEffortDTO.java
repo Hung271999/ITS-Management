@@ -90,7 +90,9 @@ public class SupportEffortDTO {
     /**
      * The Comprehensive.
      */
-    private Double comprehensive;
+    private Double totalEffort;
+
+
 
     /**
      * The Filter.
@@ -119,10 +121,11 @@ public class SupportEffortDTO {
         this.participants = supportEffortEntity.getParticipants();
         this.status = supportEffortEntity.getStatus();
         this.type = supportEffortEntity.getType();
+        this.system = supportEffortEntity.getSystem() != null ? supportEffortEntity.getSystem().getId() : 0;
         this.systemName = supportEffortEntity.getSystem() != null ? supportEffortEntity.getSystem().getSystemName() : "";
         this.content = supportEffortEntity.getContent();
         this.note = supportEffortEntity.getNote();
-        this.comprehensive = supportEffortEntity.getComprehensive();
+        this.totalEffort = supportEffortEntity.getTotalEffort();
         this.filter = null;
     }
 }

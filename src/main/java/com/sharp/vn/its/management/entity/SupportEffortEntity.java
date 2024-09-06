@@ -83,8 +83,8 @@ public class SupportEffortEntity extends BaseEntity{
     /**
      * The Comprehensive.
      */
-    @Column(name = "comprehensive")
-    private Double comprehensive;
+    @Column(name = "total_effort")
+    private Double totalEffort;
 
     /**
      * The Created by.
