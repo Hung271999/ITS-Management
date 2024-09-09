@@ -291,4 +291,13 @@ public class TaskController extends BaseController {
         taskService.cloneSupportTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/upload-excel")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return new ResponseEntity<>("Please to a file to upload!", HttpStatus.BAD_REQUEST);
+        }
+        taskService.uploadFileExcel(file);
+        return new ResponseEntity<>("Uploaded and processed excel file successfully!", HttpStatus.OK);
+    }
 }

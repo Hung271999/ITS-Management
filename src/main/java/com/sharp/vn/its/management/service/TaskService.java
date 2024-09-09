@@ -42,6 +42,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -808,5 +812,51 @@ public class TaskService extends BaseService {
                         .collect(Collectors.toList())
         );
         log.info("Clone {} support effort tasks successfully.", numberOfTasks);
+    }
+
+    public void uploadFileExcel(MultipartFile file) throws IOException {
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet sheet = workbook.getSheetAt(0);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+
+        Iterator<Row> rowIterator = sheet.iterator();
+        List<SupportEffortEntity> supportEffortList = new ArrayList<>();
+        Set<String> otherSystems = new HashSet<>();
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            SupportEffortEntity supportEffort = new SupportEffortEntity();
+            try {
+                supportEffort.setId((long) row.getCell(0).getNumericCellValue());
+                if (row.getCell(1) != null) {
+                    Date startDate = row.getCell(1).getDateCellValue();
+                    LocalDateTime startDateTime = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    supportEffort.setStartDate(startDateTime);
+                }
+                if (row.getCell(2) != null ) {
+                    Date endDate = row.getCell(1).getDateCellValue();
+                    LocalDateTime endDateTime = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    supportEffort.setEndDate(endDateTime);
+                }
+                supportEffort.setEffort(row.getCell(3).getNumericCellValue());
+                supportEffort.setImplementer(row.getCell(4).getStringCellValue().trim());
+                supportEffort.setParticipants(row.getCell(5).getStringCellValue().trim());
+                supportEffort.setStatus(SupportEffortStatus.valueOfDescription(row.getCell(6).getStringCellValue().trim()).getStatus());
+                supportEffort.setType(SupportEffortType.valueOfDescription(row.getCell(7).getStringCellValue().trim()).getType());
+                SystemEntity system = systemRepository.findBySystemName(row.getCell(8).getStringCellValue());
+                if(system != null)
+                    supportEffort.setSystem(system);
+                else
+                    otherSystems.add(row.getCell(8).getStringCellValue());
+                supportEffort.setContent(row.getCell(9).getStringCellValue().trim());
+                supportEffort.setTotalEffort(row.getCell(13).getNumericCellValue());
+                supportEffortList.add(supportEffort);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+//        supportEffortRepository.saveAll(supportEffortList);
+        log.info(otherSystems.toString());
+        workbook.close();
     }
 }

@@ -21,6 +21,14 @@ public interface SystemRepository extends BaseJpaRepository<SystemEntity, Long> 
      * @return the page
      */
     Page<SystemEntity> findBySystemNameContains(@Param("searchParam") String searchParam, Pageable pageable);
+
+    /**
+     * Find by system name system entity.
+     *
+     * @param systemName the system name
+     * @return the system entity
+     */
+    SystemEntity findBySystemName(String systemName);
 }
 
 
