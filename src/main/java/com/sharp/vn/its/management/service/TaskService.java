@@ -827,7 +827,7 @@ public class TaskService extends BaseService {
             Row row = rowIterator.next();
             SupportEffortEntity supportEffort = new SupportEffortEntity();
             try {
-                supportEffort.setId((long) row.getCell(0).getNumericCellValue());
+//                supportEffort.setId((long) row.getCell(0).getNumericCellValue());
                 if (row.getCell(1) != null) {
                     Date startDate = row.getCell(1).getDateCellValue();
                     LocalDateTime startDateTime = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -846,8 +846,9 @@ public class TaskService extends BaseService {
                 SystemEntity system = systemRepository.findBySystemName(row.getCell(8).getStringCellValue());
                 if(system != null)
                     supportEffort.setSystem(system);
-                else
+                else{
                     otherSystems.add(row.getCell(8).getStringCellValue());
+                }
                 supportEffort.setContent(row.getCell(9).getStringCellValue().trim());
                 supportEffort.setTotalEffort(row.getCell(13).getNumericCellValue());
                 supportEffortList.add(supportEffort);

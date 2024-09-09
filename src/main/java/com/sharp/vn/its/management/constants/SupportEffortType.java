@@ -42,7 +42,7 @@ public enum SupportEffortType {
     /**
      * The Trouble shooting.
      */
-    TROUBLE_SHOOTING(7, "Trouble Shooting "),
+    TROUBLE_SHOOTING(7, "Trouble Shooting"),
 
     /**
      * Manual support effort type.
