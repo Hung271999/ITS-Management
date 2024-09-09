@@ -855,7 +855,7 @@ public class TaskService extends BaseService {
                 System.out.println(e);
             }
         }
-//        supportEffortRepository.saveAll(supportEffortList);
+        supportEffortRepository.saveAll(supportEffortList);
         log.info(otherSystems.toString());
         workbook.close();
     }
