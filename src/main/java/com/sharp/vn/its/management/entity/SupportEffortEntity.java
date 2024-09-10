@@ -81,7 +81,7 @@ public class SupportEffortEntity extends BaseEntity{
     private String note;
 
     /**
-     * The Comprehensive.
+     * The Total effort.
      */
     @Column(name = "total_effort")
     private Double totalEffort;

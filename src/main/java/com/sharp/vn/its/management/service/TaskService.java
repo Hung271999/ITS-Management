@@ -4,7 +4,6 @@ package com.sharp.vn.its.management.service;
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.dto.task.*;
-import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -19,10 +18,7 @@ import com.sharp.vn.its.management.exception.ObjectNotFoundException;
 import com.sharp.vn.its.management.filter.CriteriaFilterItem;
 import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
 import com.sharp.vn.its.management.filter.SortCriteria;
-import com.sharp.vn.its.management.repositories.SupportEffortRepository;
-import com.sharp.vn.its.management.repositories.SystemRepository;
-import com.sharp.vn.its.management.repositories.TaskRepository;
-import com.sharp.vn.its.management.repositories.UserRepository;
+import com.sharp.vn.its.management.repositories.*;
 import com.sharp.vn.its.management.util.CollectionUtils;
 import com.sharp.vn.its.management.util.DateTimeUtil;
 import com.sharp.vn.its.management.util.ExcelUtils;
@@ -38,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -808,5 +803,42 @@ public class TaskService extends BaseService {
                         .collect(Collectors.toList())
         );
         log.info("Clone {} support effort tasks successfully.", numberOfTasks);
+    }
+
+    /**
+     * Get effort by type per week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO getEffortByTypePerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findEffortByWeekForType(filter.getTypes(), filter.getYears(), filter.getWeeks());
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, Double> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue())
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(chartDataList.get(0).getWeek());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.collectingAndThen(Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue()), total -> total)
+                        )),
+                taskDataItems.stream()
+                        .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
+                        .sum());
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
     }
 }

@@ -291,4 +291,16 @@ public class TaskController extends BaseController {
         taskService.cloneSupportTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Gets effort by type for week.
+     *
+     * @param filter the filter
+     * @return the effort by type for week
+     */
+    @PostMapping("/effort-by-type-for-week")
+    public ResponseEntity<TaskDataDTO> getEffortByTypeForWeek(@RequestBody TaskFilter filter) {
+        TaskDataDTO taskDataDTO = taskService.getEffortByTypePerWeek(filter);
+        return ResponseEntity.ok(taskDataDTO);
+    }
 }
