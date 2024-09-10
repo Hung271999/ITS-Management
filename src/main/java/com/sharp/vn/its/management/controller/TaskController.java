@@ -291,4 +291,9 @@ public class TaskController extends BaseController {
         taskService.cloneSupportTask(request.getTaskId(), request.getNumberOfCloneTask());
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/test")
+    public TaskDataDTO loadSupportEffortByWeekForSpecificTypes(@RequestBody TaskFilter filter){
+        return taskService.getSupportEffortByWeekForAMS(filter);
+    }
 }

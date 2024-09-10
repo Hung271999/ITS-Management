@@ -1,10 +1,7 @@
 package com.sharp.vn.its.management.repositories;
 
 import com.sharp.vn.its.management.data.TaskData;
-import com.sharp.vn.its.management.entity.SystemEntity;
-import com.sharp.vn.its.management.entity.TaskEntity;
-import com.sharp.vn.its.management.entity.UserEntity;
-import com.sharp.vn.its.management.entity.UserGroupEntity;
+import com.sharp.vn.its.management.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +23,8 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    private static final Set<Integer> SPECIFIC_TYPE_IDS = Set.of(2, 6, 7, 11);
 
     @Override
     public List<TaskData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years) {
@@ -295,6 +295,51 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             taskData.setId(((Number) row[0]).longValue());
             if(row[1] != null)taskData.setWeek(((Number) row[1]).intValue());
             if(row[2] != null )taskData.setTotal(((Number) row[2]).intValue());
+            return taskData;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskData> findSupportEffortByWeekForSpecificTypes(List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<SupportEffortEntity> root = cq.from(SupportEffortEntity.class);
+
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), root.get("endDate"));
+        Expression<Integer> year = cb.function("date_part", Integer.class, cb.literal("year"), root.get("endDate"));
+
+        cq.multiselect(
+                root.get("type"),
+                week,
+                cb.sum(root.get("totalEffort"))
+        );
+        List<Predicate> predicates = new ArrayList<>();
+        Predicate typePredicate = root.get("type").in(SPECIFIC_TYPE_IDS);
+        predicates.add(typePredicate);
+        if (!years.isEmpty()) {
+           Predicate yearPredicate = year.in(years);
+           predicates.add(yearPredicate);
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(root.get("type"), week);
+        cq.orderBy(
+                cb.asc(root.get("type")),
+                cb.asc(week)
+        );
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        query.getResultList();
+        return query.getResultList().stream().map(row -> {
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            if(row[1] != null)taskData.setWeek(((Number) row[1]).intValue());
+            taskData.setTotal(((Number) row[2]).intValue());
             return taskData;
         }).collect(Collectors.toList());
     }

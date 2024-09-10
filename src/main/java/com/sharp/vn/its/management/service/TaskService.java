@@ -809,4 +809,47 @@ public class TaskService extends BaseService {
         );
         log.info("Clone {} support effort tasks successfully.", numberOfTasks);
     }
+
+    public TaskDataDTO getSupportEffortByWeekForAMS(TaskFilter filter) {
+        List<TaskData> typeData = taskRepository.findSupportEffortByWeekForSpecificTypes(filter.getYears(), filter.getWeeks());
+        List<TaskData> AMSData = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+
+        Map<Integer, Double> totalCountByWeekForTypes = typeData.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue())
+                ));
+        Map<Integer, Double> totalCountByWeekForAMS = AMSData.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue())
+                ));
+
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        TreeMap<Integer, List<TaskData>> mapGroupByWeekForAMS = AMSData.stream()
+                .collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
+        mapGroupByWeekForAMS.forEach((week, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(chartDataList.get(0).getWeek());
+            Map<Integer, Number> valuesMap = new HashMap<>();
+            valuesMap.put(1, totalCountByWeekForTypes.getOrDefault(week, 0.0));
+            valuesMap.put(2, totalCountByWeekForAMS.getOrDefault(week, 0.0));
+            item.setValues(valuesMap);
+            item.setTotalCount(valuesMap.values().stream().mapToDouble(Number::doubleValue).sum());
+            taskDataItems.add(item);
+        });
+
+        Map<Integer, Number> totalValuesMap = new HashMap<>();
+        totalValuesMap.put(1, taskDataItems.stream()
+                .mapToDouble(taskDetailDTO -> taskDetailDTO.getValues().getOrDefault(1, 0).doubleValue())
+                .sum());
+        totalValuesMap.put(2, taskDataItems.stream()
+                .mapToDouble(taskDetailDTO -> taskDetailDTO.getValues().getOrDefault(2, 0).doubleValue())
+                .sum());
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                totalValuesMap,
+                totalValuesMap.values().stream().mapToDouble(Number::doubleValue).sum()
+        );
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
+    }
 }
