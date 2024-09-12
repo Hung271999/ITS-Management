@@ -5,6 +5,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 /**
  * The interface Support effort repository.
@@ -20,4 +23,7 @@ public interface SupportEffortRepository extends BaseJpaRepository<SupportEffort
      * @return the page
      */
     Page<SupportEffortEntity> findAll(Specification<SupportEffortEntity> spec, Pageable pageable);
+
+    @Query("SELECT se.type FROM SupportEffortEntity se")
+    List<Integer> findAllTypeIds();
 }

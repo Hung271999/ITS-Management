@@ -157,9 +157,9 @@ public class TaskService extends BaseService {
         // update when task id is not null
         if (taskId != null) {
             taskEntity = taskRepository.findById(taskId).orElseThrow(() -> {
-                        log.error("Task not found with id: {}", taskId);
-                        return new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
-                    });
+                log.error("Task not found with id: {}", taskId);
+                return new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
+            });
         }
         final String userName = authenticationService.getUser().getUsername();
         if (userName == null) {
@@ -302,10 +302,10 @@ public class TaskService extends BaseService {
     /**
      * Duplicate task.
      *
-     * @param taskId the taskId
+     * @param taskId        the taskId
      * @param numberOfTasks the number of tasks
      */
-    public void cloneTask(Long taskId, int numberOfTasks){
+    public void cloneTask(Long taskId, int numberOfTasks) {
         if (taskId == null) {
             log.error("Task id not found");
             throw new DataValidationException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
@@ -316,7 +316,7 @@ public class TaskService extends BaseService {
             return new ObjectNotFoundException(MessageCode.ERROR_TASK_ID_NOT_FOUND);
         });
         List<TaskEntity> taskEntities = new ArrayList<>();
-        for (int i = 0 ; i < numberOfTasks; i++){
+        for (int i = 0; i < numberOfTasks; i++) {
             TaskEntity taskClone = new TaskEntity();
             BeanUtils.copyProperties(taskEntity, taskClone);
             taskClone.setId(null);
@@ -358,7 +358,7 @@ public class TaskService extends BaseService {
      *
      * @return the list
      */
-    public List<Integer> getAllYearsFromExpiredDate(){
+    public List<Integer> getAllYearsFromExpiredDate() {
         return taskRepository.findAllYearsFromExpiredDate();
     }
 
@@ -367,7 +367,7 @@ public class TaskService extends BaseService {
      *
      * @return the list
      */
-    public List<Integer> getAllWeeksFromExpiredDate(){
+    public List<Integer> getAllWeeksFromExpiredDate() {
         return taskRepository.findWeeksFromExpiredDate();
     }
 
@@ -445,7 +445,7 @@ public class TaskService extends BaseService {
                         )), taskDetailDTOS.stream()
                 .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                 .sum());
-        return new TaskDataDTO(taskSummaryDTO,taskDetailDTOS);
+        return new TaskDataDTO(taskSummaryDTO, taskDetailDTOS);
     }
 
     /**
@@ -454,7 +454,7 @@ public class TaskService extends BaseService {
      * @return the task data dto
      */
     public TaskDataDTO getTaskSystemByWeek(TaskFilter filter) {
-        List<TaskData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(),filter.getYears(), filter.getWeeks());
+        List<TaskData> data = taskRepository.findTaskSystemByWeek(filter.getSystemIds(), filter.getYears(), filter.getWeeks());
         Map<Long, List<TaskData>> mapGroupBySystemId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
 
         List<TaskDetailDTO> taskDetailDTOS = new ArrayList<>();
@@ -486,7 +486,7 @@ public class TaskService extends BaseService {
      * @param filter the filter
      * @return the task data dto
      */
-    public TaskDataDTO getTaskByPersonInChargePerWeek(TaskFilter filter){
+    public TaskDataDTO getTaskByPersonInChargePerWeek(TaskFilter filter) {
         List<TaskData> data = taskRepository.findTaskByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
         Map<Long, List<TaskData>> mapGroupByUserId = data.stream().collect(Collectors.groupingBy(TaskData::getId));
 
@@ -509,7 +509,7 @@ public class TaskService extends BaseService {
                         )), taskDataItems.stream()
                 .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                 .sum());
-        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
 
     /**
@@ -518,7 +518,7 @@ public class TaskService extends BaseService {
      * @param filter the filter
      * @return the task data dto
      */
-    public TaskDataDTO getEffortByPersonInChargePerWeek(TaskFilter filter){
+    public TaskDataDTO getEffortByPersonInChargePerWeek(TaskFilter filter) {
         List<TaskData> data = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
         Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
@@ -546,7 +546,7 @@ public class TaskService extends BaseService {
                 taskDataItems.stream()
                         .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
                         .sum());
-        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
 
     /**
@@ -555,7 +555,7 @@ public class TaskService extends BaseService {
      * @param filter the filter
      * @return the task data dto
      */
-    public TaskDataDTO getTaskByGroupPerWeek(TaskFilter filter){
+    public TaskDataDTO getTaskByGroupPerWeek(TaskFilter filter) {
         List<TaskData> data = taskRepository.findTaskByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
         Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
@@ -583,7 +583,7 @@ public class TaskService extends BaseService {
                 taskDataItems.stream()
                         .mapToInt(taskDetailDTO -> taskDetailDTO.getTotalCount().intValue())
                         .sum());
-        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
 
     /**
@@ -592,7 +592,7 @@ public class TaskService extends BaseService {
      * @param filter the filter
      * @return the task data dto
      */
-    public TaskDataDTO getTaskByWeekForPersonInCharge(TaskFilter filter){
+    public TaskDataDTO getTaskByWeekForPersonInCharge(TaskFilter filter) {
         List<TaskData> data = taskRepository.findTaskByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
         Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
@@ -620,7 +620,7 @@ public class TaskService extends BaseService {
                 taskDataItems.stream()
                         .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
                         .sum());
-        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
 
     /**
@@ -782,7 +782,7 @@ public class TaskService extends BaseService {
      * @param supportTaskId the support task id
      * @param numberOfTasks the number of tasks
      */
-    public void cloneSupportTask(Long supportTaskId, int numberOfTasks){
+    public void cloneSupportTask(Long supportTaskId, int numberOfTasks) {
         if (supportTaskId == null) {
             log.error("Support effort task id not found");
             throw new DataValidationException(MessageCode.ERROR_SUPPORT_TASK_ID_NOT_FOUND);
@@ -811,7 +811,7 @@ public class TaskService extends BaseService {
      * @param filter the filter
      * @return the task data dto
      */
-    public TaskDataDTO getEffortByTypePerWeek(TaskFilter filter){
+    public TaskDataDTO getEffortByTypePerWeek(TaskFilter filter) {
         List<TaskData> data = taskRepository.findEffortByWeekForType(filter.getTypes(), filter.getYears(), filter.getWeeks());
         Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
 
@@ -839,6 +839,16 @@ public class TaskService extends BaseService {
                 taskDataItems.stream()
                         .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
                         .sum());
-        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
+    }
+
+    /**
+     * Get all support effort IDs.
+     *
+     * @return the list of support effort IDs
+     */
+    public Set<Integer> getAllUniqueTypeIds() {
+        List<Integer> typeIds = supportEffortRepository.findAllTypeIds();
+        return new HashSet<>(typeIds);
     }
 }

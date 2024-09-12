@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The type Task controller.
@@ -302,5 +303,16 @@ public class TaskController extends BaseController {
     public ResponseEntity<TaskDataDTO> getEffortByTypeForWeek(@RequestBody TaskFilter filter) {
         TaskDataDTO taskDataDTO = taskService.getEffortByTypePerWeek(filter);
         return ResponseEntity.ok(taskDataDTO);
+    }
+
+    /**
+     * Get all support effort IDs.
+     *
+     * @return the list of support effort IDs
+     */
+    @GetMapping("/unique-type-ids")
+    public ResponseEntity<Set<Integer>> getAllUniqueTypeIds() {
+        Set<Integer> uniqueTypeIds = taskService.getAllUniqueTypeIds();
+        return ResponseEntity.ok(uniqueTypeIds);
     }
 }
