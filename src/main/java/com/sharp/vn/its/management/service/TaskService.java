@@ -4,7 +4,6 @@ package com.sharp.vn.its.management.service;
 import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.dto.task.*;
-import com.sharp.vn.its.management.constants.*;
 import com.sharp.vn.its.management.constants.FilterType;
 import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.constants.TaskStatus;
@@ -38,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -810,23 +808,23 @@ public class TaskService extends BaseService {
         log.info("Clone {} support effort tasks successfully.", numberOfTasks);
     }
 
-    public TaskDataDTO getSupportEffortByWeekForAMS(TaskFilter filter) {
+    public TaskDataDTO getEffortByWeekForAMS(TaskFilter filter) {
         List<TaskData> typeData = taskRepository.findSupportEffortByWeekForSpecificTypes(filter.getYears(), filter.getWeeks());
         List<TaskData> AMSData = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
 
-        Map<Integer, Map<EffortType, Double>> totalCountByWeek = new HashMap<>();
+        Map<Integer, Map<EffortType, Double>> totalEffortByWeek = new HashMap<>();
 
         typeData.forEach(taskData -> {
-            totalCountByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
+            totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
                     .merge(EffortType.TYPES, taskData.getTotal().doubleValue(), Double::sum);
         });
         AMSData.forEach(taskData -> {
-            totalCountByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
+            totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
                     .merge(EffortType.AMS, taskData.getTotal().doubleValue(), Double::sum);
         });
 
         List<TaskDetailDTO> taskDataItems = new ArrayList<>();
-        totalCountByWeek.forEach((week, efforts) -> {
+        totalEffortByWeek.forEach((week, efforts) -> {
             TaskDetailDTO item = new TaskDetailDTO();
             item.setWeek(week);
             Map<Integer, Number> valuesMap = new HashMap<>();
