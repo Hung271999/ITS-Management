@@ -62,7 +62,12 @@ public enum SupportEffortType {
     /**
      * Monitor support effort type.
      */
-    MONITOR(11, "監視");
+    MONITOR(11, "監視"),
+
+    /**
+     * Mtg support effort type.
+     */
+    MTG(12, "MTG");
 
     /**
      * The Type.
