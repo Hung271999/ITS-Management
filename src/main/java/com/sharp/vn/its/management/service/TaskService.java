@@ -828,6 +828,7 @@ public class TaskService extends BaseService {
             SupportEffortEntity supportEffort = new SupportEffortEntity();
             try {
 //                supportEffort.setId((long) row.getCell(0).getNumericCellValue());
+                Double id = row.getCell(0).getNumericCellValue();
                 if (row.getCell(1) != null) {
                     Date startDate = row.getCell(1).getDateCellValue();
                     LocalDateTime startDateTime = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
