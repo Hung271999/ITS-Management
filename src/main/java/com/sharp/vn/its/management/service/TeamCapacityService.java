@@ -21,13 +21,24 @@ import java.util.stream.Collectors;
 
 import static org.hibernate.query.sqm.tree.SqmNode.log;
 
+/**
+ * The type Team capacity service.
+ */
 @Service
 public class TeamCapacityService {
 
+    /**
+     * The Repository.
+     */
     @Autowired
     private TeamCapacityRepository repository;
 
-    // Convert entity to DTO
+    /**
+     * Convert to dto team capacity dto.
+     *
+     * @param entity the entity
+     * @return the team capacity dto
+     */
     private TeamCapacityDTO convertToDTO(TeamCapacityEntity entity) {
         TeamCapacityDTO dto = new TeamCapacityDTO();
         dto.setId(entity.getId());
@@ -42,7 +53,12 @@ public class TeamCapacityService {
         return dto;
     }
 
-    // Convert DTO to entity
+    /**
+     * Convert to entity team capacity entity.
+     *
+     * @param dto the dto
+     * @return the team capacity entity
+     */
     private TeamCapacityEntity convertToEntity(TeamCapacityDTO dto) {
         TeamCapacityEntity entity = new TeamCapacityEntity();
         entity.setId(dto.getId());
@@ -57,31 +73,55 @@ public class TeamCapacityService {
         return entity;
     }
 
-    // Get all team capacities
+    /**
+     * Gets all team capacities.
+     *
+     * @return the all team capacities
+     */
     public List<TeamCapacityDTO> getAllTeamCapacities() {
         List<TeamCapacityEntity> entities = repository.findAll();
         return entities.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    // Get team capacity by ID
+    /**
+     * Gets team capacity by id.
+     *
+     * @param id the id
+     * @return the team capacity by id
+     */
     public TeamCapacityDTO getTeamCapacityById(long id) {
         Optional<TeamCapacityEntity> entity = repository.findById(id);
         return entity.map(this::convertToDTO).orElse(null);
     }
 
-    // Create or update team capacity
+    /**
+     * Save team capacity team capacity dto.
+     *
+     * @param dto the dto
+     * @return the team capacity dto
+     */
     public TeamCapacityDTO saveTeamCapacity(TeamCapacityDTO dto) {
         TeamCapacityEntity entity = convertToEntity(dto);
         entity = repository.save(entity);
         return convertToDTO(entity);
     }
 
-    // Delete team capacity by ID
+    /**
+     * Delete team capacity.
+     *
+     * @param id the id
+     */
     public void deleteTeamCapacity(long id) {
         repository.deleteById(id);
     }
 
 
+    /**
+     * Upload file excel.
+     *
+     * @param file the file
+     * @throws IOException the io exception
+     */
     public void uploadFileExcel(MultipartFile file) throws IOException {
         InputStream inputStream = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(inputStream);
