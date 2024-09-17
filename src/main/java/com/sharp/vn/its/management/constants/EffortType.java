@@ -6,7 +6,10 @@ public enum EffortType {
     AMS(1),
 
     //Support, Trouble shoot, Monitor, Q&A
-    TYPES(2);
+    SUPPORT_TROUBLE_MONITOR_QA(2),
+
+    //OJT, Transfer
+    OJT_TRANSFER(3);
 
     private final int id;
 

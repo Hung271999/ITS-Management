@@ -1,5 +1,6 @@
 package com.sharp.vn.its.management.repositories;
 
+import com.sharp.vn.its.management.constants.SupportEffortType;
 import com.sharp.vn.its.management.data.TaskData;
 import com.sharp.vn.its.management.entity.*;
 import jakarta.persistence.EntityManager;
@@ -24,7 +25,8 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private static final Set<Integer> SPECIFIC_TYPE_IDS = Set.of(2, 6, 7, 11);
+    private static final Set<Integer> SPECIFIC_TYPE_IDS = Set.of(SupportEffortType.OJT.getType(), SupportEffortType.TRANSFER.getType(), SupportEffortType.SUPPORT.getType(),
+            SupportEffortType.TROUBLE_SHOOTING.getType(), SupportEffortType.MONITOR.getType(), SupportEffortType.QA.getType());
 
     @Override
     public List<TaskData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years) {
