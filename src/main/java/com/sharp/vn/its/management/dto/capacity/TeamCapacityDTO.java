@@ -71,14 +71,14 @@ public class TeamCapacityDTO {
      * @param totalHours     the total hours
      */
     public TeamCapacityDTO(double actualCapacity, LocalDateTime endDate, int headCount, long id, String note, double reports, LocalDateTime startDate, double timeOff, double totalHours) {
-        this.id = id;
-        this.startDate = startDate;
+        this.actualCapacity = actualCapacity;
         this.endDate = endDate;
         this.headCount = headCount;
-        this.totalHours = totalHours;
-        this.timeOff = timeOff;
-        this.reports = reports;
-        this.actualCapacity = totalHours-timeOff-reports;
+        this.id = id;
         this.note = note;
+        this.reports = reports;
+        this.startDate = startDate;
+        this.timeOff = timeOff;
+        this.totalHours = totalHours;
     }
 }
