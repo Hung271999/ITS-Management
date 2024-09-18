@@ -300,8 +300,8 @@ public class TaskController extends BaseController {
      * @param filter the filter
      * @return the task data dto
      */
-    @PostMapping("/statistics-effort-by-week-for-team-capacity")
-    public TaskDataDTO loadEffortByWeekForTeamCapacity(@RequestBody TaskFilter filter){
-        return taskService.getEffortByWeekForTeamCapacity(filter);
+    @PostMapping("/statistics-effort-by-week-for-categories")
+    public TaskDataDTO loadEffortByWeekForCategories(@RequestBody TaskFilter filter){
+        return taskService.getEffortByWeekForCategories(filter);
     }
 }

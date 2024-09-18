@@ -857,7 +857,7 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
 
-    public TaskDataDTO getEffortByWeekForTeamCapacity(TaskFilter filter) {
+    public TaskDataDTO getEffortByWeekForCategories(TaskFilter filter) {
         List<TaskData> typeData = taskRepository.findSupportEffortByWeekForSpecificTypes(filter.getYears(), filter.getWeeks());
         List<TaskData> AMSData = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
 
