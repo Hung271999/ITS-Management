@@ -856,4 +856,63 @@ public class TaskService extends BaseService {
 
         return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
+
+    public TaskDataDTO getEffortByWeekForTeamCapacity(TaskFilter filter) {
+        List<TaskData> typeData = taskRepository.findSupportEffortByWeekForSpecificTypes(filter.getYears(), filter.getWeeks());
+        List<TaskData> AMSData = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+
+        List<TaskData> supportTroubleQAData = typeData.stream()
+                .filter(taskData -> {
+                    int typeId = taskData.getId().intValue();
+                    return typeId == SupportEffortType.SUPPORT.getType() ||
+                            typeId == SupportEffortType.TROUBLE_SHOOTING.getType() ||
+                            typeId == SupportEffortType.QA.getType() ||
+                            typeId == SupportEffortType.MONITOR.getType();
+                }).toList();
+        List<TaskData> ojtTransferData = typeData.stream()
+                .filter(taskData -> {
+                    int typeId = taskData.getId().intValue();
+                    return typeId == SupportEffortType.OJT.getType() ||
+                            typeId == SupportEffortType.TRANSFER.getType();
+                }).toList();
+
+        Map<Integer, Map<EffortType, Double>> totalEffortByWeek = new HashMap<>();
+        supportTroubleQAData.forEach(taskData -> {
+            totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
+                    .merge(EffortType.SUPPORT_TROUBLE_MONITOR_QA, taskData.getTotal().doubleValue(), Double::sum);
+        });
+        ojtTransferData.forEach(taskData -> {
+            totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
+                    .merge(EffortType.OJT_TRANSFER, taskData.getTotal().doubleValue(), Double::sum);
+        });
+        AMSData.forEach(taskData -> {
+            totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
+                    .merge(EffortType.AMS, taskData.getTotal().doubleValue(), Double::sum);
+        });
+
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        totalEffortByWeek.forEach((week, efforts) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(week);
+            Map<Integer, Number> valuesMap = new HashMap<>();
+            efforts.forEach((effortType, total) -> valuesMap.put(effortType.getId(), total));
+            item.setValues(valuesMap);
+            item.setTotalCount(valuesMap.values().stream().mapToDouble(Number::doubleValue).sum());
+            taskDataItems.add(item);
+        });
+
+        Map<Integer, Number> totalValuesMap = new HashMap<>();
+        for (EffortType effortType : EffortType.values()) {
+            totalValuesMap.put(effortType.getId(), taskDataItems.stream()
+                    .mapToDouble(taskDetailDTO -> taskDetailDTO.getValues().getOrDefault(effortType.getId(), 0).doubleValue())
+                    .sum());
+        }
+
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                totalValuesMap,
+                totalValuesMap.values().stream().mapToDouble(Number::doubleValue).sum()
+        );
+
+        return new TaskDataDTO(taskSummaryDTO, taskDataItems);
+    }
 }

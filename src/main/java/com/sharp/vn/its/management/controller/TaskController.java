@@ -232,7 +232,7 @@ public class TaskController extends BaseController {
      */
     @GetMapping("support-effort/{id}")
     public SupportEffortDTO getSupportTaskDetail(@PathVariable(required = true) Long id) {
-        return taskService.getSupportTaskDetail(id);
+            return taskService.getSupportTaskDetail(id);
     }
 
     /**
@@ -283,8 +283,25 @@ public class TaskController extends BaseController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Load effort by week for ams task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
     @PostMapping("/statistics-effort-by-week-for-ams")
     public TaskDataDTO loadEffortByWeekForAMS(@RequestBody TaskFilter filter){
         return taskService.getEffortByWeekForAMS(filter);
+    }
+
+    /**
+     * Load effort by week for team capacity task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-effort-by-week-for-team-capacity")
+    public TaskDataDTO loadEffortByWeekForTeamCapacity(@RequestBody TaskFilter filter){
+        return taskService.getEffortByWeekForTeamCapacity(filter);
     }
 }
