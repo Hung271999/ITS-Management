@@ -235,4 +235,15 @@ public class TaskController extends BaseController {
     public TaskDataDTO getEffortOfSystemByWeek(@RequestBody TaskFilter filter) {
         return taskService.findEffortOfSystemByWeek(filter);
     }
+
+    /**
+     * Load effort by group per week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    @PostMapping("/statistics-effort-by-group-per-week")
+    public TaskDataDTO loadEffortByGroupPerWeek(@RequestBody TaskFilter filter){
+        return taskService.getEffortByGroupPerWeek(filter);
+    }
 }
