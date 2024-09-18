@@ -87,3 +87,6 @@ public interface TaskRepositoryCustom {
      */
     List<TaskData> findEffortByGroupPerWeek(List<Long> groupIds, List<Integer> years, List<Integer> weeks);
 }
+
+
+
