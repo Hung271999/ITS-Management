@@ -69,4 +69,15 @@ public class TeamCapacityEntity extends BaseEntity {
     @Column(name = "note")
     private String note;
 
+    public TeamCapacityEntity(long id, LocalDateTime startDate, LocalDateTime endDate, int headCount, double totalHours, double timeOff, double reports, double actualCapacity, String note) {
+        this.id = id;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.headCount = headCount;
+        this.totalHours = totalHours;
+        this.timeOff = timeOff;
+        this.reports = reports;
+        this.actualCapacity = totalHours-timeOff-reports;
+        this.note = note;
+    }
 }
