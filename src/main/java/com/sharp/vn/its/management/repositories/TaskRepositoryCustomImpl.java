@@ -347,6 +347,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             return taskData;
         }).collect(Collectors.toList());
     }
+
     @Override
     public List<TaskData> findEffortByGroupPerWeek(List<Long> groupIds, List<Integer> years, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
