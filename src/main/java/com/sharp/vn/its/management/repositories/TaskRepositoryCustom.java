@@ -75,4 +75,13 @@ public interface TaskRepositoryCustom {
      * @return the list
      */
     List<TaskData> findSupportEffortByWeekForSpecificTypes(List<Integer> years, List<Integer> weeks);
+
+    /**
+     * Find effort by week of actual capacity list.
+     *
+     * @param years the years
+     * @param weeks the weeks
+     * @return the list
+     */
+    List<TaskData> findEffortByWeekOfActualCapacity(List<Integer> years, List<Integer> weeks);
 }

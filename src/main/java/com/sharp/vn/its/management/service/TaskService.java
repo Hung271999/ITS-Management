@@ -857,9 +857,16 @@ public class TaskService extends BaseService {
         return new TaskDataDTO(taskSummaryDTO, taskDataItems);
     }
 
-    public TaskDataDTO getEffortByWeekForCategories(TaskFilter filter) {
+    /**
+     * Gets effort by week for categories.
+     *
+     * @param filter the filter
+     * @return the effort by week for categories
+     */
+    public TaskDataDTO getEffortByWeekForTeamCapacity(TaskFilter filter) {
         List<TaskData> typeData = taskRepository.findSupportEffortByWeekForSpecificTypes(filter.getYears(), filter.getWeeks());
         List<TaskData> AMSData = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
+        List<TaskData> actualCapacity = taskRepository.findEffortByWeekOfActualCapacity(filter.getYears(), filter.getWeeks());
 
         List<TaskData> supportTroubleQAData = typeData.stream()
                 .filter(taskData -> {
@@ -889,7 +896,10 @@ public class TaskService extends BaseService {
             totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
                     .merge(EffortType.AMS, taskData.getTotal().doubleValue(), Double::sum);
         });
-
+        actualCapacity.forEach(taskData -> {
+            totalEffortByWeek.computeIfAbsent(taskData.getWeek(), k -> new HashMap<>())
+                    .merge(EffortType.ACTUAL_CAPACITY, taskData.getTotal().doubleValue(), Double::sum);
+        });
         List<TaskDetailDTO> taskDataItems = new ArrayList<>();
         totalEffortByWeek.forEach((week, efforts) -> {
             TaskDetailDTO item = new TaskDetailDTO();

@@ -9,7 +9,10 @@ public enum EffortType {
     SUPPORT_TROUBLE_MONITOR_QA(2),
 
     //OJT, Transfer
-    OJT_TRANSFER(3);
+    OJT_TRANSFER(3),
+
+    //Actual Capacity
+    ACTUAL_CAPACITY(4);
 
     private final int id;
 

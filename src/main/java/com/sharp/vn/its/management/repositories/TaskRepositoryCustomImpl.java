@@ -345,4 +345,47 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             return taskData;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<TaskData> findEffortByWeekOfActualCapacity(List<Integer> years, List<Integer> weeks) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+        Root<TeamCapacityEntity> root = cq.from(TeamCapacityEntity.class);
+
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), root.get("endDate"));
+        Expression<Integer> year = cb.function("date_part", Integer.class, cb.literal("year"), root.get("endDate"));
+
+        cq.multiselect(
+                root.get("id"),
+                week,
+                root.get("actualCapacity")
+        );
+        List<Predicate> predicates = new ArrayList<>();
+        if (!years.isEmpty()) {
+            Predicate yearPredicate = year.in(years);
+            predicates.add(yearPredicate);
+        }
+        if (!weeks.isEmpty()) {
+            Predicate weekPredicate = week.in(weeks);
+            if (weeks.contains(0)) {
+                weekPredicate = cb.or(weekPredicate, cb.isNull(week));
+            }
+            predicates.add(weekPredicate);
+        }
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+        cq.groupBy(root.get("id"), week);
+        cq.orderBy(
+                cb.asc(root.get("id")),
+                cb.asc(week)
+        );
+        TypedQuery<Object[]> query = entityManager.createQuery(cq);
+        query.getResultList();
+        return query.getResultList().stream().map(row -> {
+            TaskData taskData = new TaskData();
+            taskData.setId(((Number) row[0]).longValue());
+            if(row[1] != null)taskData.setWeek(((Number) row[1]).intValue());
+            taskData.setTotal(((Number) row[2]).doubleValue());
+            return taskData;
+        }).collect(Collectors.toList());
+    }
 }
