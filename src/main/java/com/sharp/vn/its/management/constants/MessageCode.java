@@ -25,4 +25,8 @@ public class MessageCode {
     public static final String ERROR_GROUP_WITH_FOREIGN_KEY_TO_USER_GROUP = "MSG_GROUP_0001";
     public static final String ERROR_GROUP_ID_NOT_FOUND = "MSG_GROUP_0002";
     public static final String ERROR_GROUP_NOT_FOUND = "MSG_GROUP_0003";
+
+    //team capacity
+    public static final String ERROR_CAPACITY_ID_NOT_FOUND = "MSG_SYSTEM_0001";
+    public static final String ERROR_CAPACITY_NOT_FOUND = "MSG_SYSTEM_0002";
 }

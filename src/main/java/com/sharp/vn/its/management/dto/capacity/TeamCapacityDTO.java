@@ -1,10 +1,11 @@
 package com.sharp.vn.its.management.dto.capacity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sharp.vn.its.management.entity.TeamCapacityEntity;
+import com.sharp.vn.its.management.filter.CriteriaSearchRequest;
+import com.sharp.vn.its.management.util.DateTimeUtil;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * The type Team capacity dto.
@@ -16,35 +17,43 @@ public class TeamCapacityDTO {
     /**
      * The Id.
      */
-    private long id;
+    private long capacityId;
+
     /**
      * The Start date.
      */
-    private LocalDateTime startDate;
+    private Long startDate;
+
     /**
      * The End date.
      */
-    private LocalDateTime endDate;
+    private Long endDate;
+
     /**
      * The Head count.
      */
     private int headCount;
+
     /**
      * The Total hours.
      */
     private double totalHours;
+
     /**
      * The Time off.
      */
     private double timeOff;
+
     /**
      * The Reports.
      */
     private double reports;
+
     /**
      * The Actual capacity.
      */
     private double actualCapacity;
+
     /**
      * The Note.
      */
@@ -53,32 +62,27 @@ public class TeamCapacityDTO {
     /**
      * Instantiates a new Team capacity dto.
      */
-    public TeamCapacityDTO()
-{}
-
+    public TeamCapacityDTO() {}
 
     /**
      * Instantiates a new Team capacity dto.
      *
-     * @param actualCapacity the actual capacity
-     * @param endDate        the end date
-     * @param headCount      the head count
-     * @param id             the id
-     * @param note           the note
-     * @param reports        the reports
-     * @param startDate      the start date
-     * @param timeOff        the time off
-     * @param totalHours     the total hours
+     * @param entity the entity
      */
-    public TeamCapacityDTO(double actualCapacity, LocalDateTime endDate, int headCount, long id, String note, double reports, LocalDateTime startDate, double timeOff, double totalHours) {
-        this.actualCapacity = actualCapacity;
-        this.endDate = endDate;
-        this.headCount = headCount;
-        this.id = id;
-        this.note = note;
-        this.reports = reports;
-        this.startDate = startDate;
-        this.timeOff = timeOff;
-        this.totalHours = totalHours;
+    public TeamCapacityDTO(TeamCapacityEntity entity) {
+        this.capacityId = entity.getId();
+        this.actualCapacity = entity.getActualCapacity();
+        this.endDate = DateTimeUtil.toEpochMilli(entity.getEndDate());
+        this.headCount = entity.getHeadCount();
+        this.note = entity.getNote();
+        this.reports = entity.getReports();
+        this.startDate =DateTimeUtil.toEpochMilli(entity.getStartDate());
+        this.timeOff = entity.getTimeOff();
+        this.totalHours = entity.getTotalHours();
     }
+
+    /**
+     * The Filter.
+     */
+    private CriteriaSearchRequest filter = new CriteriaSearchRequest();
 }

@@ -1,30 +1,30 @@
 package com.sharp.vn.its.management.service;
 
+import com.sharp.vn.its.management.constants.MessageCode;
+import com.sharp.vn.its.management.constants.SortType;
 import com.sharp.vn.its.management.dto.capacity.TeamCapacityDTO;
+import com.sharp.vn.its.management.dto.system.SystemDTO;
+import com.sharp.vn.its.management.entity.SystemEntity;
 import com.sharp.vn.its.management.entity.TeamCapacityEntity;
+import com.sharp.vn.its.management.entity.UserEntity;
+import com.sharp.vn.its.management.exception.DataValidationException;
+import com.sharp.vn.its.management.exception.ObjectNotFoundException;
+import com.sharp.vn.its.management.filter.SortCriteria;
 import com.sharp.vn.its.management.repositories.TeamCapacityRepository;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.sharp.vn.its.management.repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.hibernate.query.sqm.tree.SqmNode.log;
 
 /**
  * The type Team capacity service.
  */
 @Service
+@Slf4j
 public class TeamCapacityService {
 
     /**
@@ -34,44 +34,16 @@ public class TeamCapacityService {
     private TeamCapacityRepository repository;
 
     /**
-     * Convert to dto team capacity dto.
-     *
-     * @param entity the entity
-     * @return the team capacity dto
+     * The Authentication service.
      */
-    private TeamCapacityDTO convertToDTO(TeamCapacityEntity entity) {
-        TeamCapacityDTO dto = new TeamCapacityDTO();
-        dto.setId(entity.getId());
-        dto.setStartDate(entity.getStartDate());
-        dto.setEndDate(entity.getEndDate());
-        dto.setHeadCount(entity.getHeadCount());
-        dto.setTotalHours(entity.getTotalHours());
-        dto.setTimeOff(entity.getTimeOff());
-        dto.setReports(entity.getReports());
-        dto.setActualCapacity(entity.getActualCapacity());
-        dto.setNote(entity.getNote());
-        return dto;
-    }
+    @Autowired
+    private AuthenticationService authenticationService;
 
     /**
-     * Convert to entity team capacity entity.
-     *
-     * @param dto the dto
-     * @return the team capacity entity
+     * The User repository.
      */
-    private TeamCapacityEntity convertToEntity(TeamCapacityDTO dto) {
-        TeamCapacityEntity entity = new TeamCapacityEntity();
-        entity.setId(dto.getId());
-        entity.setStartDate(dto.getStartDate());
-        entity.setEndDate(dto.getEndDate());
-        entity.setHeadCount(dto.getHeadCount());
-        entity.setTotalHours(dto.getTotalHours());
-        entity.setTimeOff(dto.getTimeOff());
-        entity.setReports(dto.getReports());
-        entity.setActualCapacity(dto.getActualCapacity());
-        entity.setNote(dto.getNote());
-        return entity;
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * Gets all team capacities.
@@ -79,31 +51,43 @@ public class TeamCapacityService {
      * @return the all team capacities
      */
     public List<TeamCapacityDTO> getAllTeamCapacities() {
-        List<TeamCapacityEntity> entities = repository.findAll();
-        return entities.stream().map(this::convertToDTO).collect(Collectors.toList());
+        log.info("Fetching all team capacities...");
+        List<TeamCapacityDTO> list = repository.findAll().stream().map(TeamCapacityDTO::new).toList();
+        log.info("All team capacities fetched successfully.");
+        return list;
     }
 
     /**
-     * Gets team capacity by id.
+     * Load all team capacities data page.
+     *
+     * @param request the request
+     * @return the page
+     */
+    public Page<TeamCapacityDTO> loadAllTeamCapacitiesData(TeamCapacityDTO request) {
+        Map<String, SortCriteria> sort = request.getFilter().getSort();
+        buildSortCondition(sort);
+        Page<TeamCapacityEntity> capacityEntities = repository.findAll(request.getFilter().getPageable());
+        return capacityEntities.map(TeamCapacityDTO::new);
+    }
+
+    /**
+     * Gets team capacity detail.
      *
      * @param id the id
-     * @return the team capacity by id
+     * @return the team capacity detail
      */
-    public TeamCapacityDTO getTeamCapacityById(long id) {
-        Optional<TeamCapacityEntity> entity = repository.findById(id);
-        return entity.map(this::convertToDTO).orElse(null);
-    }
-
-    /**
-     * Save team capacity team capacity dto.
-     *
-     * @param dto the dto
-     * @return the team capacity dto
-     */
-    public TeamCapacityDTO saveTeamCapacity(TeamCapacityDTO dto) {
-        TeamCapacityEntity entity = convertToEntity(dto);
-        entity = repository.save(entity);
-        return convertToDTO(entity);
+    public TeamCapacityDTO getTeamCapacityDetail(Long id) {
+        if (id == null) {
+            log.error("Team capacity id not found");
+            throw new DataValidationException(MessageCode.ERROR_CAPACITY_ID_NOT_FOUND);
+        }
+        log.info("Fetching team capacity detail for id: {}", id);
+        final TeamCapacityDTO teamCapacityDTO = new TeamCapacityDTO(repository.findById(id).orElseThrow(() -> {
+            log.error("Team capacity not found");
+            return new ObjectNotFoundException(MessageCode.ERROR_CAPACITY_NOT_FOUND);
+        }));
+        log.info("Team capacity detail fetched successfully for id: {}", id);
+        return teamCapacityDTO;
     }
 
     /**
@@ -111,55 +95,69 @@ public class TeamCapacityService {
      *
      * @param id the id
      */
-    public void deleteTeamCapacity(long id) {
+
+    public void deleteTeamCapacity(Long id) {
+        if (id == null) {
+            log.error("Team capacity id not found");
+            throw new DataValidationException(MessageCode.ERROR_CAPACITY_ID_NOT_FOUND);
+        }
         repository.deleteById(id);
+        log.info("Team capacity with id {} deleted successfully.", id);
     }
 
+    public TeamCapacityDTO saveTeamCapacity(TeamCapacityDTO capacityDTO) {
+        log.info("Saving team capacity...");
+        final Long capacityId = capacityDTO.getCapacityId();
 
-    /**
-     * Upload file excel.
-     *
-     * @param file the file
-     * @throws IOException the io exception
-     */
-    public void uploadFileExcel(MultipartFile file) throws IOException {
-        InputStream inputStream = file.getInputStream();
-        Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(0);
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+        TeamCapacityEntity teamCapacityEntity = new TeamCapacityEntity();
 
-        Iterator<Row> rowIterator = sheet.iterator();
-        List<TeamCapacityEntity> teamCapacityList = new ArrayList<>();
-        Set<String> otherSystems = new HashSet<>();
-        while (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
-            TeamCapacityEntity teamCapacity = new TeamCapacityEntity();
-            try {
-                teamCapacity.setId((long) row.getCell(0).getNumericCellValue());
-                if (row.getCell(1) != null) {
-                    Date startDate = row.getCell(1).getDateCellValue();
-                    LocalDateTime startDateTime = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    teamCapacity.setStartDate(startDateTime);
-                }
-                if (row.getCell(2) != null ) {
-                    Date endDate = row.getCell(1).getDateCellValue();
-                    LocalDateTime endDateTime = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    teamCapacity.setEndDate(endDateTime);
-                }
-                teamCapacity.setHeadCount(row.getCell(3).getRowIndex());
-                teamCapacity.setTotalHours(row.getCell(4).getNumericCellValue());
-                teamCapacity.setTimeOff(row.getCell(5).getNumericCellValue());
-                teamCapacity.setReports(row.getCell(6).getNumericCellValue());
-                teamCapacity.setActualCapacity(row.getCell(7).getNumericCellValue());
-                teamCapacity.setNote(row.getCell(12).getStringCellValue());
-                teamCapacityList.add(teamCapacity);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+        // update when team capacity id is not null
+        if (capacityId != null) {
+            teamCapacityEntity = repository.findById(capacityId).orElseThrow(() -> {
+                log.error("Team capacity with id {} not found.", capacityId);
+                return new DataValidationException(MessageCode.ERROR_CAPACITY_ID_NOT_FOUND);
+            });
         }
-        repository.saveAll(teamCapacityList);
-        log.info(otherSystems.toString());
-        workbook.close();
+
+        final String userName = authenticationService.getUser().getUsername();
+        if (userName == null) {
+            throw new ObjectNotFoundException("User not found");
+        }
+
+        final UserEntity userEntity = userRepository.findById(authenticationService.getUser().getId()).get();
+        // set properties
+        BeanUtils.copyProperties(capacityDTO, teamCapacityEntity);
+//        systemEntity.setSystemName(systemDTO.getSystemName());
+//        systemEntity.setCreatedBy(userEntity);
+//        systemEntity.setUpdatedBy(userEntity);
+        teamCapacityEntity = repository.save(teamCapacityEntity);
+        log.info("System saved successfully.");
+        return new TeamCapacityDTO(teamCapacityEntity);
+    }
+
+    private void buildSortCondition(Map<String, SortCriteria> sort) {
+        if (sort.isEmpty()) {
+            sort.put("updatedDate", new SortCriteria("updatedDate", SortType.DESC.getText()));
+            return;
+        }
+        sort.forEach((key, criteria) -> {
+            switch (key) {
+                case "capacityId":
+                    criteria.setFieldName("id");
+                    break;
+                case "createdDate":
+                    criteria.setFieldName("createdDate");
+                    break;
+                case "updatedDate":
+                    criteria.setFieldName("updatedDate");
+                    break;
+                case "updateBy":
+                    criteria.setFieldName("updatedBy");
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 }
 
