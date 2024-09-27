@@ -744,6 +744,12 @@ public class TaskService extends BaseService {
         log.info("Support effort task with id {} deleted successfully.", id);
     }
 
+    /**
+     * Save support task support effort dto.
+     *
+     * @param supportEffortDTO the support effort dto
+     * @return the support effort dto
+     */
     public SupportEffortDTO saveSupportTask(SupportEffortDTO supportEffortDTO) {
         log.info("Saving support effort task...");
         final Long supportTaskId = supportEffortDTO.getSupportId();

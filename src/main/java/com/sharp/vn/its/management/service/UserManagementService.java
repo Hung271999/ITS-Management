@@ -95,10 +95,12 @@ public class UserManagementService extends BaseService {
         }
 
         // set properties
-        UserEntity user = new UserEntity();
+        UserEntity user;
         if (userId != null) {
             user = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new DataValidationException("User ID not found"));
+        }else  {
+            user = new UserEntity();
         }
         user.setUsername(request.getUserName());
         user.setFirstName(request.getFirstName());
@@ -119,8 +121,19 @@ public class UserManagementService extends BaseService {
             user.setUpdatedBy(currentUser);
         }
         final Role itsRole = request.getRole();
-        saveUserGroup(user, request.getGroupIds());
-        saveUserRole(user, itsRole);
+        List<GroupEntity> groups = groupRepository.findAllById(request.getGroupIds());
+        final RoleEntity role = roleRepository.findByRoleName(itsRole)
+                .orElseThrow(() -> {
+                    log.error("Can't find role with name: {}", itsRole.name());
+                    return new ObjectNotFoundException(
+                            MessageCode.ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME);
+                });
+
+        user.getUserGroups().clear();
+        user.getRoles().clear();
+        UserRoleEntity userRole = new UserRoleEntity(user, role);
+        groups.forEach(group -> user.getUserGroups().add(new UserGroupEntity(user, group)));
+        user.getRoles().add(userRole);
         UserDTO result = new UserDTO(userRepository.save(user));
         log.info("User saved successfully.");
         return result;
@@ -263,29 +276,6 @@ public class UserManagementService extends BaseService {
         });
     }
 
-    /**
-     * Save User Role
-     *
-     * @param user    the UserEntity
-     * @param itsRole the Role
-     */
-    private void saveUserRole(UserEntity user, Role itsRole) {
-        final RoleEntity role = roleRepository.findByRoleName(itsRole)
-                .orElseThrow(() -> {
-                    log.error("Can't find role with name: {}", itsRole.name());
-                    return new ObjectNotFoundException(
-                            MessageCode.ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME);
-                });
-        Set<UserRoleEntity> roles = user.getRoles();
-        UserRoleEntity userRole = new UserRoleEntity(user, role);
-        if (roles.isEmpty()) {
-            user.getRoles().add(userRole);
-            return;
-        }
-        roles.clear();
-        roles.add(userRole);
-    }
-
     private boolean isValidPassword(Long userId, final String password) {
         if (userId != null && StringUtils.isEmpty(password)) {
             return false;
@@ -294,12 +284,5 @@ public class UserManagementService extends BaseService {
             throw new DataValidationException(MessageCode.ERROR_USER_PASSWORD_TOO_SHORT);
         }
         return true;
-    }
-
-    private void saveUserGroup(UserEntity user, List<Long> groupIds) {
-        List<GroupEntity> groups = groupRepository.findAllById(groupIds);
-        user.getUserGroups().clear();
-        groups.forEach(group -> user.getUserGroups().add(new UserGroupEntity(user, group)));
-        userRepository.save(user);
     }
 }
