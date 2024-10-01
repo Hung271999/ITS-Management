@@ -99,7 +99,7 @@ public class UserManagementService extends BaseService {
         if (userId != null) {
             user = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new DataValidationException("User ID not found"));
-        }else  {
+        }else {
             user = new UserEntity();
         }
         user.setUsername(request.getUserName());
@@ -128,7 +128,6 @@ public class UserManagementService extends BaseService {
                     return new ObjectNotFoundException(
                             MessageCode.ERROR_USER_CANNOT_FIND_ROLE_WITH_NAME);
                 });
-
         user.getUserGroups().clear();
         user.getRoles().clear();
         UserRoleEntity userRole = new UserRoleEntity(user, role);
@@ -269,6 +268,9 @@ public class UserManagementService extends BaseService {
                     break;
                 case "role":
                     criteria.setFieldName("roles.role.roleName");
+                    break;
+                case "groupIds":
+                    criteria.setFieldName("userGroups.group.groupName");
                     break;
                 default:
                     break;
