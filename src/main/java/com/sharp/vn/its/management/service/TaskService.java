@@ -78,8 +78,12 @@ public class TaskService extends BaseService {
     @Autowired
     private AuthenticationService authenticationService;
 
+    /**
+     * The Support effort repository.
+     */
     @Autowired
     private SupportEffortRepository supportEffortRepository;
+
     /**
      * The constant HEADERS.
      */
@@ -627,6 +631,79 @@ public class TaskService extends BaseService {
     }
 
     /**
+     * Find effort of system by week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO findEffortOfSystemByWeek(TaskFilter filter) {
+        List<TaskData> data = taskRepository.findTotalEffortSystemByWeek(filter.getSystemIds(),filter.getYears(),filter.getWeeks() );
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
+        Map<Integer, Double> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue())
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, chartDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(chartDataList.get(0).getWeek());
+            item.setValues(chartDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.collectingAndThen(Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue()), total -> total)
+                        )),
+                taskDataItems.stream()
+                        .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
+                        .sum());
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+    }
+
+    /**
+     * Get effort by group per week task data dto.
+     *
+     * @param filter the filter
+     * @return the task data dto
+     */
+    public TaskDataDTO getEffortByGroupPerWeek(TaskFilter filter){
+        List<TaskData> data = taskRepository.findEffortByGroupPerWeek(filter.getGroupIds(), filter.getYears(), filter.getWeeks());
+        Map<Integer, List<TaskData>> mapGroupByWeek = data.stream().collect(Collectors.groupingBy(TaskData::getWeek, TreeMap::new, Collectors.toList()));
+
+        Map<Integer, Double> totalCountByWeek = data.stream()
+                .collect(Collectors.groupingBy(
+                        TaskData::getWeek,
+                        Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue())
+                ));
+        List<TaskDetailDTO> taskDataItems = new ArrayList<>();
+        mapGroupByWeek.forEach((week, taskDataList) -> {
+            TaskDetailDTO item = new TaskDetailDTO();
+            item.setWeek(taskDataList.get(0).getWeek());
+            item.setValues(taskDataList.stream()
+                    .collect(Collectors.toMap(taskData -> taskData.getId().intValue(), TaskData::getTotal)));
+            item.setTotalCount(totalCountByWeek.get(week));
+            taskDataItems.add(item);
+        });
+
+        TaskSummaryDTO taskSummaryDTO = new TaskSummaryDTO(
+                data.stream()
+                        .collect(Collectors.groupingBy(
+                                taskData -> taskData.getId().intValue(),
+                                Collectors.collectingAndThen(Collectors.summingDouble(taskData -> taskData.getTotal().doubleValue()), total -> total)
+                        )),
+                taskDataItems.stream()
+                        .mapToDouble(taskDetailDTO -> taskDetailDTO.getTotalCount().doubleValue())
+                        .sum());
+        return new TaskDataDTO(taskSummaryDTO,taskDataItems);
+    }
+
+    /**
      * Build sort condition for support task.
      *
      * @param sort the sort
@@ -742,6 +819,12 @@ public class TaskService extends BaseService {
         log.info("Support effort task with id {} deleted successfully.", id);
     }
 
+    /**
+     * Save support task support effort dto.
+     *
+     * @param supportEffortDTO the support effort dto
+     * @return the support effort dto
+     */
     public SupportEffortDTO saveSupportTask(SupportEffortDTO supportEffortDTO) {
         log.info("Saving support effort task...");
         final Long supportTaskId = supportEffortDTO.getSupportId();
