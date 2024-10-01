@@ -81,6 +81,12 @@ public class TaskService extends BaseService {
     private AuthenticationService authenticationService;
 
     /**
+     * The Support effort repository.
+     */
+    @Autowired
+    private SupportEffortRepository supportEffortRepository;
+
+    /**
      * The constant HEADERS.
      */
     private static final List<String> HEADERS = Arrays.asList(
