@@ -88,11 +88,12 @@ public interface TaskRepositoryCustom {
     List<TaskData> findEffortByGroupPerWeek(List<Long> groupIds, List<Integer> years, List<Integer> weeks);
 
     /**
-     * Find support effort by week for specific types list.
+     * Find effort by week for type list.
      *
+     * @param types the types
      * @param years the years
      * @param weeks the weeks
      * @return the list
      */
-    List<TaskData> findSupportEffortByWeekForSpecificTypes(List<Integer> years, List<Integer> weeks);
+    List<TaskData> findEffortByWeekForType(List<Integer> types, List<Integer> years, List<Integer> weeks);
 }

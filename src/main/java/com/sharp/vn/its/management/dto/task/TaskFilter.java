@@ -14,5 +14,6 @@ public class TaskFilter {
     private List<Integer> weeks;
     private List<Integer> years;
     private List<Long> groupIds;
+    private List<Integer> types;
     private Map<String, SortCriteria> sort;
 }

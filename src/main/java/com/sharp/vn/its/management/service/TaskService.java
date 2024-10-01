@@ -892,7 +892,7 @@ public class TaskService extends BaseService {
     }
 
     public TaskDataDTO getEffortByWeekForAMS(TaskFilter filter) {
-        List<TaskData> typeData = taskRepository.findSupportEffortByWeekForSpecificTypes(filter.getYears(), filter.getWeeks());
+        List<TaskData> typeData = taskRepository.findEffortByWeekForType(filter.getTypes(), filter.getYears(), filter.getWeeks());
         List<TaskData> AMSData = taskRepository.findEffortByPersonInChargePerWeek(filter.getUserIds(), filter.getYears(), filter.getWeeks());
 
         List<TaskData> supportTroubleQAData = typeData.stream()

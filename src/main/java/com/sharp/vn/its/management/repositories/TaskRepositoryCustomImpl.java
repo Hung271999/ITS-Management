@@ -25,9 +25,6 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private static final Set<Integer> SPECIFIC_TYPE_IDS = Set.of(SupportEffortType.OJT.getType(), SupportEffortType.TRANSFER.getType(), SupportEffortType.SUPPORT.getType(),
-            SupportEffortType.TROUBLE_SHOOTING.getType(), SupportEffortType.MONITOR.getType(), SupportEffortType.QA.getType());
-
     @Override
     public List<TaskData> findTaskByPersonInCharge(List<Long> userIds, List<Integer> years) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -396,13 +393,13 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
     }
 
     @Override
-    public List<TaskData> findSupportEffortByWeekForSpecificTypes(List<Integer> years, List<Integer> weeks) {
+    public List<TaskData> findEffortByWeekForType(List<Integer> types, List<Integer> years, List<Integer> weeks) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
         Root<SupportEffortEntity> root = cq.from(SupportEffortEntity.class);
 
-        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), root.get("endDate"));
         Expression<Integer> year = cb.function("date_part", Integer.class, cb.literal("year"), root.get("endDate"));
+        Expression<Integer> week = cb.function("date_part", Integer.class, cb.literal("week"), root.get("endDate"));
 
         cq.multiselect(
                 root.get("type"),
@@ -410,11 +407,9 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
                 cb.sum(root.get("totalEffort"))
         );
         List<Predicate> predicates = new ArrayList<>();
-        Predicate typePredicate = root.get("type").in(SPECIFIC_TYPE_IDS);
-        predicates.add(typePredicate);
         if (!years.isEmpty()) {
-           Predicate yearPredicate = year.in(years);
-           predicates.add(yearPredicate);
+            Predicate yearPredicate = year.in(years);
+            predicates.add(yearPredicate);
         }
         if (!weeks.isEmpty()) {
             Predicate weekPredicate = week.in(weeks);
@@ -422,6 +417,10 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
                 weekPredicate = cb.or(weekPredicate, cb.isNull(week));
             }
             predicates.add(weekPredicate);
+        }
+        if (!types.isEmpty()) {
+            Predicate typePredicate = root.get("type").in(types);
+            predicates.add(typePredicate);
         }
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         cq.groupBy(root.get("type"), week);
@@ -435,7 +434,7 @@ public class TaskRepositoryCustomImpl implements TaskRepositoryCustom {
             TaskData taskData = new TaskData();
             taskData.setId(((Number) row[0]).longValue());
             if(row[1] != null)taskData.setWeek(((Number) row[1]).intValue());
-            taskData.setTotal(((Number) row[2]).intValue());
+            if(row[2] != null )taskData.setTotal(((Number) row[2]).doubleValue());
             return taskData;
         }).collect(Collectors.toList());
     }
